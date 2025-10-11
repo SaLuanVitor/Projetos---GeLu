@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelu - Gerenciar Receitas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍳 Gerenciar Receitas</h1>
+            <nav>
+                <a href="index.html">Cardápio</a>
+                <a href="receitas.html" class="active">Receitas</a>
+            </nav>
+        </header>
+
+        <main>
+            <section id="form-receita-edicao" class="card-section hidden">
+                <h2>Editar Receita <span id="edit-recipe-id-display"></span></h2>
+                <form id="form-edit-receita">
+                    <input type="hidden" id="edit-id-receita">
+
+                    <label for="edit-nome-receita">Nome do Prato:</label>
+                    <input type="text" id="edit-nome-receita" required>
+
+                    <label for="edit-ingredientes-receita">Ingredientes (um por linha):</label>
+                    <textarea id="edit-ingredientes-receita" rows="5" required></textarea>
+
+                    <label for="edit-descricao-receita">Descrição / Notas:</label>
+                    <textarea id="edit-descricao-receita" rows="3"></textarea>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Salvar Alterações</button>
+                        <button type="button" id="btn-cancelar-edicao" class="btn-secondary">Cancelar</button>
+                    </div>
+                    <p id="msg-status-edicao"></p>
+                </form>
+            </section>
+            
+            <section id="form-receita-cadastro" class="card-section">
+                <h2>Adicionar Nova Receita</h2>
+                <form id="form-add-receita">
+                    <label for="nome-receita">Nome do Prato:</label>
+                    <input type="text" id="nome-receita" required>
+
+                    <label for="ingredientes-receita">Ingredientes (um por linha para lista de compras):</label>
+                    <textarea id="ingredientes-receita" rows="5" required></textarea>
+
+                    <label for="descricao-receita">Descrição / Notas:</label>
+                    <textarea id="descricao-receita" rows="3"></textarea>
+                    
+                    <button type="submit" class="btn-primary">Adicionar Receita</button>
+                    <p id="msg-status-receita"></p>
+                </form>
+            </section>
+
+            <section id="lista-receitas-disponiveis" class="card-section">
+                <h2>Receitas Cadastradas</h2>
+                <div id="receitas-lista">
+                    <p>Carregando receitas...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

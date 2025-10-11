@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeLu - Meu Cardápio Semanal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 Meu Cardápio Semanal</h1>
+            <nav>
+                <a href="index.html" class="active">Cardápio</a>
+                <a href="receitas.html">Receitas</a>
+            </nav>
+        </header>
+
+        <main>
+            <section id="cardapio-semanal" class="card-section">
+                <h2>Almoços da Semana (Cozinhar no Domingo)</h2>
+                <div id="cardapio-grid">
+                    <p>Carregando cardápio...</p>
+                </div>
+                <button id="btn-atualizar-cardapio" class="btn-primary">Atualizar Cardápio</button>
+            </section>
+
+            <section id="lista-compras" class="card-section">
+    <h2>🛒 Lista de Compras (Interativa)</h2>
+    
+    <div id="compras-controls">
+        <label for="day-filter">Filtrar por Dia:</label>
+        <select id="day-filter">
+            <option value="all">Toda a Semana</option>
+            </select>
+        <button id="btn-clear-compras" class="btn-danger">Limpar Itens Marcados</button>
+    </div>
+
+    <div id="compras-lista">
+        <p>Gerando lista de compras...</p>
+    </div>
+    <button id="btn-gerar-compras" class="btn-primary">Atualizar Lista de Compras</button>
+</section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
