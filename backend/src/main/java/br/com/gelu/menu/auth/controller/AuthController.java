@@ -2,6 +2,7 @@ package br.com.gelu.menu.auth.controller;
 
 import br.com.gelu.menu.auth.dto.AuthTokenResponse;
 import br.com.gelu.menu.auth.dto.LoginRequest;
+import br.com.gelu.menu.auth.dto.LogoutResponse;
 import br.com.gelu.menu.auth.dto.RefreshTokenRequest;
 import br.com.gelu.menu.auth.dto.RefreshTokenResponse;
 import br.com.gelu.menu.auth.dto.RegisterRequest;
@@ -47,5 +48,11 @@ public class AuthController {
   public ApiResponse<RefreshTokenResponse> refresh(
       @Valid @RequestBody RefreshTokenRequest request) {
     return ApiResponse.ok(authService.refresh(request), "Token refreshed successfully");
+  }
+
+  @Operation(summary = "Logout the current refresh token session")
+  @PostMapping("/logout")
+  public ApiResponse<LogoutResponse> logout(@Valid @RequestBody RefreshTokenRequest request) {
+    return ApiResponse.ok(authService.logout(request), "User logged out successfully");
   }
 }

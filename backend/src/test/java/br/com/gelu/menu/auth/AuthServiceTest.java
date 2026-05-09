@@ -146,4 +146,44 @@ class AuthServiceTest {
         .isInstanceOf(UnauthorizedException.class)
         .hasMessage("Invalid refresh token");
   }
+
+  @Test
+  void shouldLogoutValidRefreshToken() {
+    RefreshToken refreshToken =
+        new RefreshToken(
+            java.util.UUID.randomUUID(), "hashed-token", LocalDateTime.now().plusDays(30));
+    when(jwtTokenService.hashRefreshToken("refresh-token")).thenReturn("hashed-token");
+    when(refreshTokenRepository.findByTokenHash("hashed-token"))
+        .thenReturn(Optional.of(refreshToken));
+
+    var response = authService.logout(new RefreshTokenRequest("refresh-token"));
+
+    assertThat(response.revoked()).isTrue();
+    assertThat(refreshToken.isRevoked()).isTrue();
+  }
+
+  @Test
+  void shouldRejectLogoutWithInvalidRefreshToken() {
+    when(jwtTokenService.hashRefreshToken("invalid-refresh-token")).thenReturn("invalid-hash");
+    when(refreshTokenRepository.findByTokenHash("invalid-hash")).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> authService.logout(new RefreshTokenRequest("invalid-refresh-token")))
+        .isInstanceOf(UnauthorizedException.class)
+        .hasMessage("Invalid refresh token");
+  }
+
+  @Test
+  void shouldRejectLogoutWithRevokedRefreshToken() {
+    RefreshToken refreshToken =
+        new RefreshToken(
+            java.util.UUID.randomUUID(), "revoked-hash", LocalDateTime.now().plusDays(30));
+    refreshToken.revoke();
+    when(jwtTokenService.hashRefreshToken("revoked-refresh-token")).thenReturn("revoked-hash");
+    when(refreshTokenRepository.findByTokenHash("revoked-hash"))
+        .thenReturn(Optional.of(refreshToken));
+
+    assertThatThrownBy(() -> authService.logout(new RefreshTokenRequest("revoked-refresh-token")))
+        .isInstanceOf(UnauthorizedException.class)
+        .hasMessage("Invalid refresh token");
+  }
 }

@@ -239,4 +239,67 @@ class AuthControllerTest {
         .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"))
         .andExpect(jsonPath("$.error.message").value("Invalid refresh token"));
   }
+
+  @Test
+  void shouldLogoutRefreshToken() throws Exception {
+    RefreshToken refreshToken =
+        new RefreshToken(
+            java.util.UUID.randomUUID(), "hashed-refresh-token", LocalDateTime.now().plusDays(30));
+    when(jwtTokenService.hashRefreshToken("refresh-token")).thenReturn("hashed-refresh-token");
+    when(refreshTokenRepository.findByTokenHash("hashed-refresh-token"))
+        .thenReturn(Optional.of(refreshToken));
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/logout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "refreshToken": "refresh-token"
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.revoked").value(true))
+        .andExpect(jsonPath("$.message").value("User logged out successfully"));
+  }
+
+  @Test
+  void shouldRejectLogoutWithInvalidRefreshToken() throws Exception {
+    when(jwtTokenService.hashRefreshToken("invalid-refresh-token")).thenReturn("invalid-hash");
+    when(refreshTokenRepository.findByTokenHash("invalid-hash")).thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/logout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "refreshToken": "invalid-refresh-token"
+                    }
+                    """))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"))
+        .andExpect(jsonPath("$.error.message").value("Invalid refresh token"));
+  }
+
+  @Test
+  void shouldRejectInvalidLogoutPayload() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/logout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "refreshToken": ""
+                    }
+                    """))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+  }
 }
