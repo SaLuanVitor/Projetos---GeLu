@@ -1,5 +1,6 @@
 package br.com.gelu.menu.common.api;
 
+import br.com.gelu.menu.common.exception.ConflictException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,12 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.badRequest()
         .body(ApiErrorResponse.of("VALIDATION_ERROR", "Invalid request data", details));
+  }
+
+  @ExceptionHandler(ConflictException.class)
+  public ResponseEntity<ApiErrorResponse> handleConflict(ConflictException exception) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(ApiErrorResponse.of("CONFLICT", exception.getMessage(), List.of()));
   }
 
   @ExceptionHandler(Exception.class)
