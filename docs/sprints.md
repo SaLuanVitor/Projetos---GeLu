@@ -36,8 +36,8 @@ Objetivo: implementar cadastro, login e recuperacao de senha.
 
 Tarefas:
 
-- [ ] Criar tabela `refresh_tokens`
-- [ ] Criar tabela `password_reset_tokens`
+- [x] Criar tabela `refresh_tokens`
+- [x] Criar tabela `password_reset_tokens`
 - [ ] Implementar cadastro
 - [ ] Implementar login
 - [ ] Implementar JWT
