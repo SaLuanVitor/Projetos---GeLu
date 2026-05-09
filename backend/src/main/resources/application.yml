@@ -21,3 +21,10 @@ management:
     web:
       exposure:
         include: health,info
+
+gelu:
+  auth:
+    jwt:
+      secret: ${JWT_SECRET:gelu-menu-local-development-secret-change-me}
+      access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
+      refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:30d}

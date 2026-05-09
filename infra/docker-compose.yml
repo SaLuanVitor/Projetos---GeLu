@@ -38,6 +38,9 @@ services:
       DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-gelu_menu}
       DATABASE_USERNAME: ${POSTGRES_USER:-gelu_menu}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-gelu_menu}
+      JWT_SECRET: ${JWT_SECRET:-gelu-menu-local-development-secret-change-me}
+      JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL:-15m}
+      JWT_REFRESH_TOKEN_TTL: ${JWT_REFRESH_TOKEN_TTL:-30d}
     ports:
       - "8080:8080"
     depends_on:

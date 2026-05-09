@@ -1,6 +1,7 @@
 package br.com.gelu.menu.common.api;
 
 import br.com.gelu.menu.common.exception.ConflictException;
+import br.com.gelu.menu.common.exception.UnauthorizedException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiErrorResponse> handleConflict(ConflictException exception) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(ApiErrorResponse.of("CONFLICT", exception.getMessage(), List.of()));
+  }
+
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<ApiErrorResponse> handleUnauthorized(UnauthorizedException exception) {
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(ApiErrorResponse.of("UNAUTHORIZED", exception.getMessage(), List.of()));
   }
 
   @ExceptionHandler(Exception.class)

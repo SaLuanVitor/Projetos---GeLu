@@ -1,5 +1,9 @@
 package br.com.gelu.menu.auth.controller;
 
+import br.com.gelu.menu.auth.dto.AuthTokenResponse;
+import br.com.gelu.menu.auth.dto.LoginRequest;
+import br.com.gelu.menu.auth.dto.RefreshTokenRequest;
+import br.com.gelu.menu.auth.dto.RefreshTokenResponse;
 import br.com.gelu.menu.auth.dto.RegisterRequest;
 import br.com.gelu.menu.auth.dto.RegisterResponse;
 import br.com.gelu.menu.auth.service.AuthService;
@@ -30,5 +34,18 @@ public class AuthController {
   @ResponseStatus(HttpStatus.CREATED)
   public ApiResponse<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
     return ApiResponse.ok(authService.register(request), "User registered successfully");
+  }
+
+  @Operation(summary = "Authenticate an existing user")
+  @PostMapping("/login")
+  public ApiResponse<AuthTokenResponse> login(@Valid @RequestBody LoginRequest request) {
+    return ApiResponse.ok(authService.login(request), "User authenticated successfully");
+  }
+
+  @Operation(summary = "Refresh authentication tokens")
+  @PostMapping("/refresh")
+  public ApiResponse<RefreshTokenResponse> refresh(
+      @Valid @RequestBody RefreshTokenRequest request) {
+    return ApiResponse.ok(authService.refresh(request), "Token refreshed successfully");
   }
 }

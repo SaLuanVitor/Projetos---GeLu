@@ -39,9 +39,9 @@ Tarefas:
 - [x] Criar tabela `refresh_tokens`
 - [x] Criar tabela `password_reset_tokens`
 - [x] Implementar cadastro
-- [ ] Implementar login
-- [ ] Implementar JWT
-- [ ] Implementar refresh token
+- [x] Implementar login
+- [x] Implementar JWT
+- [x] Implementar refresh token
 - [ ] Implementar logout
 - [ ] Implementar recuperacao de senha
 - [ ] Criar telas de login/cadastro
