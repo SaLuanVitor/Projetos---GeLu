@@ -36,3 +36,10 @@ cd frontend && npm install && npm run dev
 ## Ferramentas locais
 
 Arquivos em `.codex/` sao configuracoes/agentes locais do desenvolvedor e nao devem ser enviados para o Git.
+
+Use o agente local `gelu-general-orchestrator-agent` como coordenador padrao para tarefas amplas. Ele deve chamar o otimizador de tokens antes de acionar qualquer agente especializado.
+
+## Documentacao do projeto
+
+- Arquitetura: `docs/architecture.md`
+- Plano de sprints: `docs/sprints.md`
