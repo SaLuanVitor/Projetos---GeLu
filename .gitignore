@@ -1,0 +1,15 @@
+baseSistema/
+
+# Local build/runtime artifacts
+backend/target/
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+frontend/.next-dev.*.log
+frontend/tsconfig.tsbuildinfo
+infra/data/
+
+# Environment files
+.env
+.env.*
+!.env.example
