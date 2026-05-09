@@ -32,6 +32,16 @@ cd frontend && npm install && npm run dev
 
 - Backend health: `GET /api/v1/health`
 - AI agents catalog: `GET /api/v1/ai/agents`
+- OpenAPI JSON: `GET /v3/api-docs`
+- Swagger UI: `GET /swagger-ui.html`
+
+## Quality gates
+
+```bash
+docker run --rm -v ${PWD}/backend:/app -w /app maven:3.9.9-eclipse-temurin-21 mvn -q test spotless:check
+cd frontend && npm run lint && npm run typecheck && npm run format:check && npm run build
+docker compose -f infra/docker-compose.yml config --quiet
+```
 
 ## Ferramentas locais
 

@@ -19,8 +19,8 @@ Tarefas:
 - [x] Configurar variaveis de ambiente
 - [x] Configurar Flyway
 - [x] Configurar padrao de resposta da API
-- [ ] Configurar OpenAPI
-- [ ] Configurar lint e formatacao completos
+- [x] Configurar OpenAPI
+- [x] Configurar lint e formatacao completos
 
 Pronto quando:
 
@@ -347,4 +347,3 @@ Pronto quando:
 - [ ] Testes E2E passam
 - [ ] Documentacao atualizada
 - [ ] Produto pronto para homologacao
-

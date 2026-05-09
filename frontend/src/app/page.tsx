@@ -23,8 +23,8 @@ export default async function HomePage() {
               Base do sistema de receitas, dietas, treinos e IA assistiva.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-              Monolito modular com backend Spring Boot, frontend Next.js e agentes Codex
-              instalados para guiar desenvolvimento, suporte e fluxos de IA.
+              Monolito modular com backend Spring Boot, frontend Next.js e agentes Codex instalados
+              para guiar desenvolvimento, suporte e fluxos de IA.
             </p>
           </div>
 
