@@ -1,21 +1,24 @@
-# Gelu - Menu Codex Agents
+# Gelu - Menu Agent Usage
 
-This repository uses operational Codex agents stored in `.codex/agents/`.
+Codex agents and skills are local developer tooling for this project. The `.codex/` directory is intentionally ignored and must not be committed.
 
 ## How to Use
 
-Before planning or implementing work, pick the most specific agent file for the task:
+Before planning or implementing work, pick the most specific locally installed skill or agent for the task:
 
-- Product AI and nutrition flows: `.codex/agents/diet_suggestion_agent.md`, `.codex/agents/recipe_suggestion_agent.md`, `.codex/agents/calorie_analysis_agent.md`, `.codex/agents/training_adjustment_agent.md`, `.codex/agents/family_meal_planner_agent.md`
-- Development work: `.codex/agents/development_agent.md`, `.codex/agents/backend_agent.md`, `.codex/agents/frontend_agent.md`, `.codex/agents/database_agent.md`, `.codex/agents/test_agent.md`
-- Operations and docs: `.codex/agents/devops_agent.md`, `.codex/agents/documentation_agent.md`, `.codex/agents/ux_agent.md`
-- Prompt/context optimization: `.codex/agents/prompt_optimizer_agent.md`, `.codex/agents/token_optimizer_agent.md`
-- Support flows: `.codex/agents/support_agent.md`
-- Requirements and stories: `.codex/agents/requirements_agent.md`
+- Product AI and nutrition flows: `gelu-diet-suggestion-agent`, `gelu-recipe-suggestion-agent`, `gelu-calorie-analysis-agent`, `gelu-training-adjustment-agent`, `gelu-family-meal-planner-agent`
+- Development work: `gelu-development-agent`, `gelu-backend-agent`, `gelu-frontend-agent`, `gelu-database-agent`, `gelu-test-agent`
+- Operations and docs: `gelu-devops-agent`, `gelu-documentation-agent`, `gelu-ux-agent`
+- Prompt/context optimization: `gelu-prompt-optimizer-agent`, `gelu-token-optimizer-agent`
+- Support flows: `gelu-support-agent`
+- Requirements and stories: `gelu-requirements-agent`
+
+Local skills may point to local agent instructions under `.codex/agents/`. Keep those files on your machine only.
 
 ## Project Rules
 
 - `baseSistema/` is local reference material and must remain ignored by Git.
+- `.codex/` is local Codex configuration and must remain ignored by Git.
 - Keep the project as a modular monolith: Spring Boot backend, Next.js frontend, PostgreSQL, MinIO, Docker Compose.
 - Use API base path `/api/v1`.
 - Use the response envelope `{ success, data, message }` for success and `{ success, error }` for errors.

@@ -1,4 +1,5 @@
 baseSistema/
+.codex/
 
 # Local build/runtime artifacts
 backend/target/

@@ -17,7 +17,6 @@ Base inicial do sistema Gelu - Menu: uma plataforma para organizacao pessoal e f
 backend/      API Spring Boot modular
 frontend/     App Next.js
 infra/        Docker Compose e arquivos de ambiente
-.codex/agents Agentes operacionais do Codex
 AGENTS.md     Guia de uso dos agentes no repositorio
 ```
 
@@ -33,3 +32,7 @@ cd frontend && npm install && npm run dev
 
 - Backend health: `GET /api/v1/health`
 - AI agents catalog: `GET /api/v1/ai/agents`
+
+## Ferramentas locais
+
+Arquivos em `.codex/` sao configuracoes/agentes locais do desenvolvedor e nao devem ser enviados para o Git.
