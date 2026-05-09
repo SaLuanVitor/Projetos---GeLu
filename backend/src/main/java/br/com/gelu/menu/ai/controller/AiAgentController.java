@@ -1,8 +1,8 @@
-package br.com.nutrifam.ai.controller;
+package br.com.gelu.menu.ai.controller;
 
-import br.com.nutrifam.ai.agents.AiAgentCatalog;
-import br.com.nutrifam.ai.agents.AiAgentDescriptor;
-import br.com.nutrifam.common.api.ApiResponse;
+import br.com.gelu.menu.ai.agents.AiAgentCatalog;
+import br.com.gelu.menu.ai.agents.AiAgentDescriptor;
+import br.com.gelu.menu.common.api.ApiResponse;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

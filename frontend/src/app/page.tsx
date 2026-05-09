@@ -17,7 +17,7 @@ export default async function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-leaf-700">
-              NutriFam
+              Gelu - Menu
             </p>
             <h1 className="mt-2 max-w-3xl text-4xl font-semibold text-ink">
               Base do sistema de receitas, dietas, treinos e IA assistiva.

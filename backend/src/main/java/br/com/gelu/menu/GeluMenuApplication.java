@@ -1,12 +1,12 @@
-package br.com.nutrifam;
+package br.com.gelu.menu;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NutriFamApplication {
+public class GeluMenuApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(NutriFamApplication.class, args);
+        SpringApplication.run(GeluMenuApplication.class, args);
     }
 }

@@ -1,6 +1,6 @@
-package br.com.nutrifam.common.health;
+package br.com.gelu.menu.common.health;
 
-import br.com.nutrifam.common.api.ApiResponse;
+import br.com.gelu.menu.common.api.ApiResponse;
 import java.time.OffsetDateTime;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +13,7 @@ public class HealthController {
     @GetMapping
     public ApiResponse<HealthResponse> health() {
         return ApiResponse.ok(
-                new HealthResponse("UP", "nutrifam-backend", OffsetDateTime.now()),
+                new HealthResponse("UP", "gelu-menu-backend", OffsetDateTime.now()),
                 "Service is healthy"
         );
     }

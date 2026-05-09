@@ -1,4 +1,4 @@
-package br.com.nutrifam.common.health;
+package br.com.gelu.menu.common.health;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;

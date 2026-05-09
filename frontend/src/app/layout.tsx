@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NutriFam",
+  title: "Gelu - Menu",
   description: "Organizacao familiar de receitas, dietas, treinos e sugestoes assistivas."
 };
 

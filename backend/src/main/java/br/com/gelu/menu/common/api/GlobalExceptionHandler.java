@@ -1,4 +1,4 @@
-package br.com.nutrifam.common.api;
+package br.com.gelu.menu.common.api;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;

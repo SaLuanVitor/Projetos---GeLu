@@ -1,4 +1,4 @@
-package br.com.nutrifam.ai.agents;
+package br.com.gelu.menu.ai.agents;
 
 import java.util.List;
 import org.springframework.stereotype.Component;

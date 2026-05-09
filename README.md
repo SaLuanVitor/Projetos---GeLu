@@ -1,6 +1,6 @@
-# NutriFam
+# Gelu - Menu
 
-Base inicial do sistema NutriFam/Gelu: uma plataforma para organizacao pessoal e familiar de receitas, dietas, treinos, acompanhamento calorico, suporte e sugestoes assistivas com IA.
+Base inicial do sistema Gelu - Menu: uma plataforma para organizacao pessoal e familiar de receitas, dietas, treinos, acompanhamento calorico, suporte e sugestoes assistivas com IA.
 
 ## Stack
 
@@ -33,4 +33,3 @@ cd frontend && npm install && npm run dev
 
 - Backend health: `GET /api/v1/health`
 - AI agents catalog: `GET /api/v1/ai/agents`
-

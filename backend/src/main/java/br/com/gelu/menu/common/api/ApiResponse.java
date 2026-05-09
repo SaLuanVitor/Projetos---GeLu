@@ -1,4 +1,4 @@
-package br.com.nutrifam.common.api;
+package br.com.gelu.menu.common.api;
 
 public record ApiResponse<T>(
         boolean success,

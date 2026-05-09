@@ -1,10 +1,10 @@
 spring:
   application:
-    name: nutrifam-backend
+    name: gelu-menu-backend
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/nutrifam}
-    username: ${DATABASE_USERNAME:nutrifam}
-    password: ${DATABASE_PASSWORD:nutrifam}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/gelu_menu}
+    username: ${DATABASE_USERNAME:gelu_menu}
+    password: ${DATABASE_PASSWORD:gelu_menu}
   jpa:
     hibernate:
       ddl-auto: validate

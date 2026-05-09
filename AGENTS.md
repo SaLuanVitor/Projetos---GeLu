@@ -1,4 +1,4 @@
-# NutriFam Codex Agents
+# Gelu - Menu Codex Agents
 
 This repository uses operational Codex agents stored in `.codex/agents/`.
 
@@ -21,4 +21,3 @@ Before planning or implementing work, pick the most specific agent file for the 
 - Use the response envelope `{ success, data, message }` for success and `{ success, error }` for errors.
 - The backend owns AI orchestration; AI agents do not access the database directly.
 - Health endpoints and placeholders are allowed in the base, but new business behavior must be backed by tests.
-
