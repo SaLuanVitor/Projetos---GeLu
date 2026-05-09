@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import br.com.gelu.menu.auth.controller.AuthController;
 import br.com.gelu.menu.auth.service.AuthService;
 import br.com.gelu.menu.auth.token.JwtTokenService;
+import br.com.gelu.menu.auth.token.PasswordResetToken;
+import br.com.gelu.menu.auth.token.PasswordResetTokenRepository;
 import br.com.gelu.menu.auth.token.RefreshToken;
 import br.com.gelu.menu.auth.token.RefreshTokenRepository;
 import br.com.gelu.menu.auth.token.TokenPair;
@@ -38,6 +40,8 @@ class AuthControllerTest {
   @MockBean private UserRepository userRepository;
 
   @MockBean private RefreshTokenRepository refreshTokenRepository;
+
+  @MockBean private PasswordResetTokenRepository passwordResetTokenRepository;
 
   @MockBean private JwtTokenService jwtTokenService;
 
@@ -301,5 +305,148 @@ class AuthControllerTest {
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.success").value(false))
         .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+  }
+
+  @Test
+  void shouldRequestPasswordResetForExistingUser() throws Exception {
+    User user = new User("Luan", "luan@example.com", "password-hash");
+    when(userRepository.findByEmail("luan@example.com")).thenReturn(Optional.of(user));
+    when(passwordResetTokenRepository.save(any(PasswordResetToken.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "email": "LUAN@EXAMPLE.COM"
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.accepted").value(true))
+        .andExpect(jsonPath("$.data.resetToken").isNotEmpty())
+        .andExpect(jsonPath("$.message").value("Password reset request accepted"));
+  }
+
+  @Test
+  void shouldAcceptPasswordResetRequestForMissingUser() throws Exception {
+    when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "email": "missing@example.com"
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.accepted").value(true))
+        .andExpect(jsonPath("$.data.resetToken").doesNotExist());
+  }
+
+  @Test
+  void shouldRejectInvalidForgotPasswordPayload() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/forgot-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "email": "invalid"
+                    }
+                    """))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+  }
+
+  @Test
+  void shouldResetPassword() throws Exception {
+    User user =
+        new User(
+            "Luan",
+            "luan@example.com",
+            new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder()
+                .encode("old-password"));
+    String tokenHash = hashToken("valid-reset-token");
+    PasswordResetToken resetToken =
+        new PasswordResetToken(user.getId(), tokenHash, LocalDateTime.now().plusMinutes(30));
+    when(passwordResetTokenRepository.findByTokenHash(tokenHash))
+        .thenReturn(Optional.of(resetToken));
+    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "token": "valid-reset-token",
+                      "newPassword": "new-strong-password"
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.reset").value(true))
+        .andExpect(jsonPath("$.message").value("Password reset successfully"));
+  }
+
+  @Test
+  void shouldRejectInvalidPasswordResetToken() throws Exception {
+    when(passwordResetTokenRepository.findByTokenHash(hashToken("invalid-reset-token")))
+        .thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "token": "invalid-reset-token",
+                      "newPassword": "new-strong-password"
+                    }
+                    """))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"))
+        .andExpect(jsonPath("$.error.message").value("Invalid password reset token"));
+  }
+
+  @Test
+  void shouldRejectInvalidResetPasswordPayload() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/reset-password")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "token": "",
+                      "newPassword": "short"
+                    }
+                    """))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
+  }
+
+  private String hashToken(String token) {
+    try {
+      java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+      return java.util.HexFormat.of()
+          .formatHex(digest.digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+    } catch (java.security.NoSuchAlgorithmException exception) {
+      throw new IllegalStateException(exception);
+    }
   }
 }

@@ -60,6 +60,11 @@ public class User {
     return passwordHash;
   }
 
+  public void updatePasswordHash(String passwordHash) {
+    this.passwordHash = passwordHash;
+    this.updatedAt = LocalDateTime.now();
+  }
+
   public boolean isActive() {
     return active;
   }

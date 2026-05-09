@@ -1,12 +1,16 @@
 package br.com.gelu.menu.auth.controller;
 
 import br.com.gelu.menu.auth.dto.AuthTokenResponse;
+import br.com.gelu.menu.auth.dto.ForgotPasswordRequest;
+import br.com.gelu.menu.auth.dto.ForgotPasswordResponse;
 import br.com.gelu.menu.auth.dto.LoginRequest;
 import br.com.gelu.menu.auth.dto.LogoutResponse;
 import br.com.gelu.menu.auth.dto.RefreshTokenRequest;
 import br.com.gelu.menu.auth.dto.RefreshTokenResponse;
 import br.com.gelu.menu.auth.dto.RegisterRequest;
 import br.com.gelu.menu.auth.dto.RegisterResponse;
+import br.com.gelu.menu.auth.dto.ResetPasswordRequest;
+import br.com.gelu.menu.auth.dto.ResetPasswordResponse;
 import br.com.gelu.menu.auth.service.AuthService;
 import br.com.gelu.menu.common.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,5 +58,19 @@ public class AuthController {
   @PostMapping("/logout")
   public ApiResponse<LogoutResponse> logout(@Valid @RequestBody RefreshTokenRequest request) {
     return ApiResponse.ok(authService.logout(request), "User logged out successfully");
+  }
+
+  @Operation(summary = "Request password reset")
+  @PostMapping("/forgot-password")
+  public ApiResponse<ForgotPasswordResponse> forgotPassword(
+      @Valid @RequestBody ForgotPasswordRequest request) {
+    return ApiResponse.ok(authService.forgotPassword(request), "Password reset request accepted");
+  }
+
+  @Operation(summary = "Reset password with a valid token")
+  @PostMapping("/reset-password")
+  public ApiResponse<ResetPasswordResponse> resetPassword(
+      @Valid @RequestBody ResetPasswordRequest request) {
+    return ApiResponse.ok(authService.resetPassword(request), "Password reset successfully");
   }
 }

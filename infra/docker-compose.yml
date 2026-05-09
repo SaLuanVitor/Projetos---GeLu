@@ -41,6 +41,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-gelu-menu-local-development-secret-change-me}
       JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL:-15m}
       JWT_REFRESH_TOKEN_TTL: ${JWT_REFRESH_TOKEN_TTL:-30d}
+      EXPOSE_PASSWORD_RESET_TOKEN: ${EXPOSE_PASSWORD_RESET_TOKEN:-true}
+      PASSWORD_RESET_TOKEN_TTL: ${PASSWORD_RESET_TOKEN_TTL:-30m}
     ports:
       - "8080:8080"
     depends_on:

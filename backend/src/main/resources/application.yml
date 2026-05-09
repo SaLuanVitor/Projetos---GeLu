@@ -24,6 +24,8 @@ management:
 
 gelu:
   auth:
+    expose-password-reset-token: ${EXPOSE_PASSWORD_RESET_TOKEN:true}
+    password-reset-token-ttl: ${PASSWORD_RESET_TOKEN_TTL:30m}
     jwt:
       secret: ${JWT_SECRET:gelu-menu-local-development-secret-change-me}
       access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}

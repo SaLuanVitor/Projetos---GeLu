@@ -43,7 +43,7 @@ Tarefas:
 - [x] Implementar JWT
 - [x] Implementar refresh token
 - [x] Implementar logout
-- [ ] Implementar recuperacao de senha
+- [x] Implementar recuperacao de senha
 - [ ] Criar telas de login/cadastro
 - [ ] Criar testes de auth
 
