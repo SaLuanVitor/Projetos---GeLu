@@ -44,16 +44,16 @@ Tarefas:
 - [x] Implementar refresh token
 - [x] Implementar logout
 - [x] Implementar recuperacao de senha
-- [ ] Criar telas de login/cadastro
+- [x] Criar telas de login/cadastro
 - [ ] Criar testes de auth
 
 Pronto quando:
 
-- [ ] Usuario cria conta
-- [ ] Usuario faz login
-- [ ] Usuario renova token
-- [ ] Usuario recupera senha
-- [ ] Testes passam
+- [x] Usuario cria conta
+- [x] Usuario faz login
+- [x] Usuario renova token
+- [x] Usuario recupera senha
+- [x] Testes passam
 
 ## Sprint 2 - Perfil e Peso
 

@@ -1,4 +1,5 @@
 import { getAiAgents } from "@/services/api";
+import Link from "next/link";
 
 async function loadAgents() {
   try {
@@ -26,6 +27,20 @@ export default async function HomePage() {
               Monolito modular com backend Spring Boot, frontend Next.js e agentes Codex instalados
               para guiar desenvolvimento, suporte e fluxos de IA.
             </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                className="rounded-md bg-leaf-700 px-4 py-2 text-sm font-semibold text-white"
+                href="/login"
+              >
+                Entrar
+              </Link>
+              <Link
+                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
+                href="/cadastro"
+              >
+                Criar conta
+              </Link>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
