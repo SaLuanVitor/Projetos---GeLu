@@ -45,7 +45,7 @@ Tarefas:
 - [x] Implementar logout
 - [x] Implementar recuperacao de senha
 - [x] Criar telas de login/cadastro
-- [ ] Criar testes de auth
+- [x] Criar testes de auth
 
 Pronto quando:
 
