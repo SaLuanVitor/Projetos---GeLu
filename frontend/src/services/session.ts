@@ -49,7 +49,13 @@ export function loadSession(): StoredSession | null {
   }
 
   try {
-    return JSON.parse(rawSession) as StoredSession;
+    const session = JSON.parse(rawSession) as StoredSession;
+    if (!isStoredSession(session) || isSessionExpired(session)) {
+      window.localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+
+    return session;
   } catch {
     window.localStorage.removeItem(SESSION_KEY);
     return null;
@@ -58,4 +64,25 @@ export function loadSession(): StoredSession | null {
 
 export function clearSession() {
   window.localStorage.removeItem(SESSION_KEY);
+}
+
+function isStoredSession(session: Partial<StoredSession> | null): session is StoredSession {
+  return Boolean(
+    session?.accessToken &&
+      session.refreshToken &&
+      session.tokenType &&
+      typeof session.expiresIn === "number" &&
+      session.user?.id &&
+      session.user.email &&
+      session.updatedAt
+  );
+}
+
+function isSessionExpired(session: StoredSession) {
+  const updatedAt = new Date(session.updatedAt).getTime();
+  if (Number.isNaN(updatedAt)) {
+    return true;
+  }
+
+  return Date.now() >= updatedAt + session.expiresIn * 1000;
 }

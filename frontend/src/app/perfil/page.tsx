@@ -5,12 +5,15 @@ import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
 import { TextInput } from "@/components/ui/FormField";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
+import { ApiClientError } from "@/services/auth";
 import { createWeightRecord, getProfile, updateProfile } from "@/services/profile";
-import { loadSession, type StoredSession } from "@/services/session";
+import { clearSession, loadSession, type StoredSession } from "@/services/session";
 import type { ProfileResponse } from "@/types/api";
-import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [session, setSession] = useState<StoredSession | null>(null);
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [name, setName] = useState("");
@@ -26,6 +29,38 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const loadProfile = useCallback(
+    async (accessToken: string) => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const loadedProfile = await getProfile(accessToken);
+        setProfile(loadedProfile);
+        setName(loadedProfile.name);
+        setBirthDate(loadedProfile.birthDate ?? "");
+        setHeightCm(toInputValue(loadedProfile.heightCm));
+        setBiologicalSex(loadedProfile.biologicalSex ?? "");
+        setGoal(loadedProfile.goal ?? "");
+        setBasalCalories(toInputValue(loadedProfile.basalCalories));
+        setDailyCalorieGoal(toInputValue(loadedProfile.dailyCalorieGoal));
+      } catch (requestError) {
+        if (requestError instanceof ApiClientError && requestError.code === "UNAUTHORIZED") {
+          clearSession();
+          router.replace("/login");
+          return;
+        }
+
+        setError(
+          requestError instanceof Error ? requestError.message : "Falha ao carregar perfil."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [router]
+  );
+
   useEffect(() => {
     const storedSession = loadSession();
     setSession(storedSession);
@@ -35,28 +70,7 @@ export default function ProfilePage() {
     }
 
     void loadProfile(storedSession.accessToken);
-  }, []);
-
-  async function loadProfile(accessToken: string) {
-    setLoading(true);
-    setError("");
-
-    try {
-      const loadedProfile = await getProfile(accessToken);
-      setProfile(loadedProfile);
-      setName(loadedProfile.name);
-      setBirthDate(loadedProfile.birthDate ?? "");
-      setHeightCm(toInputValue(loadedProfile.heightCm));
-      setBiologicalSex(loadedProfile.biologicalSex ?? "");
-      setGoal(loadedProfile.goal ?? "");
-      setBasalCalories(toInputValue(loadedProfile.basalCalories));
-      setDailyCalorieGoal(toInputValue(loadedProfile.dailyCalorieGoal));
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Falha ao carregar perfil.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [loadProfile]);
 
   async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,6 +94,12 @@ export default function ProfilePage() {
       setProfile(updatedProfile);
       setStatus("Perfil atualizado com sucesso.");
     } catch (requestError) {
+      if (requestError instanceof ApiClientError && requestError.code === "UNAUTHORIZED") {
+        clearSession();
+        router.replace("/login");
+        return;
+      }
+
       setError(requestError instanceof Error ? requestError.message : "Falha ao atualizar perfil.");
     }
   }
@@ -103,6 +123,12 @@ export default function ProfilePage() {
       await loadProfile(session.accessToken);
       setStatus("Peso registrado com sucesso.");
     } catch (requestError) {
+      if (requestError instanceof ApiClientError && requestError.code === "UNAUTHORIZED") {
+        clearSession();
+        router.replace("/login");
+        return;
+      }
+
       setError(requestError instanceof Error ? requestError.message : "Falha ao registrar peso.");
     }
   }

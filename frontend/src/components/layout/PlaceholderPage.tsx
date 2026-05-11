@@ -18,7 +18,7 @@ export function PlaceholderPage({ description, title }: { description: string; t
             Esta folha visual segue o design das telas, mas a regra de negocio sera implementada na
             sprint correspondente.
           </p>
-          <ActionLink className="mt-6" href="/" variant="outline">
+          <ActionLink className="mt-6" href="/dashboard" variant="outline">
             Voltar ao inicio
           </ActionLink>
         </PaperCard>

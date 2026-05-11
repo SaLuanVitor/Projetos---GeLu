@@ -173,6 +173,10 @@ frontend/
     utils/
 ```
 
+As telas publicas de autenticacao (`/login`, `/cadastro`, `/recuperar-senha` e
+`/redefinir-senha`) usam um layout proprio de caderno/folha de receita, sem menu interno. A area
+autenticada usa `AppShell`, com navegacao completa e inicio em `/dashboard`.
+
 ## Padrao de API
 
 Base URL:
@@ -257,4 +261,3 @@ Modulos que podem virar servicos separados:
 - Support Service
 
 A extracao so deve ocorrer quando houver necessidade real de escala, isolamento operacional ou manutencao independente.
-

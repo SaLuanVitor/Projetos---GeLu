@@ -4,12 +4,15 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ActionLink } from "@/components/ui/ActionButton";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
+import { ApiClientError } from "@/services/auth";
 import { listWeightHistory } from "@/services/profile";
-import { loadSession, type StoredSession } from "@/services/session";
+import { clearSession, loadSession, type StoredSession } from "@/services/session";
 import type { WeightHistoryItem } from "@/types/api";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export default function WeightEvolutionPage() {
+  const router = useRouter();
   const [session, setSession] = useState<StoredSession | null>(null);
   const [history, setHistory] = useState<WeightHistoryItem[]>([]);
   const [error, setError] = useState("");
@@ -25,13 +28,19 @@ export default function WeightEvolutionPage() {
 
     listWeightHistory(storedSession.accessToken)
       .then(setHistory)
-      .catch((requestError) =>
+      .catch((requestError) => {
+        if (requestError instanceof ApiClientError && requestError.code === "UNAUTHORIZED") {
+          clearSession();
+          router.replace("/login");
+          return;
+        }
+
         setError(
           requestError instanceof Error ? requestError.message : "Falha ao carregar historico."
-        )
-      )
+        );
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [router]);
 
   const reminder = useMemo(() => getReminder(history), [history]);
   const current = history[0];

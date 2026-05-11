@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720" role="img" aria-labelledby="title desc">
+  <title id="title">Cozinha familiar do Gelu - Menu</title>
+  <desc id="desc">Ilustracao artesanal de uma cozinha com janela, caderno de receitas, legumes e panela.</desc>
+  <defs>
+    <linearGradient id="sun" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff7dc"/>
+      <stop offset="1" stop-color="#eec78a"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8e8cc"/>
+      <stop offset="1" stop-color="#d8af7e"/>
+    </linearGradient>
+    <filter id="paperShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#4b2f1f" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect width="900" height="720" rx="26" fill="url(#wall)"/>
+  <path fill="#c6925d" opacity=".22" d="M0 515h900v205H0z"/>
+  <g opacity=".18" stroke="#7a573f" stroke-width="3">
+    <path d="M52 74h796M52 138h796M52 202h796M52 266h796"/>
+    <path d="M112 40v330M236 40v330M654 40v330M780 40v330"/>
+  </g>
+  <g transform="translate(312 56)" filter="url(#paperShadow)">
+    <rect width="282" height="276" rx="14" fill="#8c5f3d"/>
+    <rect x="18" y="18" width="246" height="240" rx="8" fill="url(#sun)"/>
+    <path fill="#b47c50" d="M130 18h20v240h-20zM18 130h246v18H18z"/>
+    <g fill="#fff9e7" opacity=".52">
+      <path d="M52 18h18l-10 240H42zM210 18h20l-24 240h-19z"/>
+      <path d="M90 18h12L92 258H78zM178 18h13l8 240h-14z"/>
+    </g>
+  </g>
+  <path fill="#6f4329" d="M52 532h796v118H52z"/>
+  <path fill="#442818" d="M52 640h796v80H52z"/>
+  <g transform="translate(284 400)" filter="url(#paperShadow)">
+    <path fill="#fff6df" d="M0 28c80-33 156 16 220-15 65 35 136-16 216 15v162c-80-31-151 15-216-15-64 31-140-18-220 15z"/>
+    <path fill="none" stroke="#caa782" stroke-width="4" d="M218 17v160"/>
+    <g stroke="#d8b98e" stroke-width="4">
+      <path d="M36 66h144M38 95h136M36 124h150"/>
+      <path d="M256 66h144M252 95h130M258 124h120"/>
+    </g>
+  </g>
+  <g transform="translate(620 328)">
+    <ellipse cx="76" cy="185" rx="95" ry="18" fill="#5a3320" opacity=".34"/>
+    <path fill="#b85a20" d="M20 70c0-34 112-34 112 0v108c0 33-112 33-112 0z"/>
+    <path fill="#d87a35" d="M34 70c0-20 84-20 84 0v104c0 20-84 20-84 0z"/>
+    <ellipse cx="76" cy="70" rx="56" ry="18" fill="#f5a453" stroke="#5f402a" stroke-width="8"/>
+    <path fill="none" stroke="#5f402a" stroke-linecap="round" stroke-width="8" d="M50 45c8-20 44-20 52 0"/>
+    <path fill="#5f402a" d="M11 100c-26 8-26 50 0 58v-20c-8-7-8-14 0-20zM141 100c26 8 26 50 0 58v-20c8-7 8-14 0-20z"/>
+  </g>
+  <g transform="translate(72 386)">
+    <ellipse cx="96" cy="180" rx="110" ry="18" fill="#5a3320" opacity=".28"/>
+    <path fill="#b96b36" d="M30 76h132l-20 100H50z"/>
+    <path fill="#7f4a25" d="M24 66h144v24H24z"/>
+    <g fill="#4b7d3b">
+      <ellipse cx="62" cy="58" rx="24" ry="46" transform="rotate(-24 62 58)"/>
+      <ellipse cx="98" cy="48" rx="28" ry="54"/>
+      <ellipse cx="134" cy="62" rx="24" ry="48" transform="rotate(24 134 62)"/>
+    </g>
+    <g stroke="#e9792a" stroke-linecap="round" stroke-width="16">
+      <path d="M8 172c65-36 126-44 178-30"/>
+      <path d="M18 196c56-30 116-38 168-24"/>
+    </g>
+    <g fill="#eff0c8" stroke="#7a573f" stroke-width="4">
+      <circle cx="202" cy="116" r="18"/>
+      <circle cx="224" cy="136" r="20"/>
+      <circle cx="200" cy="154" r="16"/>
+    </g>
+  </g>
+  <g transform="translate(735 418)">
+    <circle cx="54" cy="86" r="48" fill="#e8c96d"/>
+    <circle cx="54" cy="86" r="34" fill="#fff3c7"/>
+    <g stroke="#bd8b3d" stroke-width="4">
+      <path d="M54 52v68M20 86h68M30 62l48 48M78 62l-48 48"/>
+    </g>
+  </g>
+  <g fill="#fff0d5" opacity=".45">
+    <circle cx="132" cy="98" r="6"/>
+    <circle cx="732" cy="124" r="5"/>
+    <circle cx="242" cy="228" r="4"/>
+    <circle cx="804" cy="260" r="7"/>
+  </g>
+</svg>

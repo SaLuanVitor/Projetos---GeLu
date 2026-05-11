@@ -68,6 +68,8 @@ describe("session service", () => {
   });
 
   it("loads a valid stored session", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-10T00:10:00.000Z"));
     const storedSession: StoredSession = {
       accessToken: "access-token",
       refreshToken: "refresh-token",
@@ -79,6 +81,23 @@ describe("session service", () => {
     window.localStorage.setItem("gelu-menu-session", JSON.stringify(storedSession));
 
     expect(loadSession()).toEqual(storedSession);
+  });
+
+  it("discards expired session data", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-10T01:00:00.000Z"));
+    const storedSession: StoredSession = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      tokenType: "Bearer",
+      expiresIn: 900,
+      user,
+      updatedAt: "2026-05-10T00:00:00.000Z"
+    };
+    window.localStorage.setItem("gelu-menu-session", JSON.stringify(storedSession));
+
+    expect(loadSession()).toBeNull();
+    expect(window.localStorage.getItem("gelu-menu-session")).toBeNull();
   });
 
   it("clears a stored session", () => {

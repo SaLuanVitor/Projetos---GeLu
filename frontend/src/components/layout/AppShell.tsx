@@ -1,11 +1,14 @@
 "use client";
 
+import { ActionButton } from "@/components/ui/ActionButton";
+import { clearSession, loadSession } from "@/services/session";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 const navItems = [
-  { href: "/", label: "Inicio" },
+  { href: "/dashboard", label: "Inicio" },
   { href: "/receitas", label: "Receitas" },
   { href: "/dieta-semanal", label: "Dieta Semanal" },
   { href: "/familia", label: "Familia" },
@@ -17,12 +20,32 @@ const navItems = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  useEffect(() => {
+    if (!loadSession()) {
+      router.replace("/login");
+      return;
+    }
+
+    setSessionChecked(true);
+  }, [router]);
+
+  function handleLogout() {
+    clearSession();
+    router.push("/");
+  }
+
+  if (!sessionChecked) {
+    return <div className="paper-canvas min-h-screen bg-surface text-on-surface" />;
+  }
 
   return (
     <div className="paper-canvas min-h-screen bg-surface text-on-surface">
       <header className="sticky top-0 z-30 border-b-2 border-outline bg-surface/95 shadow-paper backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <Link className="inline-flex items-end gap-3" href="/">
+          <Link className="inline-flex items-end gap-3" href="/dashboard">
             <span className="flex h-11 w-11 rotate-[-3deg] items-center justify-center rounded-lg border-2 border-tertiary bg-primary-fixed font-display text-xl font-extrabold text-primary shadow-label">
               GL
             </span>
@@ -38,7 +61,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <nav className="flex gap-2 overflow-x-auto pb-1 lg:flex-wrap lg:justify-end lg:overflow-visible lg:pb-0">
             {navItems.map((item, index) => {
-              const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+              const active = isActiveRoute(pathname, item.href);
               return (
                 <Link
                   className={`shrink-0 rounded-lg border-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-transform hover:rotate-1 ${
@@ -58,6 +81,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
+            <ActionButton
+              className="shrink-0 px-3 py-1.5 text-xs uppercase tracking-wide"
+              onClick={handleLogout}
+              type="button"
+              variant="outline"
+            >
+              Sair
+            </ActionButton>
           </nav>
         </div>
       </header>
@@ -68,4 +99,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       </footer>
     </div>
   );
+}
+
+function isActiveRoute(pathname: string, href: string) {
+  if (href === "/dashboard" || href === "/perfil") {
+    return pathname === href;
+  }
+
+  return pathname.startsWith(href);
 }
