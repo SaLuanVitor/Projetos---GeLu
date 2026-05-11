@@ -5,16 +5,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest(HealthController.class)
-@AutoConfigureMockMvc(addFilters = false)
 class HealthControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+  private final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new HealthController()).build();
 
   @Test
   void shouldReturnHealthEnvelope() throws Exception {

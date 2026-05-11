@@ -61,21 +61,21 @@ Objetivo: permitir gestao de perfil e historico de peso.
 
 Tarefas:
 
-- [ ] Criar endpoint de perfil
-- [ ] Criar edicao de perfil
-- [ ] Criar tabela `weight_history`
-- [ ] Criar registro de peso
-- [ ] Criar tela de perfil
-- [ ] Criar tela de evolucao
-- [ ] Criar lembrete mensal simples
-- [ ] Criar testes
+- [x] Criar endpoint de perfil
+- [x] Criar edicao de perfil
+- [x] Criar tabela `weight_history`
+- [x] Criar registro de peso
+- [x] Criar tela de perfil
+- [x] Criar tela de evolucao
+- [x] Criar lembrete mensal simples
+- [x] Criar testes
 
 Pronto quando:
 
-- [ ] Usuario edita perfil
-- [ ] Usuario registra peso
-- [ ] Historico aparece
-- [ ] Testes passam
+- [x] Usuario edita perfil
+- [x] Usuario registra peso
+- [x] Historico aparece
+- [x] Testes passam
 
 ## Sprint 3 - Receitas
 

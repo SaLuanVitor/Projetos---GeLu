@@ -102,6 +102,12 @@ export default function LoginPage() {
                 >
                   Sair localmente
                 </button>
+                <Link
+                  className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
+                  href="/perfil"
+                >
+                  Perfil
+                </Link>
               </div>
             </div>
           ) : null}

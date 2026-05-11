@@ -79,3 +79,40 @@ export type ResetPasswordRequest = {
 export type ResetPasswordResponse = {
   reset: boolean;
 };
+
+export type ProfileResponse = {
+  id: string;
+  name: string;
+  email: string;
+  birthDate: string | null;
+  heightCm: number | null;
+  currentWeight: number | null;
+  biologicalSex: string | null;
+  goal: string | null;
+  basalCalories: number | null;
+  dailyCalorieGoal: number | null;
+  active: boolean;
+  createdAt: string;
+};
+
+export type UpdateProfileRequest = {
+  name: string;
+  birthDate: string | null;
+  heightCm: number | null;
+  biologicalSex: string | null;
+  goal: string | null;
+  basalCalories: number | null;
+  dailyCalorieGoal: number | null;
+};
+
+export type WeightHistoryItem = {
+  id: string;
+  weightKg: number;
+  recordedAt: string;
+  createdAt: string;
+};
+
+export type CreateWeightRecordRequest = {
+  weightKg: number;
+  recordedAt: string | null;
+};

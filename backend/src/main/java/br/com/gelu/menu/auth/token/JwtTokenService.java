@@ -2,7 +2,9 @@ package br.com.gelu.menu.auth.token;
 
 import br.com.gelu.menu.users.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Map;
+import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,6 +66,34 @@ public class JwtTokenService {
     return TOKEN_TYPE;
   }
 
+  public UUID validateAccessToken(String token) {
+    String[] parts = token.split("\\.");
+    if (parts.length != 3) {
+      throw new IllegalArgumentException("Invalid access token");
+    }
+
+    String signingInput = parts[0] + "." + parts[1];
+    if (!MessageDigest.isEqual(
+        sign(signingInput).getBytes(StandardCharsets.UTF_8),
+        parts[2].getBytes(StandardCharsets.UTF_8))) {
+      throw new IllegalArgumentException("Invalid access token");
+    }
+
+    Map<String, Object> payload = decodePayload(parts[1]);
+    Object expiresAt = payload.get("exp");
+    if (!(expiresAt instanceof Number number)
+        || Instant.now().getEpochSecond() >= number.longValue()) {
+      throw new IllegalArgumentException("Expired access token");
+    }
+
+    Object subject = payload.get("sub");
+    if (!(subject instanceof String value)) {
+      throw new IllegalArgumentException("Invalid access token");
+    }
+
+    return UUID.fromString(value);
+  }
+
   public String hashRefreshToken(String refreshToken) {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -103,6 +134,15 @@ public class JwtTokenService {
           .encodeToString(objectMapper.writeValueAsBytes(values));
     } catch (JsonProcessingException exception) {
       throw new IllegalStateException("Unable to create JWT payload", exception);
+    }
+  }
+
+  private Map<String, Object> decodePayload(String payload) {
+    try {
+      byte[] decodedPayload = Base64.getUrlDecoder().decode(payload);
+      return objectMapper.readValue(decodedPayload, new TypeReference<>() {});
+    } catch (IllegalArgumentException | IOException exception) {
+      throw new IllegalArgumentException("Invalid access token", exception);
     }
   }
 
