@@ -1,145 +1,129 @@
-import { AppShell } from "@/components/layout/AppShell";
 import { ActionLink } from "@/components/ui/ActionButton";
-import { DashboardCard } from "@/components/ui/DashboardCard";
 import { PaperCard } from "@/components/ui/PaperCard";
-import { getAiAgents } from "@/services/api";
 
-async function loadAgents() {
-  try {
-    return await getAiAgents();
-  } catch {
-    return [];
-  }
-}
-
-const dashboardCards = [
+const features = [
   {
-    accent: "orange" as const,
-    label: "Refeicoes do dia",
-    title: "Planner de hoje",
-    value: "4 itens"
+    title: "Receitas em familia",
+    description: "Guarde ideias de pratos, organize favoritos e prepare o caderno para a rotina."
   },
   {
-    accent: "green" as const,
-    label: "Treino do dia",
-    title: "Caminhada leve",
-    value: "35 min"
+    title: "Perfil e evolucao",
+    description: "Acompanhe dados pessoais, metas e historico de peso em um visual leve."
   },
   {
-    accent: "brown" as const,
-    label: "Saldo calorico",
-    title: "Resumo estimado",
-    value: "+120 kcal"
-  },
-  {
-    accent: "green" as const,
-    label: "Peso atual",
-    title: "Acompanhamento",
-    value: "Perfil"
-  },
-  {
-    accent: "orange" as const,
-    label: "Convites pendentes",
-    title: "Familia",
-    value: "0"
-  },
-  {
-    accent: "brown" as const,
-    label: "Sugestoes inteligentes",
-    title: "Dica do chef IA",
-    value: "3 ideias"
+    title: "Planner semanal",
+    description: "Planeje refeicoes, treinos e sugestoes inteligentes no mesmo lugar."
   }
 ];
 
-export default async function HomePage() {
-  const agents = await loadAgents();
-
+export default function LandingPage() {
   return (
-    <AppShell>
-      <main className="mx-auto max-w-6xl px-5 py-8">
-        <section className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-stretch">
-          <div className="wobbly-paper border-2 border-outline bg-surface-container-low p-7 shadow-paper">
-            <p className="text-sm font-bold uppercase tracking-wide text-secondary">
-              Diario de alimentacao familiar
+    <main className="paper-canvas min-h-screen overflow-hidden bg-surface text-on-surface">
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6">
+        <div className="inline-flex items-end gap-3">
+          <span className="flex h-11 w-11 rotate-[-3deg] items-center justify-center rounded-lg border-2 border-tertiary bg-primary-fixed font-display text-xl font-extrabold text-primary shadow-label">
+            GL
+          </span>
+          <div>
+            <p className="font-display text-3xl font-extrabold leading-none text-primary">
+              GeLu - Menu
             </p>
-            <h1 className="mt-3 max-w-3xl font-display text-5xl font-extrabold leading-tight text-primary">
-              Seu caderno vivo para receitas, peso, treinos e ideias de IA.
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-on-surface-variant">
-              Organize a semana com um visual de planner artesanal, sem perder os fluxos reais de
-              conta, perfil e evolucao que ja estao conectados ao backend.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <ActionLink href="/login">Entrar</ActionLink>
-              <ActionLink href="/cadastro" variant="secondary">
-                Criar conta
-              </ActionLink>
-              <ActionLink href="/perfil" variant="outline">
-                Abrir perfil
-              </ActionLink>
-            </div>
-          </div>
-
-          <PaperCard tape="green" className="bg-recipe-lines bg-[length:100%_32px]">
             <p className="text-xs font-bold uppercase tracking-wide text-tertiary">
-              Anotacao da cozinha
+              Caderno familiar de receitas
             </p>
-            <h2 className="mt-3 font-display text-3xl font-bold text-secondary">
-              Lembrete mensal de peso
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-on-surface-variant">
-              A tela de evolucao avisa quando estiver na hora de registrar uma nova medida e manter
-              o historico sempre fresco.
-            </p>
-            <ActionLink className="mt-5" href="/perfil/evolucao" variant="outline">
-              Ver evolucao
+          </div>
+        </div>
+
+        <div className="flex shrink-0 gap-2">
+          <ActionLink href="/login" variant="outline">
+            Entrar
+          </ActionLink>
+          <ActionLink className="hidden sm:inline-flex" href="/cadastro">
+            Criar conta
+          </ActionLink>
+        </div>
+      </header>
+
+      <section className="mx-auto grid max-w-6xl gap-10 px-5 py-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-16">
+        <div>
+          <p className="w-fit rotate-[-1deg] rounded-lg border-2 border-tertiary bg-secondary-fixed px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-secondary-fixed shadow-label">
+            Alimentacao, rotina e cuidado em um so lugar
+          </p>
+          <h1 className="mt-6 max-w-3xl font-display text-5xl font-extrabold leading-[1.05] text-primary md:text-7xl">
+            Organize o menu da casa como um caderno vivo.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-on-surface-variant">
+            O Gelu - Menu junta receitas, dieta semanal, ambiente familiar, evolucao de peso,
+            treinos e sugestoes por IA em uma experiencia acolhedora, visual e simples de usar.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <ActionLink className="px-6 py-3 text-base" href="/cadastro">
+              Criar conta gratis
             </ActionLink>
-          </PaperCard>
-        </section>
+            <ActionLink className="px-6 py-3 text-base" href="/login" variant="secondary">
+              Ja tenho login
+            </ActionLink>
+          </div>
+        </div>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {dashboardCards.map((card) => (
-            <DashboardCard key={card.label} {...card} />
-          ))}
-        </section>
+        <div className="relative min-h-[520px]">
+          <div className="absolute left-4 top-4 h-44 w-44 rounded-full bg-secondary-fixed/70 blur-3xl" />
+          <div className="absolute bottom-8 right-0 h-52 w-52 rounded-full bg-primary-fixed/80 blur-3xl" />
 
-        <section className="mt-8 grid gap-5 lg:grid-cols-[1fr_1fr]">
-          <PaperCard tape="brown">
-            <h2 className="font-display text-3xl font-bold text-tertiary">Agentes disponiveis</h2>
-            <p className="mt-2 text-sm leading-6 text-on-surface-variant">
-              Catalogo exposto pelo modulo de IA do backend, mantido como referencia tecnica.
+          <PaperCard
+            className="relative z-10 rotate-[-1deg] bg-recipe-lines bg-[length:100%_32px] p-7"
+            tape="orange"
+          >
+            <p className="text-xs font-bold uppercase tracking-wide text-tertiary">
+              Planner de hoje
             </p>
-            <div className="mt-5 grid gap-3">
-              {agents.length > 0 ? (
-                agents.slice(0, 4).map((agent) => (
+            <h2 className="mt-3 font-display text-4xl font-bold text-primary">
+              Refeicoes da familia
+            </h2>
+            <div className="mt-6 grid gap-3">
+              {["Cafe com tapioca", "Bowl mediterraneo", "Lanche de frutas", "Sopa de abobora"].map(
+                (item, index) => (
                   <div
-                    className="rounded-lg border-2 border-outline-variant bg-surface-container-lowest p-3"
-                    key={agent.key}
+                    className="flex items-center justify-between rounded-lg border-2 border-outline-variant bg-surface-container-lowest px-4 py-3"
+                    key={item}
                   >
-                    <p className="font-bold text-tertiary">{agent.name}</p>
-                    <p className="mt-1 text-sm text-on-surface-variant">{agent.purpose}</p>
+                    <span className="font-bold text-tertiary">{item}</span>
+                    <span className="rounded-full bg-secondary-fixed px-3 py-1 text-xs font-bold text-on-secondary-fixed">
+                      {index === 0
+                        ? "manha"
+                        : index === 1
+                          ? "almoco"
+                          : index === 2
+                            ? "lanche"
+                            : "jantar"}
+                    </span>
                   </div>
-                ))
-              ) : (
-                <p className="rounded-lg border-2 border-dashed border-outline-variant p-4 text-sm text-on-surface-variant">
-                  Backend offline ou catalogo ainda indisponivel.
-                </p>
+                )
               )}
             </div>
           </PaperCard>
 
-          <PaperCard tape="orange">
-            <h2 className="font-display text-3xl font-bold text-primary">Proximas folhas</h2>
-            <div className="mt-5 grid gap-3 text-sm text-on-surface-variant">
-              <p>Receitas, dieta semanal, familia e sugestoes IA ja aparecem no menu.</p>
-              <p>
-                Nesta etapa elas ficam como paginas visuais de preparacao, sem criar regras de
-                negocio antes das sprints correspondentes.
-              </p>
-            </div>
+          <PaperCard
+            className="absolute bottom-2 right-4 z-20 w-72 rotate-[2deg] bg-surface-container-lowest"
+            tape="green"
+          >
+            <p className="text-xs font-bold uppercase tracking-wide text-secondary">Evolucao</p>
+            <p className="mt-2 font-display text-3xl font-extrabold text-tertiary">82,4 kg</p>
+            <p className="mt-2 text-sm leading-6 text-on-surface-variant">
+              Registre peso e metas sem perder a sensacao de planner pessoal.
+            </p>
           </PaperCard>
-        </section>
-      </main>
-    </AppShell>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-6xl gap-5 px-5 pb-14 md:grid-cols-3">
+        {features.map((feature) => (
+          <PaperCard key={feature.title} tape="brown">
+            <h3 className="font-display text-2xl font-bold text-tertiary">{feature.title}</h3>
+            <p className="mt-3 text-sm leading-6 text-on-surface-variant">{feature.description}</p>
+          </PaperCard>
+        ))}
+      </section>
+    </main>
   );
 }
