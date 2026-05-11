@@ -1,10 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { AppShell } from "@/components/layout/AppShell";
+import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
+import { TextInput } from "@/components/ui/FormField";
+import { PaperCard } from "@/components/ui/PaperCard";
+import { StatusMessage } from "@/components/ui/StatusMessage";
 import { createWeightRecord, getProfile, updateProfile } from "@/services/profile";
 import { loadSession, type StoredSession } from "@/services/session";
 import type { ProfileResponse } from "@/types/api";
+import { FormEvent, useEffect, useState } from "react";
 
 export default function ProfilePage() {
   const [session, setSession] = useState<StoredSession | null>(null);
@@ -105,161 +109,147 @@ export default function ProfilePage() {
 
   if (!session) {
     return (
-      <main className="min-h-screen bg-slate-50 px-6 py-10">
-        <section className="mx-auto max-w-xl rounded-lg border border-slate-200 bg-white p-6">
-          <h1 className="text-2xl font-semibold text-ink">Perfil</h1>
-          <p className="mt-3 text-sm text-slate-600">Entre para editar seu perfil.</p>
-          <Link
-            className="mt-5 inline-flex rounded-md bg-leaf-700 px-4 py-2 text-sm font-semibold text-white"
-            href="/login"
-          >
-            Entrar
-          </Link>
-        </section>
-      </main>
+      <AppShell>
+        <main className="mx-auto max-w-xl px-5 py-10">
+          <PaperCard tape="orange">
+            <h1 className="font-display text-4xl font-bold text-primary">Perfil</h1>
+            <p className="mt-3 text-sm leading-6 text-on-surface-variant">
+              Entre para editar seu perfil e registrar seu peso.
+            </p>
+            <ActionLink className="mt-5" href="/login">
+              Entrar
+            </ActionLink>
+          </PaperCard>
+        </main>
+      </AppShell>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-10">
-      <section className="mx-auto max-w-5xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <AppShell>
+      <main className="mx-auto max-w-6xl px-5 py-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <Link className="text-sm font-semibold text-leaf-700" href="/">
-              Gelu - Menu
-            </Link>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">Perfil e peso</h1>
+            <p className="text-sm font-bold uppercase tracking-wide text-secondary">
+              Minha pagina do caderno
+            </p>
+            <h1 className="mt-2 font-display text-5xl font-extrabold text-primary">
+              Perfil e peso
+            </h1>
           </div>
-          <Link
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
-            href="/perfil/evolucao"
-          >
+          <ActionLink href="/perfil/evolucao" variant="outline">
             Ver evolucao
-          </Link>
+          </ActionLink>
         </div>
 
-        {loading ? <p className="mt-6 text-sm text-slate-600">Carregando perfil...</p> : null}
-        {status ? (
-          <p className="mt-6 rounded-md bg-leaf-50 p-3 text-sm text-leaf-700">{status}</p>
-        ) : null}
-        {error ? (
-          <p className="mt-6 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>
-        ) : null}
+        <div className="mt-6 space-y-3">
+          {loading ? <StatusMessage>Carregando perfil...</StatusMessage> : null}
+          {status ? <StatusMessage variant="success">{status}</StatusMessage> : null}
+          {error ? <StatusMessage variant="error">{error}</StatusMessage> : null}
+        </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
-          <form
-            className="rounded-lg border border-slate-200 bg-white p-6"
-            onSubmit={handleProfileSubmit}
-          >
-            <h2 className="text-lg font-semibold text-ink">Dados pessoais</h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <TextInput label="Nome" maxLength={150} required value={name} onChange={setName} />
-              <TextInput
-                label="E-mail"
-                disabled
-                value={profile?.email ?? session.user.email}
-                onChange={() => undefined}
-              />
-              <TextInput label="Nascimento" type="date" value={birthDate} onChange={setBirthDate} />
-              <TextInput
-                label="Altura (cm)"
-                min="1"
-                step="0.01"
-                type="number"
-                value={heightCm}
-                onChange={setHeightCm}
-              />
-              <TextInput
-                label="Sexo biologico"
-                maxLength={20}
-                value={biologicalSex}
-                onChange={setBiologicalSex}
-              />
-              <TextInput label="Objetivo" maxLength={80} value={goal} onChange={setGoal} />
-              <TextInput
-                label="Calorias basais"
-                min="1"
-                step="0.01"
-                type="number"
-                value={basalCalories}
-                onChange={setBasalCalories}
-              />
-              <TextInput
-                label="Meta calorica diaria"
-                min="1"
-                step="0.01"
-                type="number"
-                value={dailyCalorieGoal}
-                onChange={setDailyCalorieGoal}
-              />
-            </div>
-            <button
-              className="mt-6 rounded-md bg-leaf-700 px-4 py-2 text-sm font-semibold text-white"
-              type="submit"
-            >
-              Salvar perfil
-            </button>
-          </form>
+          <PaperCard tape="green">
+            <form onSubmit={handleProfileSubmit}>
+              <h2 className="font-display text-3xl font-bold text-tertiary">Dados pessoais</h2>
+              <p className="mt-2 text-sm text-on-surface-variant">
+                Dados corporais e metas ficam no seu perfil. O e-mail nao e editavel nesta sprint.
+              </p>
+              <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                <TextInput
+                  label="Nome"
+                  maxLength={150}
+                  required
+                  value={name}
+                  onValueChange={setName}
+                />
+                <TextInput
+                  disabled
+                  label="E-mail"
+                  value={profile?.email ?? session.user.email}
+                  onValueChange={() => undefined}
+                />
+                <TextInput
+                  label="Nascimento"
+                  type="date"
+                  value={birthDate}
+                  onValueChange={setBirthDate}
+                />
+                <TextInput
+                  label="Altura (cm)"
+                  min="1"
+                  step="0.01"
+                  type="number"
+                  value={heightCm}
+                  onValueChange={setHeightCm}
+                />
+                <TextInput
+                  label="Sexo biologico"
+                  maxLength={20}
+                  value={biologicalSex}
+                  onValueChange={setBiologicalSex}
+                />
+                <TextInput label="Objetivo" maxLength={80} value={goal} onValueChange={setGoal} />
+                <TextInput
+                  label="Calorias basais"
+                  min="1"
+                  step="0.01"
+                  type="number"
+                  value={basalCalories}
+                  onValueChange={setBasalCalories}
+                />
+                <TextInput
+                  label="Meta calorica diaria"
+                  min="1"
+                  step="0.01"
+                  type="number"
+                  value={dailyCalorieGoal}
+                  onValueChange={setDailyCalorieGoal}
+                />
+              </div>
+              <ActionButton className="mt-6" type="submit">
+                Salvar perfil
+              </ActionButton>
+            </form>
+          </PaperCard>
 
           <aside className="space-y-6">
-            <form
-              className="rounded-lg border border-slate-200 bg-white p-6"
-              onSubmit={handleWeightSubmit}
-            >
-              <h2 className="text-lg font-semibold text-ink">Registrar peso</h2>
-              <p className="mt-2 text-sm text-slate-600">
-                Peso atual:{" "}
-                {profile?.currentWeight ? `${profile.currentWeight} kg` : "nao informado"}
+            <PaperCard tape="orange" className="bg-recipe-lines bg-[length:100%_32px]">
+              <p className="text-xs font-bold uppercase tracking-wide text-tertiary">Peso atual</p>
+              <p className="mt-3 font-display text-4xl font-extrabold text-primary">
+                {profile?.currentWeight ? `${profile.currentWeight} kg` : "Nao informado"}
               </p>
-              <TextInput
-                label="Peso (kg)"
-                min="1"
-                required
-                step="0.01"
-                type="number"
-                value={weightKg}
-                onChange={setWeightKg}
-              />
-              <TextInput
-                label="Data e hora"
-                type="datetime-local"
-                value={recordedAt}
-                onChange={setRecordedAt}
-              />
-              <button
-                className="mt-5 w-full rounded-md bg-leaf-700 px-4 py-2 text-sm font-semibold text-white"
-                type="submit"
-              >
-                Registrar peso
-              </button>
-            </form>
+            </PaperCard>
+
+            <PaperCard tape="brown">
+              <form onSubmit={handleWeightSubmit}>
+                <h2 className="font-display text-3xl font-bold text-tertiary">Registrar peso</h2>
+                <div className="mt-6 space-y-5">
+                  <TextInput
+                    label="Peso (kg)"
+                    min="1"
+                    required
+                    step="0.01"
+                    type="number"
+                    value={weightKg}
+                    onValueChange={setWeightKg}
+                  />
+                  <TextInput
+                    label="Data e hora"
+                    type="datetime-local"
+                    value={recordedAt}
+                    onValueChange={setRecordedAt}
+                  />
+                </div>
+                <ActionButton className="mt-6 w-full" type="submit" variant="secondary">
+                  Registrar peso
+                </ActionButton>
+              </form>
+            </PaperCard>
           </aside>
         </div>
-      </section>
-    </main>
-  );
-}
-
-function TextInput({
-  label,
-  onChange,
-  value,
-  ...props
-}: {
-  label: string;
-  onChange: (value: string) => void;
-  value: string;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">) {
-  return (
-    <label className="block text-sm font-medium text-slate-700">
-      {label}
-      <input
-        className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-leaf-600 disabled:bg-slate-100"
-        onChange={(event) => onChange(event.target.value)}
-        value={value}
-        {...props}
-      />
-    </label>
+      </main>
+    </AppShell>
   );
 }
 

@@ -8,11 +8,34 @@
 
 body {
   margin: 0;
-  background: #f7faf8;
-  color: #1b2430;
+  background: radial-gradient(circle at top left, rgba(232, 109, 45, 0.1), transparent 26rem),
+    radial-gradient(circle at bottom right, rgba(184, 237, 179, 0.16), transparent 28rem), #fef9ed;
+  color: #1d1c15;
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+*:focus-visible {
+  outline: 3px solid rgba(232, 109, 45, 0.45);
+  outline-offset: 3px;
+}
+
+.paper-canvas {
+  background-image: radial-gradient(circle at 1px 1px, rgba(121, 87, 63, 0.08) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+.wobbly-paper {
+  clip-path: polygon(0.5% 1%, 99% 0, 100% 98.5%, 1% 100%);
 }

@@ -1,10 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { AppShell } from "@/components/layout/AppShell";
+import { ActionLink } from "@/components/ui/ActionButton";
+import { PaperCard } from "@/components/ui/PaperCard";
+import { StatusMessage } from "@/components/ui/StatusMessage";
 import { listWeightHistory } from "@/services/profile";
 import { loadSession, type StoredSession } from "@/services/session";
 import type { WeightHistoryItem } from "@/types/api";
+import { useEffect, useMemo, useState } from "react";
 
 export default function WeightEvolutionPage() {
   const [session, setSession] = useState<StoredSession | null>(null);
@@ -31,70 +34,133 @@ export default function WeightEvolutionPage() {
   }, []);
 
   const reminder = useMemo(() => getReminder(history), [history]);
+  const current = history[0];
+  const previous = history[1];
+  const delta = current && previous ? Number(current.weightKg) - Number(previous.weightKg) : null;
 
   if (!session) {
     return (
-      <main className="min-h-screen bg-slate-50 px-6 py-10">
-        <section className="mx-auto max-w-xl rounded-lg border border-slate-200 bg-white p-6">
-          <h1 className="text-2xl font-semibold text-ink">Evolucao de peso</h1>
-          <p className="mt-3 text-sm text-slate-600">Entre para visualizar seu historico.</p>
-          <Link
-            className="mt-5 inline-flex rounded-md bg-leaf-700 px-4 py-2 text-sm font-semibold text-white"
-            href="/login"
-          >
-            Entrar
-          </Link>
-        </section>
-      </main>
+      <AppShell>
+        <main className="mx-auto max-w-xl px-5 py-10">
+          <PaperCard tape="green">
+            <h1 className="font-display text-4xl font-bold text-primary">Evolucao de peso</h1>
+            <p className="mt-3 text-sm leading-6 text-on-surface-variant">
+              Entre para visualizar seu historico.
+            </p>
+            <ActionLink className="mt-5" href="/login">
+              Entrar
+            </ActionLink>
+          </PaperCard>
+        </main>
+      </AppShell>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-10">
-      <section className="mx-auto max-w-4xl">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <AppShell>
+      <main className="mx-auto max-w-6xl px-5 py-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <Link className="text-sm font-semibold text-leaf-700" href="/perfil">
-              Perfil
-            </Link>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">Evolucao de peso</h1>
+            <p className="text-sm font-bold uppercase tracking-wide text-secondary">
+              Minha evolucao
+            </p>
+            <h1 className="mt-2 font-display text-5xl font-extrabold text-primary">
+              Historico de peso
+            </h1>
           </div>
-          <Link
-            className="rounded-md bg-leaf-700 px-4 py-2 text-sm font-semibold text-white"
-            href="/perfil"
-          >
+          <ActionLink href="/perfil" variant="secondary">
             Registrar peso
-          </Link>
+          </ActionLink>
         </div>
 
-        {reminder ? (
-          <p className="mt-6 rounded-md bg-amber-50 p-3 text-sm text-amber-800">{reminder}</p>
-        ) : null}
-        {loading ? <p className="mt-6 text-sm text-slate-600">Carregando historico...</p> : null}
-        {error ? (
-          <p className="mt-6 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>
-        ) : null}
+        <div className="mt-6 space-y-3">
+          {reminder ? <StatusMessage variant="warning">{reminder}</StatusMessage> : null}
+          {loading ? <StatusMessage>Carregando historico...</StatusMessage> : null}
+          {error ? <StatusMessage variant="error">{error}</StatusMessage> : null}
+        </div>
 
-        <div className="mt-6 rounded-lg border border-slate-200 bg-white">
-          {history.length > 0 ? (
-            <div className="divide-y divide-slate-100">
-              {history.map((item) => (
-                <div className="flex items-center justify-between gap-4 p-4" key={item.id}>
-                  <div>
-                    <p className="text-sm font-semibold text-ink">{item.weightKg} kg</p>
-                    <p className="mt-1 text-xs text-slate-500">
+        <section className="mt-6 grid gap-4 md:grid-cols-3">
+          <PaperCard tape="orange">
+            <p className="text-xs font-bold uppercase tracking-wide text-tertiary">Peso atual</p>
+            <p className="mt-3 font-display text-4xl font-extrabold text-primary">
+              {current ? `${current.weightKg} kg` : "--"}
+            </p>
+          </PaperCard>
+          <PaperCard tape="green">
+            <p className="text-xs font-bold uppercase tracking-wide text-tertiary">Peso anterior</p>
+            <p className="mt-3 font-display text-4xl font-extrabold text-secondary">
+              {previous ? `${previous.weightKg} kg` : "--"}
+            </p>
+          </PaperCard>
+          <PaperCard tape="brown">
+            <p className="text-xs font-bold uppercase tracking-wide text-tertiary">
+              Variacao recente
+            </p>
+            <p className="mt-3 font-display text-4xl font-extrabold text-tertiary">
+              {delta == null ? "--" : `${delta > 0 ? "+" : ""}${delta.toFixed(2)} kg`}
+            </p>
+          </PaperCard>
+        </section>
+
+        <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
+          <PaperCard tape="green">
+            <h2 className="font-display text-3xl font-bold text-tertiary">Grafico simples</h2>
+            <div className="mt-6 flex h-64 items-end gap-3 border-b-2 border-l-2 border-outline p-4">
+              {history
+                .slice(0, 8)
+                .reverse()
+                .map((item) => (
+                  <div className="flex flex-1 flex-col items-center gap-2" key={item.id}>
+                    <div
+                      className="w-full rounded-t-lg border-2 border-tertiary bg-secondary-fixed"
+                      style={{
+                        height: `${Math.max(24, Math.min(190, Number(item.weightKg) * 2))}px`
+                      }}
+                      title={`${item.weightKg} kg`}
+                    />
+                    <span className="text-xs font-bold text-tertiary">
+                      {new Date(item.recordedAt).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit"
+                      })}
+                    </span>
+                  </div>
+                ))}
+              {history.length === 0 ? (
+                <p className="self-center text-sm text-on-surface-variant">
+                  Registre seu primeiro peso para desenhar a curva.
+                </p>
+              ) : null}
+            </div>
+          </PaperCard>
+
+          <PaperCard tape="orange">
+            <h2 className="font-display text-3xl font-bold text-tertiary">Registros</h2>
+            <div className="mt-5 space-y-3">
+              {history.length > 0 ? (
+                history.map((item) => (
+                  <div
+                    className="rounded-lg border-2 border-outline-variant bg-surface-container-lowest p-3"
+                    key={item.id}
+                  >
+                    <p className="font-display text-2xl font-bold text-primary">
+                      {item.weightKg} kg
+                    </p>
+                    <p className="mt-1 text-xs text-on-surface-variant">
                       Registrado em {new Date(item.recordedAt).toLocaleString("pt-BR")}
                     </p>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="rounded-lg border-2 border-dashed border-outline-variant p-4 text-sm text-on-surface-variant">
+                  Nenhum peso registrado ainda.
+                </p>
+              )}
             </div>
-          ) : (
-            <p className="p-6 text-sm text-slate-600">Nenhum peso registrado ainda.</p>
-          )}
-        </div>
-      </section>
-    </main>
+          </PaperCard>
+        </section>
+      </main>
+    </AppShell>
   );
 }
 

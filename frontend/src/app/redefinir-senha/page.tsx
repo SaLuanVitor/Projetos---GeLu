@@ -1,8 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { AppShell } from "@/components/layout/AppShell";
+import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
+import { TextAreaField, TextInput } from "@/components/ui/FormField";
+import { PaperCard } from "@/components/ui/PaperCard";
+import { StatusMessage } from "@/components/ui/StatusMessage";
 import { resetPassword } from "@/services/auth";
+import { FormEvent, useEffect, useState } from "react";
 
 export default function ResetPasswordPage() {
   const [token, setToken] = useState("");
@@ -34,65 +38,58 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-10">
-      <section className="mx-auto max-w-md">
-        <Link className="text-sm font-semibold text-leaf-700" href="/">
-          Gelu - Menu
-        </Link>
-        <form
-          className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
-          onSubmit={handleResetPassword}
-        >
-          <h1 className="text-2xl font-semibold text-ink">Redefinir senha</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Use o token recebido e escolha uma nova senha.
+    <AppShell>
+      <main className="mx-auto grid max-w-5xl gap-8 px-5 py-10 lg:grid-cols-[1fr_430px]">
+        <section className="flex flex-col justify-center">
+          <p className="text-sm font-bold uppercase tracking-wide text-secondary">Nova senha</p>
+          <h1 className="mt-3 font-display text-5xl font-extrabold leading-tight text-primary">
+            Troque a chave do seu caderno com seguranca.
+          </h1>
+          <p className="mt-4 max-w-xl text-base leading-7 text-on-surface-variant">
+            Cole o token recebido e escolha uma senha forte para voltar ao planejamento.
           </p>
+          <ActionLink className="mt-6 w-fit" href="/login" variant="outline">
+            Voltar ao login
+          </ActionLink>
+        </section>
 
-          <label className="mt-5 block text-sm font-medium text-slate-700">
-            Token
-            <textarea
-              className="mt-2 min-h-24 w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-leaf-600"
-              onChange={(event) => setToken(event.target.value)}
-              required
-              value={token}
-            />
-          </label>
-          <label className="mt-4 block text-sm font-medium text-slate-700">
-            Nova senha
-            <input
-              className="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-leaf-600"
-              maxLength={72}
-              minLength={8}
-              onChange={(event) => setNewPassword(event.target.value)}
-              required
-              type="password"
-              value={newPassword}
-            />
-          </label>
+        <PaperCard tape="orange">
+          <form onSubmit={handleResetPassword}>
+            <h2 className="font-display text-3xl font-bold text-tertiary">Redefinir senha</h2>
+            <p className="mt-2 text-sm leading-6 text-on-surface-variant">
+              O token e usado uma unica vez.
+            </p>
 
-          <button
-            className="mt-6 w-full rounded-md bg-leaf-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-            disabled={loading}
-            type="submit"
-          >
-            {loading ? "Redefinindo..." : "Redefinir senha"}
-          </button>
+            <div className="mt-6 space-y-5">
+              <TextAreaField label="Token" required value={token} onValueChange={setToken} />
+              <TextInput
+                label="Nova senha"
+                maxLength={72}
+                minLength={8}
+                required
+                type="password"
+                value={newPassword}
+                onValueChange={setNewPassword}
+              />
+            </div>
 
-          {status ? (
-            <p className="mt-4 rounded-md bg-leaf-50 p-3 text-sm text-leaf-700">{status}</p>
-          ) : null}
-          {error ? (
-            <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>
-          ) : null}
+            <ActionButton className="mt-6 w-full" disabled={loading} type="submit">
+              {loading ? "Redefinindo..." : "Redefinir senha"}
+            </ActionButton>
 
-          <p className="mt-4 text-center text-sm text-slate-600">
-            Voltar para{" "}
-            <Link className="font-semibold text-leaf-700" href="/login">
-              login
-            </Link>
-          </p>
-        </form>
-      </section>
-    </main>
+            {status ? (
+              <StatusMessage className="mt-4" variant="success">
+                {status}
+              </StatusMessage>
+            ) : null}
+            {error ? (
+              <StatusMessage className="mt-4" variant="error">
+                {error}
+              </StatusMessage>
+            ) : null}
+          </form>
+        </PaperCard>
+      </main>
+    </AppShell>
   );
 }
