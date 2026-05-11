@@ -1,5 +1,7 @@
 baseSistema/
 .codex/
+docs/telas.md
+docs/telas/
 
 # Local build/runtime artifacts
 backend/target/
