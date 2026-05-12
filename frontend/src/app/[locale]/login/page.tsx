@@ -50,7 +50,6 @@ export default function LoginPage() {
         <div className="mt-8 space-y-6">
           <AuthTextInput
             label={t("email")}
-            marker="edit"
             maxLength={180}
             placeholder={t("emailPlaceholder")}
             required
@@ -65,7 +64,6 @@ export default function LoginPage() {
                 {t("forgotPassword")}
               </Link>
             }
-            marker="lock"
             maxLength={72}
             minLength={8}
             placeholder={t("passwordPlaceholder")}

@@ -58,7 +58,6 @@ export default function RegisterPage() {
           />
           <AuthTextInput
             label={t("email")}
-            marker="edit"
             maxLength={180}
             placeholder={t("emailPlaceholder")}
             required
@@ -68,7 +67,6 @@ export default function RegisterPage() {
           />
           <AuthTextInput
             label={t("password")}
-            marker="lock"
             maxLength={72}
             minLength={8}
             placeholder={t("passwordPlaceholder")}

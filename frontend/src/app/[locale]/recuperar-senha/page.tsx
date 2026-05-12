@@ -52,7 +52,6 @@ export default function ForgotPasswordPage() {
         <div className="mt-8">
           <AuthTextInput
             label={t("email")}
-            marker="edit"
             maxLength={180}
             placeholder={t("emailPlaceholder")}
             required

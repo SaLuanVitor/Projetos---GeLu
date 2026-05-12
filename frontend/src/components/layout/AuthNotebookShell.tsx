@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -8,6 +10,7 @@ import type {
   ReactNode,
   TextareaHTMLAttributes
 } from "react";
+import { useState } from "react";
 
 type AuthNotebookShellProps = {
   children: ReactNode;
@@ -115,6 +118,7 @@ export function AuthTextInput({
   labelAction,
   marker,
   onValueChange,
+  type,
   value,
   ...props
 }: {
@@ -124,6 +128,10 @@ export function AuthTextInput({
   onValueChange: (value: string) => void;
   value: string;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">) {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+  const inputType = isPassword && showPassword ? "text" : type;
+
   return (
     <label className="block text-sm font-extrabold tracking-wide text-tertiary">
       <span className="flex items-center justify-between gap-3 px-1">
@@ -134,9 +142,20 @@ export function AuthTextInput({
         <input
           className="w-full border-2 border-outline bg-transparent px-2 py-3 pr-10 text-lg text-on-surface outline-none placeholder:text-outline/70 focus:border-primary"
           onChange={(event) => onValueChange(event.target.value)}
+          type={inputType}
           value={value}
           {...props}
         />
+        {isPassword ? (
+          <button
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-outline transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface-container-highest"
+            onClick={() => setShowPassword((current) => !current)}
+            type="button"
+          >
+            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+          </button>
+        ) : null}
         {marker ? (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-outline">
             {marker}
@@ -144,6 +163,44 @@ export function AuthTextInput({
         ) : null}
       </span>
     </label>
+  );
+}
+
+function EyeIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path d="m3 3 18 18" />
+      <path d="M10.6 10.6A2 2 0 0 0 12 14a2 2 0 0 0 1.4-.6" />
+      <path d="M9.9 5.2A9.6 9.6 0 0 1 12 5c6.5 0 10 7 10 7a17.2 17.2 0 0 1-2.4 3.4" />
+      <path d="M6.5 6.5C3.6 8.3 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 4.4-1" />
+    </svg>
   );
 }
 

@@ -60,7 +60,6 @@ export default function ResetPasswordPage() {
           />
           <AuthTextInput
             label={t("password")}
-            marker="lock"
             maxLength={72}
             minLength={8}
             placeholder={t("passwordPlaceholder")}
