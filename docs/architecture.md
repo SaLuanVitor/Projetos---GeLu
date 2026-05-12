@@ -173,9 +173,17 @@ frontend/
     utils/
 ```
 
-As telas publicas de autenticacao (`/login`, `/cadastro`, `/recuperar-senha` e
-`/redefinir-senha`) usam um layout proprio de caderno/folha de receita, sem menu interno. A area
-autenticada usa `AppShell`, com navegacao completa e inicio em `/dashboard`.
+As telas publicas de autenticacao (`/login`, `/cadastro`, `/recuperar-senha`,
+`/redefinir-senha` e `/ajuda-acesso`) usam um layout proprio de caderno/folha de receita, sem menu
+interno. A area autenticada usa `AppShell`, com navegacao completa e inicio em `/dashboard`.
+
+Abrir `/login` sempre deve exibir a tela publica de login, mesmo quando existir sessao local. O
+frontend so deve enviar o usuario para `/dashboard` depois de um submit de login bem-sucedido ou ao
+acessar explicitamente uma rota interna com sessao valida.
+
+Quando a sessao local estiver ausente, expirada, corrompida ou for rejeitada pelo backend em uma
+rota autenticada, o frontend deve remover `gelu-menu-session` e redirecionar para `/login`. O
+backend continua sendo a fonte de autorizacao via Bearer JWT.
 
 ## Padrao de API
 

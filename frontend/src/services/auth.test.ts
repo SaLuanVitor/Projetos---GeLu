@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ApiClientError,
   forgotPassword,
+  handleInvalidSession,
+  isAuthenticationError,
   loginUser,
   refreshAuthToken,
   registerUser,
@@ -140,6 +142,76 @@ describe("auth service", () => {
       new ApiClientError("Nao foi possivel concluir a operacao.", "REQUEST_ERROR", [])
     );
   });
+
+  it("uses a clear message when the backend cannot be reached", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+
+    await expect(loginUser({ email: "luan@example.com", password: "secret" })).rejects.toEqual(
+      new ApiClientError(
+        "Nao foi possivel conectar ao backend. Verifique se a API esta rodando em http://localhost:8080/api/v1.",
+        "NETWORK_ERROR",
+        []
+      )
+    );
+  });
+
+  it("uses a clear message when another service responds instead of the API", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: vi.fn().mockRejectedValue(new SyntaxError("Unexpected token <"))
+      })
+    );
+
+    await expect(loginUser({ email: "luan@example.com", password: "secret" })).rejects.toEqual(
+      new ApiClientError(
+        "A API respondeu sem o formato esperado. Confirme se http://localhost:8080/api/v1 aponta para o backend Gelu - Menu.",
+        "INVALID_API_RESPONSE",
+        []
+      )
+    );
+  });
+
+  it("detects authentication errors by code or message", () => {
+    expect(
+      isAuthenticationError(new ApiClientError("Authentication required", "REQUEST_ERROR"))
+    ).toBe(true);
+    expect(isAuthenticationError(new ApiClientError("Invalid token", "UNAUTHORIZED"))).toBe(true);
+    expect(isAuthenticationError(new ApiClientError("Other failure", "REQUEST_ERROR"))).toBe(false);
+  });
+
+  it("clears local session and redirects when handling invalid session", () => {
+    vi.stubGlobal("window", {
+      localStorage: createLocalStorageMock([["gelu-menu-session", "stored-session"]])
+    });
+    const redirectToLogin = vi.fn();
+
+    const handled = handleInvalidSession(
+      new ApiClientError("Authentication required", "REQUEST_ERROR"),
+      redirectToLogin
+    );
+
+    expect(handled).toBe(true);
+    expect(window.localStorage.getItem("gelu-menu-session")).toBeNull();
+    expect(redirectToLogin).toHaveBeenCalledOnce();
+  });
+
+  it("does not clear local session for non-authentication errors", () => {
+    vi.stubGlobal("window", {
+      localStorage: createLocalStorageMock([["gelu-menu-session", "stored-session"]])
+    });
+    const redirectToLogin = vi.fn();
+
+    const handled = handleInvalidSession(
+      new ApiClientError("Other failure", "REQUEST_ERROR"),
+      redirectToLogin
+    );
+
+    expect(handled).toBe(false);
+    expect(window.localStorage.getItem("gelu-menu-session")).toBe("stored-session");
+    expect(redirectToLogin).not.toHaveBeenCalled();
+  });
 });
 
 function mockFetch(data: unknown, status = 200) {
@@ -164,4 +236,19 @@ function expectFetch(path: string, body: unknown) {
     },
     body: JSON.stringify(body)
   });
+}
+
+function createLocalStorageMock(initialEntries: [string, string][] = []): Storage {
+  const storage = new Map<string, string>(initialEntries);
+
+  return {
+    get length() {
+      return storage.size;
+    },
+    clear: vi.fn(() => storage.clear()),
+    getItem: vi.fn((key: string) => storage.get(key) ?? null),
+    key: vi.fn((index: number) => Array.from(storage.keys())[index] ?? null),
+    removeItem: vi.fn((key: string) => storage.delete(key)),
+    setItem: vi.fn((key: string, value: string) => storage.set(key, value))
+  };
 }

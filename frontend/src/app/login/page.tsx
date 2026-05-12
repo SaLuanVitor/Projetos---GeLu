@@ -10,10 +10,10 @@ import {
 } from "@/components/layout/AuthNotebookShell";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { loginUser } from "@/services/auth";
-import { loadSession, saveSession } from "@/services/session";
+import { saveSession } from "@/services/session";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,12 +22,6 @@ export default function LoginPage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (loadSession()) {
-      router.replace("/dashboard");
-    }
-  }, [router]);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

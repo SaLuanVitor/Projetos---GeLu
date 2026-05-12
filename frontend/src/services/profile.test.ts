@@ -86,6 +86,21 @@ describe("profile service", () => {
       new ApiClientError("Authentication required", "UNAUTHORIZED", [])
     );
   });
+
+  it("maps empty unauthorized responses to authentication errors", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: vi.fn()
+      })
+    );
+
+    await expect(listWeightHistory("expired-token")).rejects.toEqual(
+      new ApiClientError("Authentication required", "UNAUTHORIZED", [])
+    );
+  });
 });
 
 function mockFetch(data: unknown) {
@@ -93,6 +108,7 @@ function mockFetch(data: unknown) {
     "fetch",
     vi.fn().mockResolvedValue({
       ok: true,
+      status: 200,
       json: vi.fn().mockResolvedValue({
         success: true,
         data,

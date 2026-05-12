@@ -12,6 +12,7 @@ import type {
   ResetPasswordRequest,
   ResetPasswordResponse
 } from "@/types/api";
+import { clearSession } from "@/services/session";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
 
@@ -23,6 +24,39 @@ export class ApiClientError extends Error {
   ) {
     super(message);
   }
+}
+
+export function isAuthenticationError(error: unknown) {
+  if (!(error instanceof ApiClientError)) {
+    return false;
+  }
+
+  const code = error.code.toUpperCase();
+  const message = error.message.toLowerCase();
+
+  return (
+    code.includes("AUTH") ||
+    code.includes("UNAUTHORIZED") ||
+    message.includes("authentication required") ||
+    message.includes("unauthorized")
+  );
+}
+
+export function handleInvalidSession(error: unknown, redirectToLogin: () => void): boolean {
+  if (!isAuthenticationError(error)) {
+    return false;
+  }
+
+  clearSession();
+  redirectToLogin();
+  if (
+    typeof window !== "undefined" &&
+    window.location?.assign &&
+    window.location.pathname !== "/login"
+  ) {
+    window.location.assign("/login");
+  }
+  return true;
 }
 
 export async function registerUser(request: RegisterRequest): Promise<RegisterResponse> {
@@ -50,15 +84,24 @@ export async function resetPassword(request: ResetPasswordRequest): Promise<Rese
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+  } catch {
+    throw new ApiClientError(
+      `Nao foi possivel conectar ao backend. Verifique se a API esta rodando em ${API_URL}.`,
+      "NETWORK_ERROR",
+      []
+    );
+  }
 
-  const payload = (await response.json()) as ApiResponse<T> | ApiErrorResponse;
+  const payload = await readPayload<T>(response);
 
   if (!response.ok || !payload.success) {
     const error = "error" in payload ? payload.error : undefined;
@@ -70,4 +113,16 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   }
 
   return payload.data;
+}
+
+async function readPayload<T>(response: Response): Promise<ApiResponse<T> | ApiErrorResponse> {
+  try {
+    return (await response.json()) as ApiResponse<T> | ApiErrorResponse;
+  } catch {
+    throw new ApiClientError(
+      `A API respondeu sem o formato esperado. Confirme se ${API_URL} aponta para o backend Gelu - Menu.`,
+      "INVALID_API_RESPONSE",
+      []
+    );
+  }
 }

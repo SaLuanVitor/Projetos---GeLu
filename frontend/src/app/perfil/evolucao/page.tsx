@@ -4,9 +4,9 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ActionLink } from "@/components/ui/ActionButton";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
-import { ApiClientError } from "@/services/auth";
+import { handleInvalidSession } from "@/services/auth";
 import { listWeightHistory } from "@/services/profile";
-import { clearSession, loadSession, type StoredSession } from "@/services/session";
+import { loadSession, type StoredSession } from "@/services/session";
 import type { WeightHistoryItem } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -29,9 +29,7 @@ export default function WeightEvolutionPage() {
     listWeightHistory(storedSession.accessToken)
       .then(setHistory)
       .catch((requestError) => {
-        if (requestError instanceof ApiClientError && requestError.code === "UNAUTHORIZED") {
-          clearSession();
-          router.replace("/login");
+        if (handleInvalidSession(requestError, () => router.replace("/login"))) {
           return;
         }
 

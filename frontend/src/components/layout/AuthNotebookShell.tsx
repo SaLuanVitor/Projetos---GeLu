@@ -48,7 +48,7 @@ export function AuthNotebookShell({
             <div className="w-full max-w-[470px] rounded-[2rem] border-[3px] border-tertiary bg-surface-container-highest/75 p-6 shadow-[7px_8px_0_rgba(95,64,42,0.95)] sm:p-8">
               {children}
               <div className="mt-8 flex items-center justify-center gap-6 text-sm font-bold text-tertiary">
-                <Link className="transition-colors hover:text-primary" href="/ajuda">
+                <Link className="transition-colors hover:text-primary" href="/ajuda-acesso">
                   ? Ajuda
                 </Link>
                 <span aria-hidden="true">oo</span>

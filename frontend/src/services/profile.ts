@@ -52,7 +52,11 @@ async function request<T>(
     body: options.body ? JSON.stringify(options.body) : undefined
   });
 
-  const payload = (await response.json()) as ApiResponse<T> | ApiErrorResponse;
+  if (response.status === 401 || response.status === 403) {
+    throw new ApiClientError("Authentication required", "UNAUTHORIZED", []);
+  }
+
+  const payload = await readPayload<T>(response);
 
   if (!response.ok || !payload.success) {
     const error = "error" in payload ? payload.error : undefined;
@@ -64,4 +68,12 @@ async function request<T>(
   }
 
   return payload.data;
+}
+
+async function readPayload<T>(response: Response): Promise<ApiResponse<T> | ApiErrorResponse> {
+  try {
+    return (await response.json()) as ApiResponse<T> | ApiErrorResponse;
+  } catch {
+    throw new ApiClientError("Nao foi possivel concluir a operacao.", "REQUEST_ERROR", []);
+  }
 }
