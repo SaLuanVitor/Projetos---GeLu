@@ -25,6 +25,7 @@ import br.com.gelu.menu.users.User;
 import br.com.gelu.menu.users.UserRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -206,7 +207,12 @@ class AuthServiceTest {
   @Test
   void shouldCreatePasswordResetTokenForExistingUser() {
     User user = new User("Luan", "luan@example.com", passwordEncoder.encode("strong-password"));
+    PasswordResetToken previousToken =
+        new PasswordResetToken(
+            user.getId(), hashToken("previous-reset-token"), LocalDateTime.now().plusMinutes(30));
     when(userRepository.findByEmail("luan@example.com")).thenReturn(Optional.of(user));
+    when(passwordResetTokenRepository.findByUserIdAndUsedAtIsNull(user.getId()))
+        .thenReturn(List.of(previousToken));
     when(passwordResetTokenRepository.save(any(PasswordResetToken.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -221,6 +227,7 @@ class AuthServiceTest {
     assertThat(resetToken.getUserId()).isEqualTo(user.getId());
     assertThat(resetToken.getTokenHash()).isNotEqualTo(response.resetToken());
     assertThat(resetToken.getTokenHash()).hasSize(64);
+    assertThat(previousToken.isUsed()).isTrue();
   }
 
   @Test
@@ -241,17 +248,51 @@ class AuthServiceTest {
     String tokenHash = hashToken(rawToken);
     PasswordResetToken resetToken =
         new PasswordResetToken(user.getId(), tokenHash, LocalDateTime.now().plusMinutes(30));
+    RefreshToken firstRefreshToken =
+        new RefreshToken(user.getId(), "first-refresh-hash", LocalDateTime.now().plusDays(30));
+    RefreshToken secondRefreshToken =
+        new RefreshToken(user.getId(), "second-refresh-hash", LocalDateTime.now().plusDays(30));
     when(passwordResetTokenRepository.findByTokenHash(tokenHash))
         .thenReturn(Optional.of(resetToken));
     when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+    when(refreshTokenRepository.findByUserIdAndRevokedAtIsNull(user.getId()))
+        .thenReturn(List.of(firstRefreshToken, secondRefreshToken));
 
     var response =
         authService.resetPassword(new ResetPasswordRequest(rawToken, "new-strong-password"));
 
     assertThat(response.reset()).isTrue();
     assertThat(resetToken.isUsed()).isTrue();
+    assertThat(firstRefreshToken.isRevoked()).isTrue();
+    assertThat(secondRefreshToken.isRevoked()).isTrue();
     assertThat(passwordEncoder.matches("new-strong-password", user.getPasswordHash())).isTrue();
     assertThat(passwordEncoder.matches("old-password", user.getPasswordHash())).isFalse();
+  }
+
+  @Test
+  void shouldRejectPreviousPasswordResetTokenAfterNewForgotPasswordRequest() {
+    User user = new User("Luan", "luan@example.com", passwordEncoder.encode("strong-password"));
+    String previousRawToken = "previous-reset-token";
+    PasswordResetToken previousToken =
+        new PasswordResetToken(
+            user.getId(), hashToken(previousRawToken), LocalDateTime.now().plusMinutes(30));
+    when(userRepository.findByEmail("luan@example.com")).thenReturn(Optional.of(user));
+    when(passwordResetTokenRepository.findByUserIdAndUsedAtIsNull(user.getId()))
+        .thenReturn(List.of(previousToken));
+    when(passwordResetTokenRepository.save(any(PasswordResetToken.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    authService.forgotPassword(new ForgotPasswordRequest("luan@example.com"));
+
+    assertThat(previousToken.isUsed()).isTrue();
+    when(passwordResetTokenRepository.findByTokenHash(hashToken(previousRawToken)))
+        .thenReturn(Optional.of(previousToken));
+    assertThatThrownBy(
+            () ->
+                authService.resetPassword(
+                    new ResetPasswordRequest(previousRawToken, "new-strong-password")))
+        .isInstanceOf(UnauthorizedException.class)
+        .hasMessage("Invalid password reset token");
   }
 
   @Test

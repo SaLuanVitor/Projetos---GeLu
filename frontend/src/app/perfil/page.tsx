@@ -5,9 +5,9 @@ import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
 import { TextInput } from "@/components/ui/FormField";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
-import { handleInvalidSession } from "@/services/auth";
+import { getValidSession, handleInvalidSession, logoutUser } from "@/services/auth";
 import { createWeightRecord, getProfile, updateProfile } from "@/services/profile";
-import { clearSession, loadSession, type StoredSession } from "@/services/session";
+import { clearSession, type StoredSession } from "@/services/session";
 import type { ProfileResponse } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useState } from "react";
@@ -61,19 +61,32 @@ export default function ProfilePage() {
   );
 
   useEffect(() => {
-    const storedSession = loadSession();
-    setSession(storedSession);
-    if (!storedSession) {
-      setLoading(false);
-      return;
-    }
+    let active = true;
 
-    void loadProfile(storedSession.accessToken);
+    getValidSession().then((storedSession) => {
+      if (!active) {
+        return;
+      }
+
+      setSession(storedSession);
+      if (!storedSession) {
+        setLoading(false);
+        return;
+      }
+
+      void loadProfile(storedSession.accessToken);
+    });
+
+    return () => {
+      active = false;
+    };
   }, [loadProfile]);
 
   async function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!session) {
+    const currentSession = await getValidSession();
+    setSession(currentSession);
+    if (!currentSession) {
       return;
     }
 
@@ -81,7 +94,7 @@ export default function ProfilePage() {
     setError("");
 
     try {
-      const updatedProfile = await updateProfile(session.accessToken, {
+      const updatedProfile = await updateProfile(currentSession.accessToken, {
         name,
         birthDate: birthDate || null,
         heightCm: toNumberOrNull(heightCm),
@@ -103,7 +116,9 @@ export default function ProfilePage() {
 
   async function handleWeightSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!session) {
+    const currentSession = await getValidSession();
+    setSession(currentSession);
+    if (!currentSession) {
       return;
     }
 
@@ -111,13 +126,13 @@ export default function ProfilePage() {
     setError("");
 
     try {
-      await createWeightRecord(session.accessToken, {
+      await createWeightRecord(currentSession.accessToken, {
         weightKg: Number(weightKg),
         recordedAt: recordedAt ? `${recordedAt}:00` : null
       });
       setWeightKg("");
       setRecordedAt("");
-      await loadProfile(session.accessToken);
+      await loadProfile(currentSession.accessToken);
       setStatus("Peso registrado com sucesso.");
     } catch (requestError) {
       if (handleInvalidSession(requestError, () => router.replace("/login"))) {
@@ -128,7 +143,16 @@ export default function ProfilePage() {
     }
   }
 
-  function handleLogoutConfirm() {
+  async function handleLogoutConfirm() {
+    const refreshToken = session?.refreshToken;
+    if (refreshToken) {
+      try {
+        await logoutUser({ refreshToken });
+      } catch {
+        // Local logout must proceed even when the remote token is already invalid or offline.
+      }
+    }
+
     clearSession();
     router.push("/");
   }
@@ -307,10 +331,7 @@ export default function ProfilePage() {
             className="w-full max-w-md border-2 border-outline bg-surface p-6 shadow-paper"
             role="dialog"
           >
-            <h2
-              className="font-display text-3xl font-bold text-primary"
-              id="logout-confirm-title"
-            >
+            <h2 className="font-display text-3xl font-bold text-primary" id="logout-confirm-title">
               Deseja realmente sair?
             </h2>
             <p className="mt-3 text-sm leading-6 text-on-surface-variant">

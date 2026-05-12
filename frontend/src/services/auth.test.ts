@@ -5,6 +5,7 @@ import {
   handleInvalidSession,
   isAuthenticationError,
   loginUser,
+  logoutUser,
   refreshAuthToken,
   registerUser,
   resetPassword
@@ -75,6 +76,15 @@ describe("auth service", () => {
     expect(response.accessToken).toBe("new-access-token");
     expect(response.refreshToken).toBe("new-refresh-token");
     expectFetch("/auth/refresh", { refreshToken: "refresh-token" });
+  });
+
+  it("logs out through the auth API", async () => {
+    mockFetch({ revoked: true });
+
+    const response = await logoutUser({ refreshToken: "refresh-token" });
+
+    expect(response.revoked).toBe(true);
+    expectFetch("/auth/logout", { refreshToken: "refresh-token" });
   });
 
   it("requests a password reset", async () => {

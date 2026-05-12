@@ -1,6 +1,6 @@
 "use client";
 
-import { loadSession } from "@/services/session";
+import { getValidSession } from "@/services/auth";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -25,12 +25,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
-    if (!loadSession()) {
-      router.replace("/login");
-      return;
-    }
+    getValidSession().then((session) => {
+      if (!session) {
+        router.replace("/login");
+        return;
+      }
 
-    setSessionChecked(true);
+      setSessionChecked(true);
+    });
   }, [router]);
 
   if (!sessionChecked) {

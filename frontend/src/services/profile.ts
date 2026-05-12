@@ -1,4 +1,4 @@
-import { ApiClientError } from "@/services/auth";
+import { ApiClientError, getValidSession } from "@/services/auth";
 import type {
   ApiErrorResponse,
   ApiResponse,
@@ -41,7 +41,8 @@ export async function createWeightRecord(
 async function request<T>(
   path: string,
   accessToken: string,
-  options: { method?: string; body?: unknown } = {}
+  options: { method?: string; body?: unknown } = {},
+  retryOnUnauthorized = true
 ): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     method: options.method ?? "GET",
@@ -53,6 +54,13 @@ async function request<T>(
   });
 
   if (response.status === 401 || response.status === 403) {
+    if (retryOnUnauthorized) {
+      const refreshedSession = await getValidSession(true);
+      if (refreshedSession) {
+        return request(path, refreshedSession.accessToken, options, false);
+      }
+    }
+
     throw new ApiClientError("Authentication required", "UNAUTHORIZED", []);
   }
 

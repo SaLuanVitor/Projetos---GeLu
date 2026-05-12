@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearSession,
+  isSessionExpired,
   loadSession,
   saveSession,
+  shouldRefreshSession,
   type StoredSession,
   updateSessionTokens
 } from "@/services/session";
@@ -83,7 +85,7 @@ describe("session service", () => {
     expect(loadSession()).toEqual(storedSession);
   });
 
-  it("discards expired session data", () => {
+  it("loads expired session data so refresh can be attempted", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-10T01:00:00.000Z"));
     const storedSession: StoredSession = {
@@ -96,8 +98,26 @@ describe("session service", () => {
     };
     window.localStorage.setItem("gelu-menu-session", JSON.stringify(storedSession));
 
-    expect(loadSession()).toBeNull();
-    expect(window.localStorage.getItem("gelu-menu-session")).toBeNull();
+    expect(loadSession()).toEqual(storedSession);
+    expect(isSessionExpired(storedSession)).toBe(true);
+    expect(shouldRefreshSession(storedSession)).toBe(true);
+    expect(window.localStorage.getItem("gelu-menu-session")).not.toBeNull();
+  });
+
+  it("detects sessions near expiration", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-10T00:14:10.000Z"));
+    const storedSession: StoredSession = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      tokenType: "Bearer",
+      expiresIn: 900,
+      user,
+      updatedAt: "2026-05-10T00:00:00.000Z"
+    };
+
+    expect(isSessionExpired(storedSession)).toBe(false);
+    expect(shouldRefreshSession(storedSession)).toBe(true);
   });
 
   it("clears a stored session", () => {

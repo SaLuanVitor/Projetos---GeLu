@@ -4,9 +4,9 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ActionLink } from "@/components/ui/ActionButton";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
-import { handleInvalidSession } from "@/services/auth";
+import { getValidSession, handleInvalidSession } from "@/services/auth";
 import { getProfile } from "@/services/profile";
-import { loadSession, type StoredSession } from "@/services/session";
+import type { StoredSession } from "@/services/session";
 import type { ProfileResponse } from "@/types/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -32,27 +32,38 @@ export default function DashboardPage() {
   const [loadingProfile, setLoadingProfile] = useState(true);
 
   useEffect(() => {
-    const storedSession = loadSession();
-    setSession(storedSession);
-    if (!storedSession) {
-      setLoadingProfile(false);
-      return;
-    }
+    let active = true;
 
-    getProfile(storedSession.accessToken)
-      .then(setProfile)
-      .catch((requestError) => {
-        if (handleInvalidSession(requestError, () => router.replace("/login"))) {
-          return;
-        }
+    getValidSession().then((storedSession) => {
+      if (!active) {
+        return;
+      }
 
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Nao foi possivel carregar seus dados."
-        );
-      })
-      .finally(() => setLoadingProfile(false));
+      setSession(storedSession);
+      if (!storedSession) {
+        setLoadingProfile(false);
+        return;
+      }
+
+      getProfile(storedSession.accessToken)
+        .then(setProfile)
+        .catch((requestError) => {
+          if (handleInvalidSession(requestError, () => router.replace("/login"))) {
+            return;
+          }
+
+          setError(
+            requestError instanceof Error
+              ? requestError.message
+              : "Nao foi possivel carregar seus dados."
+          );
+        })
+        .finally(() => setLoadingProfile(false));
+    });
+
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   const totalMealCalories = useMemo(

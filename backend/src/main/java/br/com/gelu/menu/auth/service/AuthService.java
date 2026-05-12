@@ -30,7 +30,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -176,10 +178,17 @@ public class AuthService {
 
     user.updatePasswordHash(passwordEncoder.encode(request.newPassword()));
     resetToken.markUsed();
+    activeRefreshTokens(user.getId()).stream()
+        .filter(token -> !token.isExpired())
+        .forEach(RefreshToken::revoke);
     return new ResetPasswordResponse(true);
   }
 
   private ForgotPasswordResponse createPasswordResetResponse(User user) {
+    activePasswordResetTokens(user.getId()).stream()
+        .filter(token -> !token.isExpired())
+        .forEach(PasswordResetToken::markUsed);
+
     String resetToken = createPasswordResetToken();
     passwordResetTokenRepository.save(
         new PasswordResetToken(
@@ -194,6 +203,17 @@ public class AuthService {
     byte[] tokenBytes = new byte[PASSWORD_RESET_TOKEN_BYTES];
     secureRandom.nextBytes(tokenBytes);
     return Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
+  }
+
+  private List<RefreshToken> activeRefreshTokens(UUID userId) {
+    List<RefreshToken> tokens = refreshTokenRepository.findByUserIdAndRevokedAtIsNull(userId);
+    return tokens == null ? List.of() : tokens;
+  }
+
+  private List<PasswordResetToken> activePasswordResetTokens(UUID userId) {
+    List<PasswordResetToken> tokens =
+        passwordResetTokenRepository.findByUserIdAndUsedAtIsNull(userId);
+    return tokens == null ? List.of() : tokens;
   }
 
   private String hashPasswordResetToken(String token) {

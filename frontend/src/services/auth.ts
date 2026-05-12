@@ -12,9 +12,16 @@ import type {
   ResetPasswordRequest,
   ResetPasswordResponse
 } from "@/types/api";
-import { clearSession } from "@/services/session";
+import {
+  clearSession,
+  loadSession,
+  shouldRefreshSession,
+  updateSessionTokens,
+  type StoredSession
+} from "@/services/session";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
+let refreshSessionPromise: Promise<StoredSession | null> | null = null;
 
 export class ApiClientError extends Error {
   constructor(
@@ -71,6 +78,42 @@ export async function refreshAuthToken(
   request: RefreshTokenRequest
 ): Promise<RefreshTokenResponse> {
   return post<RefreshTokenResponse>("/auth/refresh", request);
+}
+
+export async function logoutUser(request: RefreshTokenRequest): Promise<{ revoked: boolean }> {
+  return post<{ revoked: boolean }>("/auth/logout", request);
+}
+
+export async function getValidSession(forceRefresh = false): Promise<StoredSession | null> {
+  const session = loadSession();
+  if (!session) {
+    return null;
+  }
+
+  if (!forceRefresh && !shouldRefreshSession(session)) {
+    return session;
+  }
+
+  if (refreshSessionPromise) {
+    return refreshSessionPromise;
+  }
+
+  refreshSessionPromise = refreshSession(session);
+  try {
+    return await refreshSessionPromise;
+  } finally {
+    refreshSessionPromise = null;
+  }
+}
+
+async function refreshSession(session: StoredSession): Promise<StoredSession | null> {
+  try {
+    const tokens = await refreshAuthToken({ refreshToken: session.refreshToken });
+    return updateSessionTokens(session, tokens);
+  } catch {
+    clearSession();
+    return null;
+  }
 }
 
 export async function forgotPassword(

@@ -1,6 +1,7 @@
 import type { AuthTokenResponse, AuthUser, RefreshTokenResponse } from "@/types/api";
 
 const SESSION_KEY = "gelu-menu-session";
+const REFRESH_SKEW_MS = 60_000;
 
 export type StoredSession = {
   accessToken: string;
@@ -43,6 +44,10 @@ export function updateSessionTokens(
 }
 
 export function loadSession(): StoredSession | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   const rawSession = window.localStorage.getItem(SESSION_KEY);
   if (!rawSession) {
     return null;
@@ -50,7 +55,7 @@ export function loadSession(): StoredSession | null {
 
   try {
     const session = JSON.parse(rawSession) as StoredSession;
-    if (!isStoredSession(session) || isSessionExpired(session)) {
+    if (!isStoredSession(session)) {
       window.localStorage.removeItem(SESSION_KEY);
       return null;
     }
@@ -63,6 +68,10 @@ export function loadSession(): StoredSession | null {
 }
 
 export function clearSession() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
   window.localStorage.removeItem(SESSION_KEY);
 }
 
@@ -78,11 +87,20 @@ function isStoredSession(session: Partial<StoredSession> | null): session is Sto
   );
 }
 
-function isSessionExpired(session: StoredSession) {
+export function isSessionExpired(session: StoredSession) {
   const updatedAt = new Date(session.updatedAt).getTime();
   if (Number.isNaN(updatedAt)) {
     return true;
   }
 
   return Date.now() >= updatedAt + session.expiresIn * 1000;
+}
+
+export function shouldRefreshSession(session: StoredSession) {
+  const updatedAt = new Date(session.updatedAt).getTime();
+  if (Number.isNaN(updatedAt)) {
+    return true;
+  }
+
+  return Date.now() >= updatedAt + session.expiresIn * 1000 - REFRESH_SKEW_MS;
 }
