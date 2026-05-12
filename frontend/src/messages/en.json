@@ -1,0 +1,261 @@
+{
+  "LocaleSwitcher": {
+    "label": "Language",
+    "pt-BR": "PT-BR",
+    "en": "EN"
+  },
+  "Brand": {
+    "tagline": "Family recipe notebook",
+    "note": "\"Cooking with care and organizing your family's day.\"",
+    "featureDefault": "Grandma's Recipes",
+    "organic": "Organic & Fresh"
+  },
+  "Auth": {
+    "help": "Help",
+    "loginBack": "Back to Login",
+    "login": {
+      "title": "Welcome to the notebook",
+      "subtitle": "Sign in to see what's for dinner today.",
+      "email": "Your email",
+      "emailPlaceholder": "write your email here...",
+      "password": "Your password",
+      "passwordPlaceholder": "your secret password...",
+      "forgotPassword": "Forgot my password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "register": "Create Account",
+      "newHere": "Not at our table yet?",
+      "join": "Come cook with us!",
+      "success": "Signed in successfully.",
+      "error": "Unable to sign in."
+    },
+    "register": {
+      "feature": "New house recipe",
+      "eyebrow": "Start your notebook",
+      "title": "Create your account",
+      "subtitle": "Join the table and keep recipes, profile and progress as a family.",
+      "name": "Your name",
+      "nameMarker": "name",
+      "namePlaceholder": "what should we call you?",
+      "email": "Your email",
+      "emailPlaceholder": "write your email here...",
+      "password": "Your password",
+      "passwordPlaceholder": "at least 8 characters...",
+      "submit": "Create Account",
+      "submitting": "Creating...",
+      "divider": "already registered?",
+      "login": "Sign in",
+      "success": "Account created successfully. You can sign in now.",
+      "error": "Unable to create account."
+    },
+    "forgot": {
+      "feature": "Access note",
+      "eyebrow": "Access recovery",
+      "title": "Let's prepare a new password",
+      "subtitle": "Enter your email and, if it exists, we'll send the path back to the notebook.",
+      "email": "Your email",
+      "emailPlaceholder": "write your email here...",
+      "submit": "Request",
+      "submitting": "Sending...",
+      "divider": "remembered it?",
+      "success": "If the email exists, reset instructions will be sent.",
+      "error": "Unable to request recovery.",
+      "devToken": "Dev token",
+      "reset": "Reset"
+    },
+    "reset": {
+      "feature": "New notebook key",
+      "eyebrow": "New password",
+      "title": "Change your notebook key",
+      "subtitle": "Paste the token you received and choose a strong password to return to planning.",
+      "token": "Token",
+      "tokenPlaceholder": "paste the token here...",
+      "password": "New password",
+      "passwordPlaceholder": "your new secret password...",
+      "submit": "Reset",
+      "submitting": "Resetting...",
+      "divider": "ready to sign in?",
+      "success": "Password reset successfully. You can sign in with the new password.",
+      "error": "Unable to reset password."
+    },
+    "accessHelp": {
+      "feature": "Kitchen help",
+      "eyebrow": "Access help",
+      "title": "Let's unlock your access",
+      "subtitle": "A few quick checks solve most local login issues.",
+      "items": [
+        {
+          "title": "I can't sign in",
+          "description": "Check if the Gelu - Menu backend is running at http://localhost:8080/api/v1. If you see a fetch failure, the API may be off or another app may be using port 8080."
+        },
+        {
+          "title": "I forgot my password",
+          "description": "Use password recovery. In local development, the dev token appears on screen when the backend is configured to expose it."
+        },
+        {
+          "title": "I was sent out of the internal area",
+          "description": "This happens when the local session expired or the backend rejected the token. Sign in again to create a fresh session."
+        }
+      ]
+    }
+  },
+  "Shell": {
+    "home": "Home",
+    "recipes": "Recipes",
+    "weeklyDiet": "Weekly Diet",
+    "family": "Family",
+    "evolution": "Progress",
+    "ai": "AI Suggestions",
+    "help": "Help",
+    "profile": "Profile",
+    "footer": "Made to organize the kitchen routine with care."
+  },
+  "Profile": {
+    "title": "Profile and weight",
+    "guestTitle": "Profile",
+    "guestDescription": "Sign in to edit your profile and record your weight.",
+    "login": "Sign in",
+    "eyebrow": "My notebook page",
+    "viewEvolution": "View progress",
+    "logout": "Sign out",
+    "loading": "Loading profile...",
+    "saved": "Profile updated successfully.",
+    "saveError": "Unable to update profile.",
+    "loadError": "Unable to load profile.",
+    "weightSaved": "Weight recorded successfully.",
+    "weightError": "Unable to record weight.",
+    "personalData": "Personal data",
+    "personalDescription": "Body data and goals stay in your profile. Email is not editable in this sprint.",
+    "name": "Name",
+    "email": "Email",
+    "birthDate": "Birth date",
+    "height": "Height (cm)",
+    "sex": "Biological sex",
+    "goal": "Goal",
+    "basalCalories": "Basal calories",
+    "dailyCalorieGoal": "Daily calorie goal",
+    "save": "Save profile",
+    "currentWeight": "Current weight",
+    "notInformed": "Not informed",
+    "registerWeight": "Record weight",
+    "weight": "Weight (kg)",
+    "recordedAt": "Date and time",
+    "logoutTitle": "Do you really want to sign out?",
+    "logoutText": "Your session will end on this device.",
+    "cancel": "Cancel",
+    "logoutConfirm": "Sign out"
+  },
+  "Evolution": {
+    "title": "Weight history",
+    "guestTitle": "Weight progress",
+    "guestDescription": "Sign in to view your history.",
+    "login": "Sign in",
+    "eyebrow": "My progress",
+    "registerWeight": "Record weight",
+    "loading": "Loading history...",
+    "error": "Unable to load history.",
+    "current": "Current weight",
+    "previous": "Previous weight",
+    "variation": "Recent change",
+    "chart": "Simple chart",
+    "records": "Records",
+    "emptyChart": "Record your first weight to draw the curve.",
+    "emptyRecords": "No weight recorded yet.",
+    "recordedIn": "Recorded on {date}",
+    "initialReminder": "Record your initial weight to track monthly progress.",
+    "monthlyReminder": "It has been 30 days or more since the last record. Update your weight."
+  },
+  "Dashboard": {
+    "eyebrow": "Internal area start",
+    "greeting": "Good to see you here, {name}.",
+    "description": "Your daily notebook brings together meals, training, weight and next ideas to keep the household routine organized.",
+    "updateProfile": "Update profile",
+    "viewEvolution": "View progress",
+    "loading": "Loading your notebook data...",
+    "loadError": "Unable to load your data.",
+    "fallbackName": "home cook",
+    "aiEyebrow": "Personalized AI suggestion",
+    "aiTitle": "Light dinner with quick prep",
+    "aiBadge": "AI",
+    "aiDescription": "A creamy soup with lean protein fits today's calorie balance and helps close the night without weighing down the routine.",
+    "openSuggestions": "Open suggestions",
+    "dailyMeals": "Today's meals",
+    "training": "Today's training",
+    "trainingName": "Active walk",
+    "trainingDescription": "35 minutes planned to move the afternoon.",
+    "trainingEstimate": "Estimate: 180 kcal",
+    "calorieBalance": "Calorie balance",
+    "goalBased": "Based on a {goal} kcal goal and mocked meals for the day.",
+    "weightGoal": "Weight & goal",
+    "current": "Current",
+    "goal": "Goal",
+    "define": "Define",
+    "pendingInvites": "Pending invites",
+    "pendingInvitesDescription": "No pending family invites for now. The family module will be enabled in a future sprint.",
+    "viewFamily": "View family",
+    "smartSuggestions": "Smart suggestions",
+    "meals": [
+      { "name": "Tapioca breakfast", "tag": "morning", "calories": "320 kcal" },
+      { "name": "Mediterranean bowl", "tag": "lunch", "calories": "540 kcal" },
+      { "name": "Fruit with yogurt", "tag": "snack", "calories": "210 kcal" },
+      { "name": "Pumpkin soup", "tag": "dinner", "calories": "390 kcal" }
+    ],
+    "suggestions": [
+      "Swap the snack for an option with more protein.",
+      "Set aside washed vegetables to speed up dinner.",
+      "Record this week's weight to update your progress."
+    ]
+  },
+  "Landing": {
+    "login": "Sign in",
+    "register": "Create account",
+    "eyebrow": "Food, routine and care in one place",
+    "title": "Organize the household menu like a living notebook.",
+    "description": "Gelu - Menu brings recipes, weekly diet, family space, weight progress, training and AI suggestions into a warm, visual and simple experience.",
+    "freeAccount": "Create free account",
+    "hasLogin": "I already have a login",
+    "todayPlanner": "Today's planner",
+    "familyMeals": "Family meals",
+    "progress": "Progress",
+    "progressText": "Record weight and goals without losing the feeling of a personal planner.",
+    "meals": [
+      { "name": "Tapioca breakfast", "tag": "morning" },
+      { "name": "Mediterranean bowl", "tag": "lunch" },
+      { "name": "Fruit snack", "tag": "snack" },
+      { "name": "Pumpkin soup", "tag": "dinner" }
+    ],
+    "features": [
+      {
+        "title": "Family recipes",
+        "description": "Save dish ideas, organize favorites and prepare the notebook for the routine."
+      },
+      {
+        "title": "Profile and progress",
+        "description": "Track personal data, goals and weight history in a light visual experience."
+      },
+      {
+        "title": "Weekly planner",
+        "description": "Plan meals, workouts and smart suggestions in the same place."
+      }
+    ]
+  },
+  "Placeholder": {
+    "back": "Back to dashboard",
+    "soon": "Coming soon",
+    "prepared": "This visual page follows the screen design, but the business rule will be implemented in its sprint.",
+    "titles": {
+      "help": "Help and support",
+      "weeklyDiet": "Weekly diet",
+      "family": "Family and invites",
+      "recipes": "My recipe notebook",
+      "ai": "AI suggestions"
+    },
+    "descriptions": {
+      "help": "FAQ, tickets, suggestions and system rating will be implemented in Sprint 10.",
+      "weeklyDiet": "The weekly planner with meals, recipes and family members will be built in the diet sprints.",
+      "family": "Family space, members, permissions and email invites enter the family sprints.",
+      "recipes": "Listing, filters, favorites and recipe creation start in Sprint 3.",
+      "ai": "Smart chef tips will connect to the AI module when Sprint 11 starts."
+    }
+  }
+}

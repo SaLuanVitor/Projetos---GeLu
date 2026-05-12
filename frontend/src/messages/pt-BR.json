@@ -1,0 +1,261 @@
+{
+  "LocaleSwitcher": {
+    "label": "Idioma",
+    "pt-BR": "PT-BR",
+    "en": "EN"
+  },
+  "Brand": {
+    "tagline": "Caderno familiar de receitas",
+    "note": "\"Cozinhando com afeto e organizando seu dia a dia em familia.\"",
+    "featureDefault": "Receitas da Vovo",
+    "organic": "Organico & Fresco"
+  },
+  "Auth": {
+    "help": "Ajuda",
+    "loginBack": "Voltar ao Login",
+    "login": {
+      "title": "Bem-vindo ao caderno",
+      "subtitle": "Entre para ver o que tem pro jantar hoje.",
+      "email": "Seu e-mail",
+      "emailPlaceholder": "escreva seu e-mail aqui...",
+      "password": "Sua senha",
+      "passwordPlaceholder": "sua senha secreta...",
+      "forgotPassword": "Esqueci minha senha",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "register": "Criar Conta",
+      "newHere": "Ainda nao faz parte da nossa mesa?",
+      "join": "Venha cozinhar com a gente!",
+      "success": "Login realizado com sucesso.",
+      "error": "Falha ao entrar."
+    },
+    "register": {
+      "feature": "Nova receita da casa",
+      "eyebrow": "Comece seu caderno",
+      "title": "Crie sua conta",
+      "subtitle": "Entre para a mesa e guarde receitas, perfil e evolucao em familia.",
+      "name": "Seu nome",
+      "nameMarker": "nome",
+      "namePlaceholder": "como vamos te chamar?",
+      "email": "Seu e-mail",
+      "emailPlaceholder": "escreva seu e-mail aqui...",
+      "password": "Sua senha",
+      "passwordPlaceholder": "minimo de 8 caracteres...",
+      "submit": "Criar Conta",
+      "submitting": "Criando...",
+      "divider": "ja tem cadastro?",
+      "login": "Entrar",
+      "success": "Conta criada com sucesso. Voce ja pode entrar.",
+      "error": "Falha ao criar conta."
+    },
+    "forgot": {
+      "feature": "Bilhete de acesso",
+      "eyebrow": "Recuperacao de acesso",
+      "title": "Vamos preparar uma nova senha",
+      "subtitle": "Informe seu e-mail e, se ele existir, enviaremos o caminho de volta para o caderno.",
+      "email": "Seu e-mail",
+      "emailPlaceholder": "escreva seu e-mail aqui...",
+      "submit": "Solicitar",
+      "submitting": "Enviando...",
+      "divider": "lembrou?",
+      "success": "Se o e-mail existir, as instrucoes de redefinicao serao enviadas.",
+      "error": "Falha ao solicitar recuperacao.",
+      "devToken": "Token dev",
+      "reset": "Redefinir"
+    },
+    "reset": {
+      "feature": "Nova chave do caderno",
+      "eyebrow": "Nova senha",
+      "title": "Troque a chave do seu caderno",
+      "subtitle": "Cole o token recebido e escolha uma senha forte para voltar ao planejamento.",
+      "token": "Token",
+      "tokenPlaceholder": "cole o token aqui...",
+      "password": "Nova senha",
+      "passwordPlaceholder": "sua nova senha secreta...",
+      "submit": "Redefinir",
+      "submitting": "Redefinindo...",
+      "divider": "pronto para entrar?",
+      "success": "Senha redefinida com sucesso. Voce ja pode entrar com a nova senha.",
+      "error": "Falha ao redefinir senha."
+    },
+    "accessHelp": {
+      "feature": "Ajuda da cozinha",
+      "eyebrow": "Ajuda de acesso",
+      "title": "Vamos destravar sua entrada",
+      "subtitle": "Algumas verificacoes rapidas resolvem a maior parte dos problemas de login local.",
+      "items": [
+        {
+          "title": "Nao consigo entrar",
+          "description": "Confira se o backend do Gelu - Menu esta rodando em http://localhost:8080/api/v1. Se aparecer falha de fetch, a API pode estar desligada ou outra aplicacao pode estar usando a porta 8080."
+        },
+        {
+          "title": "Esqueci minha senha",
+          "description": "Use a recuperacao de senha. Em ambiente local, o token de desenvolvimento aparece na tela quando o backend estiver configurado para expor o token."
+        },
+        {
+          "title": "Fui jogado para fora da area interna",
+          "description": "Isso acontece quando a sessao local expirou ou o backend rejeitou o token. Entre novamente para criar uma sessao nova."
+        }
+      ]
+    }
+  },
+  "Shell": {
+    "home": "Inicio",
+    "recipes": "Receitas",
+    "weeklyDiet": "Dieta Semanal",
+    "family": "Familia",
+    "evolution": "Evolucao",
+    "ai": "Sugestoes IA",
+    "help": "Ajuda",
+    "profile": "Perfil",
+    "footer": "Feito para organizar a rotina da cozinha com cuidado."
+  },
+  "Profile": {
+    "title": "Perfil e peso",
+    "guestTitle": "Perfil",
+    "guestDescription": "Entre para editar seu perfil e registrar seu peso.",
+    "login": "Entrar",
+    "eyebrow": "Minha pagina do caderno",
+    "viewEvolution": "Ver evolucao",
+    "logout": "Sair da conta",
+    "loading": "Carregando perfil...",
+    "saved": "Perfil atualizado com sucesso.",
+    "saveError": "Falha ao atualizar perfil.",
+    "loadError": "Falha ao carregar perfil.",
+    "weightSaved": "Peso registrado com sucesso.",
+    "weightError": "Falha ao registrar peso.",
+    "personalData": "Dados pessoais",
+    "personalDescription": "Dados corporais e metas ficam no seu perfil. O e-mail nao e editavel nesta sprint.",
+    "name": "Nome",
+    "email": "E-mail",
+    "birthDate": "Nascimento",
+    "height": "Altura (cm)",
+    "sex": "Sexo biologico",
+    "goal": "Objetivo",
+    "basalCalories": "Calorias basais",
+    "dailyCalorieGoal": "Meta calorica diaria",
+    "save": "Salvar perfil",
+    "currentWeight": "Peso atual",
+    "notInformed": "Nao informado",
+    "registerWeight": "Registrar peso",
+    "weight": "Peso (kg)",
+    "recordedAt": "Data e hora",
+    "logoutTitle": "Deseja realmente sair?",
+    "logoutText": "Sua sessao sera encerrada neste dispositivo.",
+    "cancel": "Cancelar",
+    "logoutConfirm": "Sair"
+  },
+  "Evolution": {
+    "title": "Historico de peso",
+    "guestTitle": "Evolucao de peso",
+    "guestDescription": "Entre para visualizar seu historico.",
+    "login": "Entrar",
+    "eyebrow": "Minha evolucao",
+    "registerWeight": "Registrar peso",
+    "loading": "Carregando historico...",
+    "error": "Falha ao carregar historico.",
+    "current": "Peso atual",
+    "previous": "Peso anterior",
+    "variation": "Variacao recente",
+    "chart": "Grafico simples",
+    "records": "Registros",
+    "emptyChart": "Registre seu primeiro peso para desenhar a curva.",
+    "emptyRecords": "Nenhum peso registrado ainda.",
+    "recordedIn": "Registrado em {date}",
+    "initialReminder": "Registre seu peso inicial para acompanhar sua evolucao mensal.",
+    "monthlyReminder": "Ja se passaram 30 dias ou mais desde o ultimo registro. Atualize seu peso."
+  },
+  "Dashboard": {
+    "eyebrow": "Inicio da parte interna",
+    "greeting": "Bom ver voce por aqui, {name}.",
+    "description": "Seu caderno do dia reune refeicoes, treino, peso e proximas ideias para manter a rotina da casa organizada.",
+    "updateProfile": "Atualizar perfil",
+    "viewEvolution": "Ver evolucao",
+    "loading": "Carregando dados do seu caderno...",
+    "loadError": "Nao foi possivel carregar seus dados.",
+    "fallbackName": "cozinheiro da casa",
+    "aiEyebrow": "Sugestao IA personalizada",
+    "aiTitle": "Jantar leve com preparo rapido",
+    "aiBadge": "IA",
+    "aiDescription": "Uma sopa cremosa com proteina magra combina com o saldo calorico de hoje e ajuda a fechar a noite sem pesar a rotina.",
+    "openSuggestions": "Abrir sugestoes",
+    "dailyMeals": "Refeicoes do dia",
+    "training": "Treino do dia",
+    "trainingName": "Caminhada ativa",
+    "trainingDescription": "35 minutos planejados para movimentar a tarde.",
+    "trainingEstimate": "Estimativa: 180 kcal",
+    "calorieBalance": "Saldo calorico",
+    "goalBased": "Baseado em uma meta de {goal} kcal e refeicoes mockadas do dia.",
+    "weightGoal": "Peso & meta",
+    "current": "Atual",
+    "goal": "Objetivo",
+    "define": "Definir",
+    "pendingInvites": "Convites pendentes",
+    "pendingInvitesDescription": "Nenhum convite familiar pendente por enquanto. O modulo de familia sera ativado em sprint futura.",
+    "viewFamily": "Ver familia",
+    "smartSuggestions": "Sugestoes inteligentes",
+    "meals": [
+      { "name": "Cafe com tapioca", "tag": "manha", "calories": "320 kcal" },
+      { "name": "Bowl mediterraneo", "tag": "almoco", "calories": "540 kcal" },
+      { "name": "Frutas com iogurte", "tag": "lanche", "calories": "210 kcal" },
+      { "name": "Sopa de abobora", "tag": "jantar", "calories": "390 kcal" }
+    ],
+    "suggestions": [
+      "Trocar o lanche por uma opcao com mais proteina.",
+      "Separar legumes ja lavados para agilizar o jantar.",
+      "Registrar o peso da semana para atualizar sua evolucao."
+    ]
+  },
+  "Landing": {
+    "login": "Entrar",
+    "register": "Criar conta",
+    "eyebrow": "Alimentacao, rotina e cuidado em um so lugar",
+    "title": "Organize o menu da casa como um caderno vivo.",
+    "description": "O Gelu - Menu junta receitas, dieta semanal, ambiente familiar, evolucao de peso, treinos e sugestoes por IA em uma experiencia acolhedora, visual e simples de usar.",
+    "freeAccount": "Criar conta gratis",
+    "hasLogin": "Ja tenho login",
+    "todayPlanner": "Planner de hoje",
+    "familyMeals": "Refeicoes da familia",
+    "progress": "Evolucao",
+    "progressText": "Registre peso e metas sem perder a sensacao de planner pessoal.",
+    "meals": [
+      { "name": "Cafe com tapioca", "tag": "manha" },
+      { "name": "Bowl mediterraneo", "tag": "almoco" },
+      { "name": "Lanche de frutas", "tag": "lanche" },
+      { "name": "Sopa de abobora", "tag": "jantar" }
+    ],
+    "features": [
+      {
+        "title": "Receitas em familia",
+        "description": "Guarde ideias de pratos, organize favoritos e prepare o caderno para a rotina."
+      },
+      {
+        "title": "Perfil e evolucao",
+        "description": "Acompanhe dados pessoais, metas e historico de peso em um visual leve."
+      },
+      {
+        "title": "Planner semanal",
+        "description": "Planeje refeicoes, treinos e sugestoes inteligentes no mesmo lugar."
+      }
+    ]
+  },
+  "Placeholder": {
+    "back": "Voltar ao painel",
+    "soon": "Em breve",
+    "prepared": "Esta folha visual segue o design das telas, mas a regra de negocio sera implementada na sprint correspondente.",
+    "titles": {
+      "help": "Ajuda e suporte",
+      "weeklyDiet": "Dieta semanal",
+      "family": "Familia e convites",
+      "recipes": "Meu caderno de receitas",
+      "ai": "Sugestoes da IA"
+    },
+    "descriptions": {
+      "help": "FAQ, chamados, sugestoes e avaliacao do sistema serao implementados na Sprint 10.",
+      "weeklyDiet": "O planner semanal com refeicoes, receitas e pessoas da familia sera construido nas sprints de dieta.",
+      "family": "Ambiente familiar, membros, permissoes e convites por e-mail entram nas sprints de familia.",
+      "recipes": "Listagem, filtros, favoritos e cadastro de receitas entram a partir da Sprint 3.",
+      "ai": "As dicas do chef inteligente serao conectadas ao modulo de IA quando a Sprint 11 comecar."
+    }
+  }
+}

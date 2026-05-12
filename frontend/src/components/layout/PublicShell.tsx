@@ -1,5 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ActionLink } from "@/components/ui/ActionButton";
 
 export function PublicShell({
@@ -11,6 +12,9 @@ export function PublicShell({
   actionLabel?: string;
   children: ReactNode;
 }) {
+  const brand = useTranslations("Brand");
+  const shell = useTranslations("Shell");
+
   return (
     <div className="paper-canvas min-h-screen bg-surface text-on-surface">
       <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6">
@@ -23,14 +27,14 @@ export function PublicShell({
               GeLu - Menu
             </span>
             <span className="block text-xs font-bold uppercase tracking-wide text-tertiary">
-              Caderno familiar de receitas
+              {brand("tagline")}
             </span>
           </span>
         </Link>
 
         <div className="flex shrink-0 items-center gap-2">
           <ActionLink href="/" variant="outline">
-            Inicio
+            {shell("home")}
           </ActionLink>
           {actionHref && actionLabel ? (
             <ActionLink className="hidden sm:inline-flex" href={actionHref}>

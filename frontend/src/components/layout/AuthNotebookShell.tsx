@@ -1,5 +1,7 @@
-import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
@@ -13,11 +15,10 @@ type AuthNotebookShellProps = {
   note?: string;
 };
 
-export function AuthNotebookShell({
-  children,
-  featureLabel = "Receitas da Vovo",
-  note = '"Cozinhando com afeto e organizando seu dia a dia em familia."'
-}: AuthNotebookShellProps) {
+export function AuthNotebookShell({ children, featureLabel, note }: AuthNotebookShellProps) {
+  const t = useTranslations("Brand");
+  const auth = useTranslations("Auth");
+
   return (
     <main className="paper-canvas min-h-screen bg-surface px-4 py-6 text-on-surface sm:px-6 lg:px-10">
       <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl items-center justify-center py-8">
@@ -25,7 +26,7 @@ export function AuthNotebookShell({
           className="absolute left-0 top-0 z-10 hidden rotate-[-12deg] rounded-lg border-2 border-dashed border-outline bg-surface-container-low px-4 py-2 font-display text-xl font-bold text-outline shadow-paper transition-transform hover:rotate-[-8deg] md:inline-flex"
           href="/"
         >
-          * {featureLabel}
+          * {featureLabel ?? t("featureDefault")}
         </Link>
         <span
           aria-hidden="true"
@@ -35,7 +36,7 @@ export function AuthNotebookShell({
           aria-hidden="true"
           className="absolute bottom-8 right-1 z-10 hidden rotate-[5deg] rounded-full border-2 border-secondary/40 bg-secondary-fixed/55 px-7 py-3 font-display text-xl font-bold text-secondary shadow-paper md:block"
         >
-          Organico & Fresco
+          {t("organic")}
         </span>
 
         <section className="relative grid w-full max-w-6xl gap-8 rounded-[2rem] border-2 border-outline-variant bg-surface-container-low/80 px-5 py-8 shadow-paper md:px-10 lg:grid-cols-[1fr_0.92fr] lg:gap-16 lg:px-16 lg:py-14">
@@ -43,16 +44,16 @@ export function AuthNotebookShell({
             aria-hidden="true"
             className="absolute -bottom-4 right-10 hidden h-8 w-32 rotate-[2deg] border border-tertiary/20 bg-tertiary-fixed/65 md:block"
           />
-          <BrandPanel note={note} />
+          <BrandPanel note={note ?? t("note")} />
           <section className="flex items-center justify-center">
             <div className="w-full max-w-[470px] rounded-[2rem] border-[3px] border-tertiary bg-surface-container-highest/75 p-6 shadow-[7px_8px_0_rgba(95,64,42,0.95)] sm:p-8">
               {children}
               <div className="mt-8 flex items-center justify-center gap-6 text-sm font-bold text-tertiary">
                 <Link className="transition-colors hover:text-primary" href="/ajuda-acesso">
-                  ? Ajuda
+                  ? {auth("help")}
                 </Link>
                 <span aria-hidden="true">oo</span>
-                <span>PT-BR</span>
+                <LocaleSwitcher />
               </div>
             </div>
           </section>

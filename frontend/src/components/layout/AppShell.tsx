@@ -1,27 +1,29 @@
 "use client";
 
 import { getValidSession } from "@/services/auth";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 const INTERNAL_HOME_PATH = "/dashboard";
 
 const navItems = [
-  { href: INTERNAL_HOME_PATH, label: "Inicio" },
-  { href: "/receitas", label: "Receitas" },
-  { href: "/dieta-semanal", label: "Dieta Semanal" },
-  { href: "/familia", label: "Familia" },
-  { href: "/perfil/evolucao", label: "Evolucao" },
-  { href: "/sugestoes-ia", label: "Sugestoes IA" },
-  { href: "/ajuda", label: "Ajuda" },
-  { href: "/perfil", label: "Perfil" }
-];
+  { href: INTERNAL_HOME_PATH, labelKey: "home" },
+  { href: "/receitas", labelKey: "recipes" },
+  { href: "/dieta-semanal", labelKey: "weeklyDiet" },
+  { href: "/familia", labelKey: "family" },
+  { href: "/perfil/evolucao", labelKey: "evolution" },
+  { href: "/sugestoes-ia", labelKey: "ai" },
+  { href: "/ajuda", labelKey: "help" },
+  { href: "/perfil", labelKey: "profile" }
+] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("Shell");
+  const brand = useTranslations("Brand");
   const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 GeLu - Menu
               </span>
               <span className="block text-xs font-bold uppercase tracking-wide text-tertiary">
-                Caderno familiar de receitas
+                {brand("tagline")}
               </span>
             </span>
           </Link>
@@ -75,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       : `rotate(${index % 2 === 0 ? "-0.5deg" : "0.5deg"})`
                   }}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               );
             })}
@@ -85,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {children}
       <footer className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-8 text-sm text-on-surface-variant sm:flex-row sm:items-center sm:justify-between">
         <strong className="font-display text-xl text-primary">GeLu - Menu</strong>
-        <span>Feito para organizar a rotina da cozinha com cuidado.</span>
+        <span>{t("footer")}</span>
       </footer>
     </div>
   );
