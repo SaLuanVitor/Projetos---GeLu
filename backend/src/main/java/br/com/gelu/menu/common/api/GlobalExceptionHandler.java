@@ -1,6 +1,7 @@
 package br.com.gelu.menu.common.api;
 
 import br.com.gelu.menu.common.exception.ConflictException;
+import br.com.gelu.menu.common.exception.NotFoundException;
 import br.com.gelu.menu.common.exception.UnauthorizedException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiErrorResponse> handleUnauthorized(UnauthorizedException exception) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(ApiErrorResponse.of("UNAUTHORIZED", exception.getMessage(), List.of()));
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  public ResponseEntity<ApiErrorResponse> handleNotFound(NotFoundException exception) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiErrorResponse.of("NOT_FOUND", exception.getMessage(), List.of()));
   }
 
   @ExceptionHandler(Exception.class)

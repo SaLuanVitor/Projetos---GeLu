@@ -116,3 +116,62 @@ export type CreateWeightRecordRequest = {
   weightKg: number;
   recordedAt: string | null;
 };
+
+export type RecipeIngredientRequest = {
+  name: string;
+  quantity: string | null;
+  unit: string | null;
+};
+
+export type RecipeStepRequest = {
+  instruction: string;
+};
+
+export type RecipeRequest = {
+  name: string;
+  description: string | null;
+  category: string | null;
+  prepTimeMinutes: number | null;
+  estimatedCalories: number | null;
+  servings: number | null;
+  videoUrl: string | null;
+  ingredients: RecipeIngredientRequest[];
+  steps: RecipeStepRequest[];
+};
+
+export type RecipeIngredient = {
+  id: string;
+  position: number;
+  name: string;
+  quantity: string | null;
+  unit: string | null;
+};
+
+export type RecipeStep = {
+  id: string;
+  position: number;
+  instruction: string;
+};
+
+export type RecipeResponse = {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  prepTimeMinutes: number | null;
+  estimatedCalories: number | null;
+  servings: number | null;
+  videoUrl: string | null;
+  ingredients: RecipeIngredient[];
+  steps: RecipeStep[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type RecipeSearchFilters = {
+  query?: string;
+  ingredient?: string;
+  category?: string;
+  maxPrepTimeMinutes?: string;
+  maxCalories?: string;
+};

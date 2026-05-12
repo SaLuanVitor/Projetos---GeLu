@@ -89,26 +89,26 @@ common
 
 ## Responsabilidades
 
-| Modulo        | Responsabilidade                                 |
-| ------------- | ------------------------------------------------ |
-| auth          | Login, JWT, refresh token e recuperacao de senha |
-| users         | Perfil, dados pessoais, peso e metas             |
-| recipes       | Receitas, ingredientes e preparo                 |
-| media         | Upload, URLs, thumbnails e storage               |
-| family        | Ambientes familiares e membros                   |
-| invitations   | Convites por e-mail e notificacoes               |
-| diets         | Dietas semanais                                  |
-| meals         | Refeicoes e associacao de pessoas/receitas       |
-| training      | Treinos e confirmacao diaria                     |
-| calories      | Calculos caloricos                               |
-| notifications | Notificacoes internas                            |
-| support       | Chamados de suporte                              |
-| ratings       | Avaliacoes do sistema                            |
-| suggestions   | Sugestoes enviadas por usuarios                  |
-| ai            | Sugestoes inteligentes e orquestracao de agentes |
-| admin         | Administracao do sistema                         |
-| audit         | Registro de eventos importantes                  |
-| common        | Excecoes, utils, configuracao e seguranca        |
+| Modulo        | Responsabilidade                                    |
+| ------------- | --------------------------------------------------- |
+| auth          | Login, JWT, refresh token e recuperacao de senha    |
+| users         | Perfil, dados pessoais, peso e metas                |
+| recipes       | Receitas do usuario, ingredientes, passos e filtros |
+| media         | Upload, URLs, thumbnails e storage                  |
+| family        | Ambientes familiares e membros                      |
+| invitations   | Convites por e-mail e notificacoes                  |
+| diets         | Dietas semanais                                     |
+| meals         | Refeicoes e associacao de pessoas/receitas          |
+| training      | Treinos e confirmacao diaria                        |
+| calories      | Calculos caloricos                                  |
+| notifications | Notificacoes internas                               |
+| support       | Chamados de suporte                                 |
+| ratings       | Avaliacoes do sistema                               |
+| suggestions   | Sugestoes enviadas por usuarios                     |
+| ai            | Sugestoes inteligentes e orquestracao de agentes    |
+| admin         | Administracao do sistema                            |
+| audit         | Registro de eventos importantes                     |
+| common        | Excecoes, utils, configuracao e seguranca           |
 
 ## Estrutura Backend
 
@@ -118,6 +118,7 @@ backend/
     auth/
     users/
     recipes/
+      dto/
     media/
     family/
     invitations/
@@ -239,6 +240,28 @@ Resposta de sucesso:
   "message": "Operacao realizada com sucesso"
 }
 ```
+
+## Modulo de receitas
+
+O modulo `recipes` pertence ao usuario autenticado. Cada receita fica vinculada a `users.id` e tem
+ingredientes e passos persistidos em tabelas filhas com cascade no delete.
+
+Tabelas:
+
+- `recipes`
+- `recipe_ingredients`
+- `recipe_steps`
+
+Endpoints protegidos:
+
+- `GET /api/v1/recipes`
+- `POST /api/v1/recipes`
+- `GET /api/v1/recipes/{id}`
+- `PUT /api/v1/recipes/{id}`
+- `DELETE /api/v1/recipes/{id}`
+
+Filtros da listagem: `query`, `ingredient`, `category`, `maxPrepTimeMinutes` e `maxCalories`.
+Upload de imagem, favoritos, tags e associacao com dieta semanal ficam para sprints futuras.
 
 Resposta de erro:
 

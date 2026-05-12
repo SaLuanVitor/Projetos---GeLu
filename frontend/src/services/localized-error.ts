@@ -18,6 +18,7 @@ const CODE_KEYS = new Map<string, string>([
   ["NETWORK_ERROR", "networkError"],
   ["INVALID_API_RESPONSE", "invalidApiResponse"],
   ["UNAUTHORIZED", "authenticationRequired"],
+  ["NOT_FOUND", "notFound"],
   ["REQUEST_ERROR", "requestError"],
   ["INTERNAL_ERROR", "requestError"]
 ]);

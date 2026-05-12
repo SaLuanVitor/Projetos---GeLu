@@ -130,6 +130,7 @@ Remove-Item -Recurse -Force -ErrorAction SilentlyContinue infra/data/postgres, i
 - Frontend: `http://localhost:3000`
 - Frontend em ingles: `http://localhost:3000/en`
 - Backend health: `GET http://localhost:8080/api/v1/health`
+- Recipes: `GET http://localhost:8080/api/v1/recipes`
 - AI agents catalog: `GET http://localhost:8080/api/v1/ai/agents`
 - OpenAPI JSON: `GET http://localhost:8080/v3/api-docs`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`

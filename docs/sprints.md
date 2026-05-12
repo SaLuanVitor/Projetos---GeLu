@@ -98,22 +98,23 @@ Objetivo: cadastrar e listar receitas.
 
 Tarefas:
 
-- [ ] Criar tabelas `recipes`, `recipe_ingredients` e `recipe_steps`
-- [ ] Criar CRUD de receitas
-- [ ] Criar cadastro de ingredientes
-- [ ] Criar cadastro de passos
-- [ ] Criar filtros basicos
-- [ ] Criar tela de listagem
-- [ ] Criar tela de cadastro
-- [ ] Criar testes
+- [x] Criar tabelas `recipes`, `recipe_ingredients` e `recipe_steps`
+- [x] Criar CRUD de receitas
+- [x] Criar cadastro de ingredientes
+- [x] Criar cadastro de passos
+- [x] Criar filtros basicos
+- [x] Criar tela de listagem
+- [x] Criar tela de cadastro
+- [x] Criar tela de detalhe e edicao
+- [x] Criar testes
 
 Pronto quando:
 
-- [ ] Receita e criada
-- [ ] Receita e editada
-- [ ] Receita e listada
-- [ ] Busca funciona
-- [ ] Testes passam
+- [x] Receita e criada
+- [x] Receita e editada
+- [x] Receita e listada
+- [x] Busca funciona
+- [x] Testes passam
 
 ## Sprint 4 - Midias
 
