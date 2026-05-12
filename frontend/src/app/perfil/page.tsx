@@ -5,7 +5,7 @@ import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
 import { TextInput } from "@/components/ui/FormField";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
-import { ApiClientError } from "@/services/auth";
+import { handleInvalidSession } from "@/services/auth";
 import { createWeightRecord, getProfile, updateProfile } from "@/services/profile";
 import { clearSession, loadSession, type StoredSession } from "@/services/session";
 import type { ProfileResponse } from "@/types/api";
@@ -28,6 +28,7 @@ export default function ProfilePage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const loadProfile = useCallback(
     async (accessToken: string) => {
@@ -45,9 +46,7 @@ export default function ProfilePage() {
         setBasalCalories(toInputValue(loadedProfile.basalCalories));
         setDailyCalorieGoal(toInputValue(loadedProfile.dailyCalorieGoal));
       } catch (requestError) {
-        if (requestError instanceof ApiClientError && requestError.code === "UNAUTHORIZED") {
-          clearSession();
-          router.replace("/login");
+        if (handleInvalidSession(requestError, () => router.replace("/login"))) {
           return;
         }
 
@@ -94,9 +93,7 @@ export default function ProfilePage() {
       setProfile(updatedProfile);
       setStatus("Perfil atualizado com sucesso.");
     } catch (requestError) {
-      if (requestError instanceof ApiClientError && requestError.code === "UNAUTHORIZED") {
-        clearSession();
-        router.replace("/login");
+      if (handleInvalidSession(requestError, () => router.replace("/login"))) {
         return;
       }
 
@@ -123,15 +120,33 @@ export default function ProfilePage() {
       await loadProfile(session.accessToken);
       setStatus("Peso registrado com sucesso.");
     } catch (requestError) {
-      if (requestError instanceof ApiClientError && requestError.code === "UNAUTHORIZED") {
-        clearSession();
-        router.replace("/login");
+      if (handleInvalidSession(requestError, () => router.replace("/login"))) {
         return;
       }
 
       setError(requestError instanceof Error ? requestError.message : "Falha ao registrar peso.");
     }
   }
+
+  function handleLogoutConfirm() {
+    clearSession();
+    router.push("/");
+  }
+
+  useEffect(() => {
+    if (!showLogoutConfirm) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowLogoutConfirm(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showLogoutConfirm]);
 
   if (!session) {
     return (
@@ -163,9 +178,18 @@ export default function ProfilePage() {
               Perfil e peso
             </h1>
           </div>
-          <ActionLink href="/perfil/evolucao" variant="outline">
-            Ver evolucao
-          </ActionLink>
+          <div className="flex flex-wrap gap-3">
+            <ActionLink href="/perfil/evolucao" variant="outline">
+              Ver evolucao
+            </ActionLink>
+            <ActionButton
+              onClick={() => setShowLogoutConfirm(true)}
+              type="button"
+              variant="outline"
+            >
+              Sair da conta
+            </ActionButton>
+          </div>
         </div>
 
         <div className="mt-6 space-y-3">
@@ -275,6 +299,38 @@ export default function ProfilePage() {
           </aside>
         </div>
       </main>
+      {showLogoutConfirm ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/35 px-5 py-8">
+          <div
+            aria-labelledby="logout-confirm-title"
+            aria-modal="true"
+            className="w-full max-w-md border-2 border-outline bg-surface p-6 shadow-paper"
+            role="dialog"
+          >
+            <h2
+              className="font-display text-3xl font-bold text-primary"
+              id="logout-confirm-title"
+            >
+              Deseja realmente sair?
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-on-surface-variant">
+              Sua sessao sera encerrada neste dispositivo.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <ActionButton
+                onClick={() => setShowLogoutConfirm(false)}
+                type="button"
+                variant="outline"
+              >
+                Cancelar
+              </ActionButton>
+              <ActionButton onClick={handleLogoutConfirm} type="button">
+                Sair
+              </ActionButton>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AppShell>
   );
 }

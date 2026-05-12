@@ -1,14 +1,15 @@
 "use client";
 
-import { ActionButton } from "@/components/ui/ActionButton";
-import { clearSession, loadSession } from "@/services/session";
+import { loadSession } from "@/services/session";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
+const INTERNAL_HOME_PATH = "/dashboard";
+
 const navItems = [
-  { href: "/dashboard", label: "Inicio" },
+  { href: INTERNAL_HOME_PATH, label: "Inicio" },
   { href: "/receitas", label: "Receitas" },
   { href: "/dieta-semanal", label: "Dieta Semanal" },
   { href: "/familia", label: "Familia" },
@@ -32,11 +33,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     setSessionChecked(true);
   }, [router]);
 
-  function handleLogout() {
-    clearSession();
-    router.push("/");
-  }
-
   if (!sessionChecked) {
     return <div className="paper-canvas min-h-screen bg-surface text-on-surface" />;
   }
@@ -45,7 +41,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="paper-canvas min-h-screen bg-surface text-on-surface">
       <header className="sticky top-0 z-30 border-b-2 border-outline bg-surface/95 shadow-paper backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <Link className="inline-flex items-end gap-3" href="/dashboard">
+          <Link className="inline-flex items-end gap-3" href={INTERNAL_HOME_PATH}>
             <span className="flex h-11 w-11 rotate-[-3deg] items-center justify-center rounded-lg border-2 border-tertiary bg-primary-fixed font-display text-xl font-extrabold text-primary shadow-label">
               GL
             </span>
@@ -81,14 +77,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
-            <ActionButton
-              className="shrink-0 px-3 py-1.5 text-xs uppercase tracking-wide"
-              onClick={handleLogout}
-              type="button"
-              variant="outline"
-            >
-              Sair
-            </ActionButton>
           </nav>
         </div>
       </header>
@@ -102,7 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function isActiveRoute(pathname: string, href: string) {
-  if (href === "/dashboard" || href === "/perfil") {
+  if (href === INTERNAL_HOME_PATH || href === "/perfil") {
     return pathname === href;
   }
 

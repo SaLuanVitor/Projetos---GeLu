@@ -1,6 +1,6 @@
 # Infra Gelu - Menu
 
-Docker Compose inicial para desenvolvimento local.
+Docker Compose inicial para desenvolvimento local. O guia principal de subida, parada, logs e destruicao do ambiente esta no `README.md` da raiz do projeto.
 
 ## Subir dependencias
 
