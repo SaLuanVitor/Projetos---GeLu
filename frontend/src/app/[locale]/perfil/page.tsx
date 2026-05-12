@@ -7,6 +7,7 @@ import { TextInput } from "@/components/ui/FormField";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { getValidSession, handleInvalidSession, logoutUser } from "@/services/auth";
+import { getLocalizedApiError } from "@/services/localized-error";
 import { createWeightRecord, getProfile, updateProfile } from "@/services/profile";
 import { clearSession, type StoredSession } from "@/services/session";
 import type { ProfileResponse } from "@/types/api";
@@ -17,6 +18,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 export default function ProfilePage() {
   const router = useRouter();
   const t = useTranslations("Profile");
+  const errors = useTranslations("CommonErrors");
   const [session, setSession] = useState<StoredSession | null>(null);
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [name, setName] = useState("");
@@ -53,12 +55,12 @@ export default function ProfilePage() {
           return;
         }
 
-        setError(requestError instanceof Error ? requestError.message : t("loadError"));
+        setError(getLocalizedApiError(requestError, errors, t("loadError")));
       } finally {
         setLoading(false);
       }
     },
-    [router, t]
+    [errors, router, t]
   );
 
   useEffect(() => {
@@ -111,7 +113,7 @@ export default function ProfilePage() {
         return;
       }
 
-      setError(requestError instanceof Error ? requestError.message : t("saveError"));
+      setError(getLocalizedApiError(requestError, errors, t("saveError")));
     }
   }
 
@@ -140,7 +142,7 @@ export default function ProfilePage() {
         return;
       }
 
-      setError(requestError instanceof Error ? requestError.message : t("weightError"));
+      setError(getLocalizedApiError(requestError, errors, t("weightError")));
     }
   }
 

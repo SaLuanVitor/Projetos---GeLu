@@ -4,6 +4,17 @@
     "pt-BR": "PT-BR",
     "en": "EN"
   },
+  "CommonErrors": {
+    "invalidCredentials": "E-mail ou senha invalidos.",
+    "emailAlreadyRegistered": "Este e-mail ja esta cadastrado.",
+    "invalidRefreshToken": "Sua sessao expirou. Entre novamente.",
+    "invalidPasswordResetToken": "Token de redefinicao invalido ou expirado.",
+    "authenticationRequired": "Sua sessao expirou. Entre novamente.",
+    "invalidRequestData": "Confira os dados informados.",
+    "networkError": "Nao foi possivel conectar ao backend. Verifique se a API esta rodando.",
+    "invalidApiResponse": "A API respondeu em um formato inesperado. Confirme a configuracao do backend.",
+    "requestError": "Nao foi possivel concluir a operacao."
+  },
   "Brand": {
     "tagline": "Caderno familiar de receitas",
     "note": "\"Cozinhando com afeto e organizando seu dia a dia em familia.\"",

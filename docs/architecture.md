@@ -89,26 +89,26 @@ common
 
 ## Responsabilidades
 
-| Modulo | Responsabilidade |
-| --- | --- |
-| auth | Login, JWT, refresh token e recuperacao de senha |
-| users | Perfil, dados pessoais, peso e metas |
-| recipes | Receitas, ingredientes e preparo |
-| media | Upload, URLs, thumbnails e storage |
-| family | Ambientes familiares e membros |
-| invitations | Convites por e-mail e notificacoes |
-| diets | Dietas semanais |
-| meals | Refeicoes e associacao de pessoas/receitas |
-| training | Treinos e confirmacao diaria |
-| calories | Calculos caloricos |
-| notifications | Notificacoes internas |
-| support | Chamados de suporte |
-| ratings | Avaliacoes do sistema |
-| suggestions | Sugestoes enviadas por usuarios |
-| ai | Sugestoes inteligentes e orquestracao de agentes |
-| admin | Administracao do sistema |
-| audit | Registro de eventos importantes |
-| common | Excecoes, utils, configuracao e seguranca |
+| Modulo        | Responsabilidade                                 |
+| ------------- | ------------------------------------------------ |
+| auth          | Login, JWT, refresh token e recuperacao de senha |
+| users         | Perfil, dados pessoais, peso e metas             |
+| recipes       | Receitas, ingredientes e preparo                 |
+| media         | Upload, URLs, thumbnails e storage               |
+| family        | Ambientes familiares e membros                   |
+| invitations   | Convites por e-mail e notificacoes               |
+| diets         | Dietas semanais                                  |
+| meals         | Refeicoes e associacao de pessoas/receitas       |
+| training      | Treinos e confirmacao diaria                     |
+| calories      | Calculos caloricos                               |
+| notifications | Notificacoes internas                            |
+| support       | Chamados de suporte                              |
+| ratings       | Avaliacoes do sistema                            |
+| suggestions   | Sugestoes enviadas por usuarios                  |
+| ai            | Sugestoes inteligentes e orquestracao de agentes |
+| admin         | Administracao do sistema                         |
+| audit         | Registro de eventos importantes                  |
+| common        | Excecoes, utils, configuracao e seguranca        |
 
 ## Estrutura Backend
 
@@ -184,6 +184,18 @@ acessar explicitamente uma rota interna com sessao valida.
 Quando a sessao local estiver ausente, expirada, corrompida ou for rejeitada pelo backend em uma
 rota autenticada, o frontend deve remover `gelu-menu-session` e redirecionar para `/login`. O
 backend continua sendo a fonte de autorizacao via Bearer JWT.
+
+## Localizacao e mensagens ao usuario
+
+O frontend usa `next-intl` com `pt-BR` como idioma padrao sem prefixo de URL e `en` com prefixo
+`/en`. Toda copy visivel ao usuario deve sair dos dicionarios de mensagens do frontend, incluindo
+erros, validacoes, estados vazios e textos de acessibilidade.
+
+Mensagens e codigos retornados pelo backend (`error.code`, `error.message`, `details`) sao contrato
+tecnico para integracao e diagnostico, nao copy final de interface. Antes de renderizar erros da API,
+as telas devem traduzir a mensagem por `error.code` e por mensagens conhecidas usando o helper de
+localizacao do frontend. Novas telas nao devem exibir `ApiClientError.message` diretamente ao
+usuario.
 
 ## Padrao de API
 

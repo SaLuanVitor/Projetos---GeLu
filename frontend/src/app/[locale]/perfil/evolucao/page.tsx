@@ -5,6 +5,7 @@ import { ActionLink } from "@/components/ui/ActionButton";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
+import { getLocalizedApiError } from "@/services/localized-error";
 import { listWeightHistory } from "@/services/profile";
 import type { StoredSession } from "@/services/session";
 import type { WeightHistoryItem } from "@/types/api";
@@ -15,6 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 export default function WeightEvolutionPage() {
   const router = useRouter();
   const t = useTranslations("Evolution");
+  const errors = useTranslations("CommonErrors");
   const locale = useLocale();
   const [session, setSession] = useState<StoredSession | null>(null);
   const [history, setHistory] = useState<WeightHistoryItem[]>([]);
@@ -42,7 +44,7 @@ export default function WeightEvolutionPage() {
             return;
           }
 
-          setError(requestError instanceof Error ? requestError.message : t("error"));
+          setError(getLocalizedApiError(requestError, errors, t("error")));
         })
         .finally(() => setLoading(false));
     });
@@ -50,7 +52,7 @@ export default function WeightEvolutionPage() {
     return () => {
       active = false;
     };
-  }, [router, t]);
+  }, [errors, router, t]);
 
   const reminder = useMemo(() => {
     if (history.length === 0) {

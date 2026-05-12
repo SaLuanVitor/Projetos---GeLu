@@ -11,12 +11,14 @@ import {
 } from "@/components/layout/AuthNotebookShell";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { resetPassword } from "@/services/auth";
+import { getLocalizedApiError } from "@/services/localized-error";
 import { useTranslations } from "next-intl";
 import { FormEvent, useEffect, useState } from "react";
 
 export default function ResetPasswordPage() {
   const t = useTranslations("Auth.reset");
   const auth = useTranslations("Auth");
+  const errors = useTranslations("CommonErrors");
   const [token, setToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [status, setStatus] = useState("");
@@ -39,7 +41,7 @@ export default function ResetPasswordPage() {
       setStatus(t("success"));
       setNewPassword("");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : t("error"));
+      setError(getLocalizedApiError(requestError, errors, t("error")));
     } finally {
       setLoading(false);
     }

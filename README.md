@@ -135,6 +135,12 @@ Remove-Item -Recurse -Force -ErrorAction SilentlyContinue infra/data/postgres, i
 - MinIO Console: `http://localhost:9001`
 - PostgreSQL: `localhost:5432`
 
+## Localizacao
+
+O frontend usa `pt-BR` como idioma padrao nas rotas sem prefixo, como `/login`, e ingles com prefixo
+`/en`, como `/en/login`. Toda mensagem exibida ao usuario, inclusive erros retornados pela API, deve
+respeitar o idioma ativo e passar pelos dicionarios `next-intl`.
+
 ## Credenciais locais padrao
 
 As credenciais abaixo sao apenas defaults de desenvolvimento local e podem ser sobrescritas via `.env`.

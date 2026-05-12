@@ -10,11 +10,13 @@ import {
 } from "@/components/layout/AuthNotebookShell";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { registerUser } from "@/services/auth";
+import { getLocalizedApiError } from "@/services/localized-error";
 import { useTranslations } from "next-intl";
 import { FormEvent, useState } from "react";
 
 export default function RegisterPage() {
   const t = useTranslations("Auth.register");
+  const errors = useTranslations("CommonErrors");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +37,7 @@ export default function RegisterPage() {
       setEmail("");
       setPassword("");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : t("error"));
+      setError(getLocalizedApiError(requestError, errors, t("error")));
     } finally {
       setLoading(false);
     }

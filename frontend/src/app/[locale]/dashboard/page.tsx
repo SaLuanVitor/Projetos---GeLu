@@ -5,6 +5,7 @@ import { ActionLink } from "@/components/ui/ActionButton";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
+import { getLocalizedApiError } from "@/services/localized-error";
 import { getProfile } from "@/services/profile";
 import type { StoredSession } from "@/services/session";
 import type { ProfileResponse } from "@/types/api";
@@ -15,6 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 export default function DashboardPage() {
   const router = useRouter();
   const t = useTranslations("Dashboard");
+  const errors = useTranslations("CommonErrors");
   const meals = useMemo(
     () => t.raw("meals") as Array<{ name: string; tag: string; calories: string }>,
     [t]
@@ -46,7 +48,7 @@ export default function DashboardPage() {
             return;
           }
 
-          setError(requestError instanceof Error ? requestError.message : t("loadError"));
+          setError(getLocalizedApiError(requestError, errors, t("loadError")));
         })
         .finally(() => setLoadingProfile(false));
     });
@@ -54,7 +56,7 @@ export default function DashboardPage() {
     return () => {
       active = false;
     };
-  }, [router, t]);
+  }, [errors, router, t]);
 
   const totalMealCalories = useMemo(
     () => meals.reduce((total, meal) => total + Number(meal.calories.replace(/\D/g, "")), 0),

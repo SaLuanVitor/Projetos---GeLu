@@ -4,6 +4,17 @@
     "pt-BR": "PT-BR",
     "en": "EN"
   },
+  "CommonErrors": {
+    "invalidCredentials": "Invalid email or password.",
+    "emailAlreadyRegistered": "This email is already registered.",
+    "invalidRefreshToken": "Your session expired. Sign in again.",
+    "invalidPasswordResetToken": "Invalid or expired password reset token.",
+    "authenticationRequired": "Your session expired. Sign in again.",
+    "invalidRequestData": "Check the submitted data.",
+    "networkError": "Unable to connect to the backend. Check if the API is running.",
+    "invalidApiResponse": "The API returned an unexpected format. Check the backend configuration.",
+    "requestError": "Unable to complete the request."
+  },
   "Brand": {
     "tagline": "Family recipe notebook",
     "note": "\"Cooking with care and organizing your family's day.\"",

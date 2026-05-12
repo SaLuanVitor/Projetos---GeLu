@@ -10,6 +10,7 @@ import {
 } from "@/components/layout/AuthNotebookShell";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { loginUser } from "@/services/auth";
+import { getLocalizedApiError } from "@/services/localized-error";
 import { saveSession } from "@/services/session";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -18,6 +19,7 @@ import { FormEvent, useState } from "react";
 export default function LoginPage() {
   const router = useRouter();
   const t = useTranslations("Auth.login");
+  const errors = useTranslations("CommonErrors");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("");
@@ -36,7 +38,7 @@ export default function LoginPage() {
       setStatus(t("success"));
       router.push("/dashboard");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : t("error"));
+      setError(getLocalizedApiError(requestError, errors, t("error")));
     } finally {
       setLoading(false);
     }

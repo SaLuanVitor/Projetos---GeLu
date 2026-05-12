@@ -10,12 +10,14 @@ import {
 } from "@/components/layout/AuthNotebookShell";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { forgotPassword } from "@/services/auth";
+import { getLocalizedApiError } from "@/services/localized-error";
 import { useTranslations } from "next-intl";
 import { FormEvent, useState } from "react";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("Auth.forgot");
   const auth = useTranslations("Auth");
+  const errors = useTranslations("CommonErrors");
   const [email, setEmail] = useState("");
   const [resetToken, setResetToken] = useState("");
   const [status, setStatus] = useState("");
@@ -38,7 +40,7 @@ export default function ForgotPasswordPage() {
         setResetToken(response.resetToken);
       }
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : t("error"));
+      setError(getLocalizedApiError(requestError, errors, t("error")));
     } finally {
       setLoading(false);
     }
