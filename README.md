@@ -4,7 +4,7 @@ Base inicial do sistema Gelu - Menu: uma plataforma para organizacao pessoal e f
 
 ## Stack
 
-- Frontend: Next.js, TypeScript, Tailwind CSS
+- Frontend: Next.js, TypeScript, Tailwind CSS, next-intl
 - Backend: Java 21, Spring Boot
 - Database: PostgreSQL
 - Storage local: MinIO
@@ -128,6 +128,7 @@ Remove-Item -Recurse -Force -ErrorAction SilentlyContinue infra/data/postgres, i
 ## Endpoints iniciais
 
 - Frontend: `http://localhost:3000`
+- Frontend em ingles: `http://localhost:3000/en`
 - Backend health: `GET http://localhost:8080/api/v1/health`
 - AI agents catalog: `GET http://localhost:8080/api/v1/ai/agents`
 - OpenAPI JSON: `GET http://localhost:8080/v3/api-docs`
@@ -137,9 +138,37 @@ Remove-Item -Recurse -Force -ErrorAction SilentlyContinue infra/data/postgres, i
 
 ## Localizacao
 
-O frontend usa `pt-BR` como idioma padrao nas rotas sem prefixo, como `/login`, e ingles com prefixo
-`/en`, como `/en/login`. Toda mensagem exibida ao usuario, inclusive erros retornados pela API, deve
-respeitar o idioma ativo e passar pelos dicionarios `next-intl`.
+O frontend usa `next-intl` com `pt-BR` como idioma padrao nas rotas sem prefixo, como `/login`,
+`/cadastro`, `/dashboard` e `/perfil`. Ingles usa o prefixo `/en`, como `/en/login`,
+`/en/dashboard` e `/en/perfil`.
+
+Toda mensagem exibida ao usuario, inclusive erros retornados pela API, deve respeitar o idioma ativo
+e passar pelos dicionarios `next-intl`. Mensagens tecnicas do backend, como `error.code` e
+`error.message`, sao contrato de API e nao copy final de interface.
+
+## Autenticacao e sessao
+
+- Cadastro e login usam e-mail e senha.
+- O backend emite access token JWT e refresh token.
+- O frontend guarda a sessao local em `gelu-menu-session`, renova tokens automaticamente antes da
+  expiracao e tenta uma renovacao ao receber 401/403.
+- O logout fica no perfil, chama `/api/v1/auth/logout` com o refresh token e limpa a sessao local.
+- Reset de senha revoga refresh tokens ativos do usuario; depois disso, o usuario precisa entrar
+  novamente.
+
+## Catalogo de agentes de IA
+
+O backend expoe `GET /api/v1/ai/agents` como catalogo tecnico dos agentes disponiveis. A
+orquestracao de IA pertence ao backend; agentes nao acessam banco diretamente. Agentes catalogados:
+
+- `diet-suggestion`
+- `recipe-suggestion`
+- `calorie-analysis`
+- `training-adjustment`
+- `family-meal-planner`
+- `support`
+- `prompt-optimizer`
+- `token-optimizer`
 
 ## Credenciais locais padrao
 

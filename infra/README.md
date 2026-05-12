@@ -1,6 +1,7 @@
 # Infra Gelu - Menu
 
-Docker Compose inicial para desenvolvimento local. O guia principal de subida, parada, logs e destruicao do ambiente esta no `README.md` da raiz do projeto.
+Referencia curta de Docker Compose para desenvolvimento local. O guia principal de setup, rotas,
+autenticacao, i18n, logs e destruicao de ambiente fica no `README.md` da raiz do projeto.
 
 ## Subir dependencias
 
@@ -14,9 +15,29 @@ docker compose -f infra/docker-compose.yml up -d postgres minio
 docker compose -f infra/docker-compose.yml up --build
 ```
 
+## Subir sistema completo em background
+
+```bash
+docker compose -f infra/docker-compose.yml up -d --build
+```
+
+## Logs
+
+```bash
+docker compose -f infra/docker-compose.yml logs -f
+```
+
+## Parar sem apagar dados
+
+```bash
+docker compose -f infra/docker-compose.yml down
+```
+
 ## Servicos
 
 - Frontend: http://localhost:3000
+- Frontend em ingles: http://localhost:3000/en
 - Backend: http://localhost:8080/api/v1/health
+- AI agents catalog: http://localhost:8080/api/v1/ai/agents
 - MinIO Console: http://localhost:9001
 - PostgreSQL: localhost:5432

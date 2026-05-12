@@ -24,5 +24,8 @@ Local skills may point to local agent instructions under `.codex/agents/`. Keep 
 - Keep the project as a modular monolith: Spring Boot backend, Next.js frontend, PostgreSQL, MinIO, Docker Compose.
 - Use API base path `/api/v1`.
 - Use the response envelope `{ success, data, message }` for success and `{ success, error }` for errors.
+- Keep frontend user-facing copy in `next-intl` dictionaries. `pt-BR` is the default locale without a URL prefix and `en` uses `/en`.
+- Do not render backend technical error messages directly to users; localize them in the frontend by code/message.
+- Keep docs synchronized when changing i18n, auth/session behavior, or the AI agent catalog.
 - The backend owns AI orchestration; AI agents do not access the database directly.
 - Health endpoints and placeholders are allowed in the base, but new business behavior must be backed by tests.

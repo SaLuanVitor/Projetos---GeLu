@@ -13,7 +13,7 @@ Essa decisao reduz a complexidade inicial de deploy, comunicacao entre servicos,
 ## Stack Oficial
 
 ```text
-Frontend: Next.js + TypeScript + Tailwind CSS
+Frontend: Next.js + TypeScript + Tailwind CSS + next-intl
 Backend: Java 21 + Spring Boot
 Banco: PostgreSQL
 Storage: MinIO em desenvolvimento; S3, Supabase Storage ou MinIO em producao
@@ -148,48 +148,73 @@ backend/
 frontend/
   src/
     app/
-      login/
-      cadastro/
-      recuperar-senha/
-      dashboard/
-      receitas/
-      dietas/
-      familia/
-      treinos/
-      perfil/
-      ajuda/
-      admin/
+      [locale]/
+        login/
+        cadastro/
+        recuperar-senha/
+        redefinir-senha/
+        ajuda-acesso/
+        dashboard/
+        receitas/
+        dieta-semanal/
+        familia/
+        perfil/
+        ajuda/
+        sugestoes-ia/
+      globals.css
     components/
+      i18n/
       ui/
       layout/
-      recipes/
-      diets/
-      family/
-      training/
-      support/
+    i18n/
+      navigation.ts
+      request.ts
+      routing.ts
+    messages/
+      pt-BR.json
+      en.json
     services/
-    hooks/
     types/
-    utils/
+    middleware.ts
 ```
 
 As telas publicas de autenticacao (`/login`, `/cadastro`, `/recuperar-senha`,
 `/redefinir-senha` e `/ajuda-acesso`) usam um layout proprio de caderno/folha de receita, sem menu
 interno. A area autenticada usa `AppShell`, com navegacao completa e inicio em `/dashboard`.
 
-Abrir `/login` sempre deve exibir a tela publica de login, mesmo quando existir sessao local. O
-frontend so deve enviar o usuario para `/dashboard` depois de um submit de login bem-sucedido ou ao
-acessar explicitamente uma rota interna com sessao valida.
+Rotas em portugues usam o locale padrao `pt-BR` sem prefixo de URL. Rotas em ingles usam `/en`. A
+configuracao de roteamento fica em `src/i18n/routing.ts` com prefixo `as-needed`. Exemplos:
+`/login`, `/dashboard`, `/perfil`, `/en/login`, `/en/dashboard` e `/en/perfil`.
 
-Quando a sessao local estiver ausente, expirada, corrompida ou for rejeitada pelo backend em uma
-rota autenticada, o frontend deve remover `gelu-menu-session` e redirecionar para `/login`. O
-backend continua sendo a fonte de autorizacao via Bearer JWT.
+Abrir `/login` ou `/en/login` sempre deve exibir a tela publica de login, mesmo quando existir
+sessao local. O frontend so deve enviar o usuario para a area interna depois de um submit de login
+bem-sucedido ou ao acessar explicitamente uma rota interna com sessao valida.
+
+## Autenticacao e sessao segura
+
+Cadastro e login usam e-mail e senha. O backend emite access token JWT e refresh token. O frontend
+guarda a sessao local em `gelu-menu-session` e usa helpers compartilhados para carregar uma sessao
+valida antes de chamar endpoints protegidos.
+
+Regras:
+
+- O access token autoriza chamadas protegidas via Bearer JWT.
+- O refresh token renova a sessao antes da expiracao e tambem como fallback unico apos 401/403.
+- Se o refresh falhar, o frontend remove `gelu-menu-session` e redireciona para `/login` no locale
+  ativo.
+- O logout fica na pagina de perfil, chama `/api/v1/auth/logout` com o refresh token e limpa a
+  sessao local mesmo se a chamada remota falhar.
+- A redefinicao de senha marca o token de reset como usado e revoga refresh tokens ativos do usuario.
+- Ao solicitar nova recuperacao de senha, tokens de reset anteriores nao usados deixam de ser
+  validos.
+
+O backend continua sendo a fonte de autorizacao via Bearer JWT.
 
 ## Localizacao e mensagens ao usuario
 
 O frontend usa `next-intl` com `pt-BR` como idioma padrao sem prefixo de URL e `en` com prefixo
-`/en`. Toda copy visivel ao usuario deve sair dos dicionarios de mensagens do frontend, incluindo
-erros, validacoes, estados vazios e textos de acessibilidade.
+`/en`. Toda copy visivel ao usuario deve sair de `src/messages/pt-BR.json` e
+`src/messages/en.json`, incluindo erros, validacoes, estados vazios e textos de acessibilidade.
 
 Mensagens e codigos retornados pelo backend (`error.code`, `error.message`, `details`) sao contrato
 tecnico para integracao e diagnostico, nao copy final de interface. Antes de renderizar erros da API,
@@ -240,6 +265,19 @@ Regras:
 - Toda orquestracao deve passar primeiro pelo Token Optimizer local.
 - Sugestoes de dieta, calorias e treino devem ser assistivas, nao prescritivas.
 - Sugestoes geradas devem ser registradas quando fizer sentido.
+
+Catalogo tecnico exposto em `GET /api/v1/ai/agents`:
+
+| Key                   | Agente                  | Finalidade                                               |
+| --------------------- | ----------------------- | -------------------------------------------------------- |
+| `diet-suggestion`     | DietSuggestionAgent     | Sugestoes assistivas de ajuste de dieta                  |
+| `recipe-suggestion`   | RecipeSuggestionAgent   | Recomendacao de receitas por meta, calorias e restricoes |
+| `calorie-analysis`    | CalorieAnalysisAgent    | Analise de saldo calorico                                |
+| `training-adjustment` | TrainingAdjustmentAgent | Ajustes para dias com ou sem treino confirmado           |
+| `family-meal-planner` | FamilyMealPlannerAgent  | Apoio ao planejamento de refeicoes familiares            |
+| `support`             | SupportAgent            | Classificacao e rascunho de respostas de suporte         |
+| `prompt-optimizer`    | PromptOptimizerAgent    | Otimizacao de prompts internos                           |
+| `token-optimizer`     | TokenOptimizerAgent     | Reducao de contexto preservando intencao e restricoes    |
 
 Fluxo:
 

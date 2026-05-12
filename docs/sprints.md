@@ -21,6 +21,7 @@ Tarefas:
 - [x] Configurar padrao de resposta da API
 - [x] Configurar OpenAPI
 - [x] Configurar lint e formatacao completos
+- [x] Configurar i18n frontend com `next-intl`
 
 Pronto quando:
 
@@ -29,6 +30,14 @@ Pronto quando:
 - [x] Banco sobe localmente
 - [x] MinIO sobe localmente
 - [x] API healthcheck responde
+- [x] Rotas `pt-BR` e `en` compilam
+
+## Criterios recorrentes
+
+- [ ] Toda nova tela tem chaves em `pt-BR` e `en`
+- [ ] Toda mensagem visivel ao usuario passa pelos dicionarios `next-intl`
+- [ ] Erros tecnicos da API sao traduzidos no frontend antes de renderizar
+- [ ] Fluxos autenticados usam sessao valida ou renovada antes de chamar endpoint protegido
 
 ## Sprint 1 - Autenticacao
 
@@ -44,7 +53,11 @@ Tarefas:
 - [x] Implementar refresh token
 - [x] Implementar logout
 - [x] Implementar recuperacao de senha
+- [x] Implementar refresh automatico no frontend
+- [x] Revogar refresh tokens apos reset de senha
+- [x] Invalidar tokens antigos de reset ao solicitar nova recuperacao
 - [x] Criar telas de login/cadastro
+- [x] Criar logout no perfil com confirmacao
 - [x] Criar testes de auth
 
 Pronto quando:
@@ -53,6 +66,8 @@ Pronto quando:
 - [x] Usuario faz login
 - [x] Usuario renova token
 - [x] Usuario recupera senha
+- [x] Reset de senha encerra sessoes ativas
+- [x] Logout revoga refresh token no backend
 - [x] Testes passam
 
 ## Sprint 2 - Perfil e Peso
