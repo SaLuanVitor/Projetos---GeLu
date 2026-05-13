@@ -77,7 +77,8 @@ const config: Config = {
       },
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],
-        body: ["var(--font-body)", "system-ui", "sans-serif"]
+        body: ["var(--font-body)", "system-ui", "sans-serif"],
+        hand: ["var(--font-hand)", "cursive"]
       },
       boxShadow: {
         paper: "0 4px 12px rgba(111, 78, 55, 0.08)",

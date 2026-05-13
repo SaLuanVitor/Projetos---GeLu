@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import { PageDecor } from "@/components/layout/PageDecor";
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
@@ -24,6 +25,7 @@ export function AuthNotebookShell({ children, featureLabel, note }: AuthNotebook
 
   return (
     <main className="paper-canvas min-h-screen bg-surface px-4 py-6 text-on-surface sm:px-6 lg:px-10">
+      <PageDecor variant="auth" />
       <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl items-center justify-center py-8">
         <Link
           className="absolute left-0 top-0 z-10 hidden rotate-[-12deg] rounded-lg border-2 border-dashed border-outline bg-surface-container-low px-4 py-2 font-display text-xl font-bold text-outline shadow-paper transition-transform hover:rotate-[-8deg] md:inline-flex"

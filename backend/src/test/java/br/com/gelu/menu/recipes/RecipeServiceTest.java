@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import br.com.gelu.menu.common.exception.BadRequestException;
 import br.com.gelu.menu.common.exception.NotFoundException;
 import br.com.gelu.menu.recipes.dto.RecipeIngredientRequest;
 import br.com.gelu.menu.recipes.dto.RecipeRequest;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 class RecipeServiceTest {
 
@@ -46,6 +49,8 @@ class RecipeServiceTest {
 
     assertThat(response.name()).isEqualTo("Tapioca");
     assertThat(response.category()).isEqualTo("Cafe");
+    assertThat(response.favorite()).isFalse();
+    assertThat(response.mainMediaType()).isEqualTo("IMAGE");
     assertThat(response.ingredients()).hasSize(1);
     assertThat(response.ingredients().getFirst().position()).isEqualTo(1);
     assertThat(response.steps()).hasSize(1);
@@ -56,7 +61,7 @@ class RecipeServiceTest {
     UUID userId = UUID.randomUUID();
     Recipe recipe = recipe(userId, "Tapioca", "Cafe");
     when(userRepository.existsById(userId)).thenReturn(true);
-    when(recipeRepository.search(userId, "tapioca", "goma", "Cafe", 30, new BigDecimal("400")))
+    when(recipeRepository.findAll(any(Specification.class), any(Sort.class)))
         .thenReturn(List.of(recipe));
     when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipe.getId(), userId))
         .thenReturn(List.of());
@@ -66,6 +71,47 @@ class RecipeServiceTest {
         recipeService.listRecipes(
             userId,
             new RecipeSearchFilter(" tapioca ", " goma ", " Cafe ", 30, new BigDecimal("400")));
+
+    assertThat(response).hasSize(1);
+    assertThat(response.getFirst().name()).isEqualTo("Tapioca");
+    verify(recipeRepository)
+        .findAll(
+            any(Specification.class),
+            eq(Sort.by(Sort.Order.desc("favorite"), Sort.Order.desc("createdAt"))));
+  }
+
+  @Test
+  void shouldListRecipesWithoutFilters() {
+    UUID userId = UUID.randomUUID();
+    Recipe recipe = recipe(userId, "Tapioca", "Cafe");
+    when(userRepository.existsById(userId)).thenReturn(true);
+    when(recipeRepository.findAll(any(Specification.class), any(Sort.class)))
+        .thenReturn(List.of(recipe));
+    when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipe.getId(), userId))
+        .thenReturn(List.of());
+    when(recipeMediaService.responses(List.of())).thenReturn(List.of());
+
+    var response =
+        recipeService.listRecipes(userId, new RecipeSearchFilter(null, null, null, null, null));
+
+    assertThat(response).hasSize(1);
+    assertThat(response.getFirst().name()).isEqualTo("Tapioca");
+  }
+
+  @Test
+  void shouldListRecipesWithPartialFilter() {
+    UUID userId = UUID.randomUUID();
+    Recipe recipe = recipe(userId, "Tapioca", "Cafe");
+    when(userRepository.existsById(userId)).thenReturn(true);
+    when(recipeRepository.findAll(any(Specification.class), any(Sort.class)))
+        .thenReturn(List.of(recipe));
+    when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipe.getId(), userId))
+        .thenReturn(List.of());
+    when(recipeMediaService.responses(List.of())).thenReturn(List.of());
+
+    var response =
+        recipeService.listRecipes(
+            userId, new RecipeSearchFilter(" tapioca ", null, null, null, null));
 
     assertThat(response).hasSize(1);
     assertThat(response.getFirst().name()).isEqualTo("Tapioca");
@@ -87,6 +133,55 @@ class RecipeServiceTest {
 
     assertThat(response.name()).isEqualTo("Crepioca");
     assertThat(response.category()).isEqualTo("Jantar");
+  }
+
+  @Test
+  void shouldUpdateFavorite() {
+    UUID userId = UUID.randomUUID();
+    Recipe recipe = recipe(userId, "Tapioca", "Cafe");
+    when(userRepository.existsById(userId)).thenReturn(true);
+    when(recipeRepository.findByIdAndUserId(recipe.getId(), userId))
+        .thenReturn(Optional.of(recipe));
+    when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipe.getId(), userId))
+        .thenReturn(List.of());
+    when(recipeMediaService.responses(List.of())).thenReturn(List.of());
+
+    var response = recipeService.updateFavorite(userId, recipe.getId(), true);
+
+    assertThat(response.favorite()).isTrue();
+  }
+
+  @Test
+  void shouldUpdateMainMediaTypeToVideoWhenRecipeHasVideoUrl() {
+    UUID userId = UUID.randomUUID();
+    Recipe recipe = recipe(userId, "Tapioca", "Cafe", "https://youtu.be/demo");
+    when(userRepository.existsById(userId)).thenReturn(true);
+    when(recipeRepository.findByIdAndUserId(recipe.getId(), userId))
+        .thenReturn(Optional.of(recipe));
+    when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipe.getId(), userId))
+        .thenReturn(List.of());
+    when(recipeMediaService.responses(List.of())).thenReturn(List.of());
+
+    var response =
+        recipeService.updateMainMediaType(userId, recipe.getId(), RecipeMainMediaType.VIDEO);
+
+    assertThat(response.mainMediaType()).isEqualTo("VIDEO");
+  }
+
+  @Test
+  void shouldRejectVideoMainMediaTypeWithoutVideoUrl() {
+    UUID userId = UUID.randomUUID();
+    Recipe recipe = recipe(userId, "Tapioca", "Cafe");
+    when(userRepository.existsById(userId)).thenReturn(true);
+    when(recipeRepository.findByIdAndUserId(recipe.getId(), userId))
+        .thenReturn(Optional.of(recipe));
+
+    assertThatThrownBy(
+            () ->
+                recipeService.updateMainMediaType(
+                    userId, recipe.getId(), RecipeMainMediaType.VIDEO))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessage("Recipe video URL is required to use video as main media");
   }
 
   @Test
@@ -116,8 +211,12 @@ class RecipeServiceTest {
   }
 
   private Recipe recipe(UUID userId, String name, String category) {
+    return recipe(userId, name, category, null);
+  }
+
+  private Recipe recipe(UUID userId, String name, String category, String videoUrl) {
     Recipe recipe =
-        new Recipe(userId, name, "Descricao", category, 20, new BigDecimal("320"), 2, null);
+        new Recipe(userId, name, "Descricao", category, 20, new BigDecimal("320"), 2, videoUrl);
     recipe.replaceIngredients(List.of(new RecipeIngredient(1, "Goma", "2", "colheres")));
     recipe.replaceSteps(List.of(new RecipeStep(1, "Misture tudo.")));
     return recipe;

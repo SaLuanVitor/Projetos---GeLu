@@ -2,17 +2,29 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
-import { TextInput } from "@/components/ui/FormField";
+import { SelectField, TextInput } from "@/components/ui/FormField";
+import { NotebookPageHeader, RecipePhotoPlaceholder } from "@/components/ui/Notebook";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import { getLocalizedApiError } from "@/services/localized-error";
 import { fetchRecipeMediaObjectUrl } from "@/services/recipe-media";
-import { listRecipes } from "@/services/recipes";
+import { listRecipes, setRecipeFavorite } from "@/services/recipes";
 import type { RecipeResponse, RecipeSearchFilters } from "@/types/api";
 import { useTranslations } from "next-intl";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+
+const CATEGORY_VALUES = [
+  "Cafe",
+  "Almoco",
+  "Jantar",
+  "Lanche",
+  "Sobremesa",
+  "Bebidas",
+  "Saudavel",
+  "Familia"
+];
 
 export default function RecipesPage() {
   const router = useRouter();
@@ -27,7 +39,29 @@ export default function RecipesPage() {
   const [maxPrepTimeMinutes, setMaxPrepTimeMinutes] = useState("");
   const [maxCalories, setMaxCalories] = useState("");
   const [loading, setLoading] = useState(true);
+  const [favoriteBusy, setFavoriteBusy] = useState<Record<string, boolean>>({});
   const [error, setError] = useState("");
+  const categoryOptions = [
+    { label: t("filters.allCategories"), value: "" },
+    ...CATEGORY_VALUES.map((value) => ({
+      label: t(`options.categories.${value}`),
+      value
+    }))
+  ];
+  const timeOptions = [
+    { label: t("filters.anyTime"), value: "" },
+    ...["15", "30", "45", "60"].map((value) => ({
+      label: t("filters.minutesUpTo", { count: Number(value) }),
+      value
+    }))
+  ];
+  const calorieOptions = [
+    { label: t("filters.noCalorieLimit"), value: "" },
+    ...["250", "400", "600", "800"].map((value) => ({
+      label: t("filters.kcalUpTo", { count: Number(value) }),
+      value
+    }))
+  ];
 
   const loadRecipes = useCallback(
     async (nextFilters: RecipeSearchFilters = filters) => {
@@ -40,7 +74,7 @@ export default function RecipesPage() {
       }
 
       try {
-        setRecipes(await listRecipes(session.accessToken, nextFilters));
+        setRecipes(sortRecipes(await listRecipes(session.accessToken, nextFilters)));
       } catch (requestError) {
         if (handleInvalidSession(requestError, () => router.replace("/login"))) {
           return;
@@ -111,52 +145,80 @@ export default function RecipesPage() {
     void loadRecipes(nextFilters);
   }
 
+  async function handleFavoriteToggle(recipe: RecipeResponse) {
+    const session = await getValidSession();
+    if (!session) {
+      return;
+    }
+
+    setFavoriteBusy((current) => ({ ...current, [recipe.id]: true }));
+    setError("");
+
+    try {
+      const updatedRecipe = await setRecipeFavorite(
+        session.accessToken,
+        recipe.id,
+        !recipe.favorite
+      );
+      setRecipes((current) =>
+        sortRecipes(current.map((item) => (item.id === recipe.id ? updatedRecipe : item)))
+      );
+    } catch (requestError) {
+      if (handleInvalidSession(requestError, () => router.replace("/login"))) {
+        return;
+      }
+      setError(getLocalizedApiError(requestError, errors, t("favoriteError")));
+    } finally {
+      setFavoriteBusy((current) => ({ ...current, [recipe.id]: false }));
+    }
+  }
+
   return (
     <AppShell>
       <main className="mx-auto max-w-6xl px-5 py-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-secondary">
-              {t("eyebrow")}
-            </p>
-            <h1 className="mt-2 font-display text-5xl font-extrabold text-primary">{t("title")}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-on-surface-variant">
-              {t("description")}
-            </p>
-          </div>
-          <ActionLink href="/receitas/nova">{t("newRecipe")}</ActionLink>
-        </div>
+        <NotebookPageHeader
+          action={<ActionLink href="/receitas/nova">{t("newRecipe")}</ActionLink>}
+          eyebrow={t("eyebrow")}
+          subtitle={t("description")}
+          title={t("title")}
+        />
 
-        <PaperCard className="mt-6" tape="green">
-          <form className="grid gap-4 md:grid-cols-5" onSubmit={handleFilterSubmit}>
+        <section className="scribble-border paper-grid-block mt-8 p-5">
+          <form
+            className="grid gap-4 md:grid-cols-[1fr_1fr_1fr_150px_150px_auto]"
+            onSubmit={handleFilterSubmit}
+          >
             <TextInput label={t("filters.query")} value={query} onValueChange={setQuery} />
             <TextInput
               label={t("filters.ingredient")}
               value={ingredient}
               onValueChange={setIngredient}
             />
-            <TextInput label={t("filters.category")} value={category} onValueChange={setCategory} />
-            <TextInput
+            <SelectField
+              label={t("filters.category")}
+              options={categoryOptions}
+              value={category}
+              onValueChange={setCategory}
+            />
+            <SelectField
               label={t("filters.maxTime")}
-              min="1"
-              type="number"
+              options={timeOptions}
               value={maxPrepTimeMinutes}
               onValueChange={setMaxPrepTimeMinutes}
             />
-            <TextInput
+            <SelectField
               label={t("filters.maxCalories")}
-              min="1"
-              type="number"
+              options={calorieOptions}
               value={maxCalories}
               onValueChange={setMaxCalories}
             />
-            <div className="md:col-span-5">
-              <ActionButton type="submit" variant="secondary">
+            <div className="self-end">
+              <ActionButton className="w-full whitespace-nowrap" type="submit">
                 {t("filters.apply")}
               </ActionButton>
             </div>
           </form>
-        </PaperCard>
+        </section>
 
         <div className="mt-6 space-y-3">
           {loading ? <StatusMessage>{t("loading")}</StatusMessage> : null}
@@ -173,25 +235,49 @@ export default function RecipesPage() {
           </PaperCard>
         ) : null}
 
-        <section className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
-            <PaperCard key={recipe.id} tape="brown">
-              {imageUrls[recipe.id] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  alt={recipe.name}
-                  className="-mx-2 -mt-2 mb-4 aspect-[4/3] w-[calc(100%+1rem)] rounded-lg border-2 border-outline object-cover"
-                  src={imageUrls[recipe.id]}
-                />
-              ) : null}
-              <p className="text-xs font-bold uppercase tracking-wide text-secondary">
-                {recipe.category ?? t("noCategory")}
-              </p>
-              <h2 className="mt-2 font-display text-3xl font-bold text-primary">{recipe.name}</h2>
-              <p className="mt-3 line-clamp-3 text-sm leading-6 text-on-surface-variant">
+            <article
+              className="relative bg-white p-4 shadow-paper transition-transform hover:rotate-0 md:rotate-[-1deg]"
+              key={recipe.id}
+            >
+              <span aria-hidden="true" className="washi-tape washi-green" />
+              <div className="aspect-square overflow-hidden bg-surface-container-low">
+                {imageUrls[recipe.id] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    alt={recipe.name}
+                    className="h-full w-full object-cover"
+                    src={imageUrls[recipe.id]}
+                  />
+                ) : (
+                  <RecipePhotoPlaceholder label={recipe.category ?? t("noCategory")} />
+                )}
+              </div>
+              <div className="mt-5 flex items-start justify-between gap-3">
+                <h2 className="font-hand text-4xl leading-none text-tertiary">{recipe.name}</h2>
+                <button
+                  aria-label={recipe.favorite ? t("removeFavorite") : t("addFavorite")}
+                  className="text-3xl leading-none text-primary transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60"
+                  disabled={favoriteBusy[recipe.id]}
+                  onClick={() => void handleFavoriteToggle(recipe)}
+                  type="button"
+                >
+                  {recipe.favorite ? "♥" : "♡"}
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="rounded-full bg-secondary-fixed px-3 py-1 text-xs font-semibold text-secondary">
+                  {recipe.category ?? t("noCategory")}
+                </span>
+                <span className="rounded-full bg-primary-fixed px-3 py-1 text-xs font-semibold text-primary">
+                  {recipe.servings ? t("servings", { count: recipe.servings }) : t("noServings")}
+                </span>
+              </div>
+              <p className="mt-4 line-clamp-2 text-sm leading-6 text-on-surface-variant">
                 {recipe.description ?? t("noDescription")}
               </p>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-tertiary">
+              <div className="mt-4 flex flex-wrap gap-5 text-base font-medium text-on-surface">
                 <span>
                   {recipe.prepTimeMinutes
                     ? t("minutes", { count: recipe.prepTimeMinutes })
@@ -202,17 +288,33 @@ export default function RecipesPage() {
                     ? t("kcal", { count: recipe.estimatedCalories })
                     : t("noCalories")}
                 </span>
-                <span>
-                  {recipe.servings ? t("servings", { count: recipe.servings }) : t("noServings")}
-                </span>
               </div>
-              <ActionLink className="mt-5" href={`/receitas/${recipe.id}`} variant="outline">
-                {t("viewRecipe")}
-              </ActionLink>
-            </PaperCard>
+              <div className="mt-7 flex gap-3">
+                <ActionLink className="flex-1" href={`/receitas/${recipe.id}`}>
+                  {t("viewRecipe")}
+                </ActionLink>
+                <ActionLink
+                  aria-label={t("editRecipe")}
+                  className="h-11 w-11 px-0 text-xl"
+                  href={`/receitas/${recipe.id}/editar`}
+                  variant="outline"
+                >
+                  +
+                </ActionLink>
+              </div>
+            </article>
           ))}
         </section>
       </main>
     </AppShell>
   );
+}
+
+function sortRecipes(recipes: RecipeResponse[]): RecipeResponse[] {
+  return [...recipes].sort((left, right) => {
+    if (left.favorite !== right.favorite) {
+      return Number(right.favorite) - Number(left.favorite);
+    }
+    return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+  });
 }

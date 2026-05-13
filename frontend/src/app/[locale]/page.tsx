@@ -1,3 +1,4 @@
+import { PageDecor } from "@/components/layout/PageDecor";
 import { ActionLink } from "@/components/ui/ActionButton";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { useTranslations } from "next-intl";
@@ -10,6 +11,7 @@ export default function LandingPage() {
 
   return (
     <main className="paper-canvas min-h-screen overflow-hidden bg-surface text-on-surface">
+      <PageDecor variant="public" />
       <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6">
         <div className="inline-flex items-end gap-3">
           <span className="flex h-11 w-11 rotate-[-3deg] items-center justify-center rounded-lg border-2 border-tertiary bg-primary-fixed font-display text-xl font-extrabold text-primary shadow-label">
@@ -60,10 +62,7 @@ export default function LandingPage() {
           <div className="absolute left-4 top-4 h-44 w-44 rounded-full bg-secondary-fixed/70 blur-3xl" />
           <div className="absolute bottom-8 right-0 h-52 w-52 rounded-full bg-primary-fixed/80 blur-3xl" />
 
-          <PaperCard
-            className="relative z-10 rotate-[-1deg] bg-recipe-lines bg-[length:100%_32px] p-7"
-            tape="orange"
-          >
+          <PaperCard className="paper-lines-block relative z-10 rotate-[-1deg] p-7" tape="orange">
             <p className="text-xs font-bold uppercase tracking-wide text-tertiary">
               {t("todayPlanner")}
             </p>

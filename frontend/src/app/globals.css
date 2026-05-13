@@ -8,8 +8,7 @@
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top left, rgba(232, 109, 45, 0.1), transparent 26rem),
-    radial-gradient(circle at bottom right, rgba(184, 237, 179, 0.16), transparent 28rem), #fef9ed;
+  background: #fef9ed;
   color: #1d1c15;
   font-family: var(--font-body), system-ui, sans-serif;
 }
@@ -32,10 +31,377 @@ textarea {
 }
 
 .paper-canvas {
-  background-image: radial-gradient(circle at 1px 1px, rgba(121, 87, 63, 0.08) 1px, transparent 0);
-  background-size: 22px 22px;
+  position: relative;
+  overflow-x: hidden;
+  background-color: #fef9ed;
+}
+
+.paper-canvas > :not(.page-decor) {
+  position: relative;
+  z-index: 2;
+}
+
+.paper-canvas > header {
+  z-index: 30;
+}
+
+.page-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.decor-shape {
+  position: absolute;
+  display: none;
+  opacity: 0.13;
+}
+
+.decor-fork {
+  width: 54px;
+  height: 104px;
+  border-left: 8px solid #8b7267;
+  border-right: 8px solid #8b7267;
+}
+
+.decor-fork::before,
+.decor-fork::after {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 60px;
+  content: "";
+  background: #8b7267;
+}
+
+.decor-fork::before {
+  left: 14px;
+}
+
+.decor-fork::after {
+  right: 14px;
+}
+
+.decor-ring {
+  width: 110px;
+  height: 110px;
+  border: 9px solid #8b7267;
+  border-radius: 999px;
+}
+
+.decor-ring::after {
+  position: absolute;
+  right: 14px;
+  bottom: -34px;
+  width: 8px;
+  height: 48px;
+  rotate: 26deg;
+  content: "";
+  background: #8b7267;
+}
+
+.decor-tape {
+  width: 118px;
+  height: 32px;
+  rotate: -7deg;
+  background: #ffdcc6;
+  clip-path: polygon(0 0, 100% 0, 94% 100%, 76% 82%, 58% 100%, 38% 82%, 18% 100%, 0 82%);
+}
+
+.decor-note {
+  width: 150px;
+  height: 44px;
+  rotate: -12deg;
+  border-top: 2px dashed #8b7267;
+  border-bottom: 2px dashed #8b7267;
+}
+
+.decor-note::before {
+  position: absolute;
+  inset: 8px 12px;
+  content: "";
+  border-top: 2px solid #8b7267;
+  border-bottom: 2px solid #8b7267;
+}
+
+.decor-pin {
+  width: 64px;
+  height: 64px;
+  rotate: 10deg;
+  border: 8px solid #8b7267;
+  border-radius: 12px;
+}
+
+.decor-pin::after {
+  position: absolute;
+  top: -18px;
+  left: 20px;
+  width: 18px;
+  height: 34px;
+  content: "";
+  border: 5px solid #8b7267;
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+}
+
+.decor-book {
+  width: 96px;
+  height: 72px;
+  rotate: -2deg;
+  border: 2px solid #8b7267;
+  background: rgba(248, 243, 231, 0.7);
+}
+
+.decor-book::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 50%;
+  width: 2px;
+  content: "";
+  background: #8b7267;
+}
+
+.decor-book::after {
+  position: absolute;
+  inset: 18px 14px;
+  content: "";
+  border-top: 2px solid #8b7267;
+  border-bottom: 2px solid #8b7267;
+}
+
+.decor-rolling-pin {
+  width: 170px;
+  height: 42px;
+  rotate: -8deg;
+  border: 5px solid #8b7267;
+  border-radius: 999px;
+}
+
+.decor-rolling-pin::before,
+.decor-rolling-pin::after {
+  position: absolute;
+  top: 8px;
+  width: 42px;
+  height: 16px;
+  content: "";
+  border-top: 5px solid #8b7267;
+  border-bottom: 5px solid #8b7267;
+}
+
+.decor-rolling-pin::before {
+  left: -44px;
+}
+
+.decor-rolling-pin::after {
+  right: -44px;
+}
+
+.decor-dashboard-fork {
+  top: 148px;
+  left: 22px;
+  display: block;
+  rotate: 13deg;
+}
+
+.decor-dashboard-tape {
+  top: 344px;
+  right: 7%;
+  display: block;
+}
+
+.decor-dashboard-ring {
+  right: -46px;
+  bottom: 320px;
+  display: block;
+}
+
+.decor-recipes-note {
+  top: 240px;
+  left: -28px;
+  display: block;
+}
+
+.decor-recipes-pin {
+  top: 380px;
+  right: 9%;
+  display: block;
+}
+
+.decor-recipes-tape {
+  top: 520px;
+  left: 17%;
+  display: block;
+  background: #baf0b6;
+}
+
+.decor-form-note {
+  top: 210px;
+  left: 7%;
+  display: block;
+}
+
+.decor-form-rolling-pin {
+  top: 520px;
+  right: 6%;
+  display: block;
+}
+
+.decor-detail-pin {
+  top: 190px;
+  right: 8%;
+  display: block;
+}
+
+.decor-detail-tape {
+  top: 460px;
+  left: 8%;
+  display: block;
+  background: #baf0b6;
+}
+
+.decor-evolution-book {
+  left: 50%;
+  bottom: 190px;
+  display: block;
+  translate: -50% 0;
+}
+
+.decor-evolution-tape {
+  top: 390px;
+  right: 7%;
+  display: block;
+}
+
+.decor-profile-note {
+  top: 240px;
+  right: 9%;
+  display: block;
+}
+
+.decor-profile-pin {
+  bottom: 220px;
+  left: 7%;
+  display: block;
+}
+
+.decor-default-pin {
+  top: 220px;
+  right: 10%;
+  display: block;
+}
+
+.decor-default-ring {
+  bottom: 190px;
+  left: -46px;
+  display: block;
+}
+
+.decor-auth-note {
+  top: 120px;
+  left: 8%;
+  display: block;
+}
+
+.decor-auth-ring {
+  right: 8%;
+  bottom: 110px;
+  display: block;
+}
+
+.decor-public-note {
+  top: 170px;
+  right: 8%;
+  display: block;
+}
+
+.decor-public-ring {
+  bottom: 160px;
+  left: 6%;
+  display: block;
 }
 
 .wobbly-paper {
   clip-path: polygon(0.5% 1%, 99% 0, 100% 98.5%, 1% 100%);
+}
+
+.hand-drawn-border {
+  border: 2px solid #8b7267;
+  border-radius: 18px 12px 20px 14px / 12px 18px 13px 20px;
+}
+
+.scribble-border {
+  border: 2px dashed #dfc0b4;
+  border-radius: 16px 12px 18px 13px / 13px 18px 12px 16px;
+}
+
+.paper-dots-block {
+  background-color: rgba(254, 249, 237, 0.72);
+  background-image: radial-gradient(circle at 1px 1px, rgba(162, 63, 0, 0.12) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.paper-grid-block {
+  background-color: rgba(254, 249, 237, 0.74);
+  background-image: linear-gradient(rgba(223, 192, 180, 0.34) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(223, 192, 180, 0.34) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.paper-lines-block {
+  background-color: rgba(254, 249, 237, 0.78);
+  background-image: linear-gradient(to bottom, transparent 38px, rgba(223, 192, 180, 0.72) 39px);
+  background-size: 100% 40px;
+}
+
+.notebook-card {
+  position: relative;
+  border: 2px solid #dfc0b4;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 2px 0 rgba(121, 87, 63, 0.12);
+}
+
+.notebook-card-ink {
+  border-color: #8b7267;
+  background: rgba(248, 243, 231, 0.88);
+}
+
+.washi-tape {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  z-index: 1;
+  height: 28px;
+  width: 110px;
+  translate: -50% 0;
+  rotate: -1deg;
+  border: 1px solid rgba(121, 87, 63, 0.12);
+  opacity: 0.72;
+  clip-path: polygon(0 0, 100% 0, 96% 100%, 76% 82%, 58% 100%, 38% 82%, 18% 100%, 0 82%);
+}
+
+.washi-green {
+  background: #baf0b6;
+}
+
+.washi-orange {
+  background: #ffdcc6;
+}
+
+.washi-cream {
+  background: #f8f3e7;
+}
+
+.calorie-ring {
+  background: radial-gradient(circle closest-side, #fff 72%, transparent 74% 100%),
+    conic-gradient(#a23f00 0 72%, #e7e2d6 72% 100%);
+}
+
+@media (max-width: 768px) {
+  .decor-shape {
+    display: none;
+  }
 }

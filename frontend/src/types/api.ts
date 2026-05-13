@@ -139,6 +139,8 @@ export type RecipeRequest = {
   steps: RecipeStepRequest[];
 };
 
+export type RecipeMainMediaType = "IMAGE" | "VIDEO";
+
 export type RecipeIngredient = {
   id: string;
   position: number;
@@ -172,6 +174,8 @@ export type RecipeResponse = {
   estimatedCalories: number | null;
   servings: number | null;
   videoUrl: string | null;
+  favorite: boolean;
+  mainMediaType: RecipeMainMediaType;
   mainImageUrl: string | null;
   media: RecipeMedia[];
   ingredients: RecipeIngredient[];

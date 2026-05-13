@@ -149,7 +149,7 @@ export function MediaUploader({ recipeId, initialMedia, onMediaChange }: MediaUp
           <h2 className="font-display text-3xl font-bold text-tertiary">{t("title")}</h2>
           <p className="mt-1 text-sm leading-6 text-on-surface-variant">{t("description")}</p>
         </div>
-        <label className="inline-flex cursor-pointer items-center justify-center rounded-lg border-2 border-tertiary bg-primary px-4 py-2 text-sm font-bold text-on-primary shadow-label transition-transform hover:rotate-1 hover:scale-[1.02]">
+        <label className="inline-flex cursor-pointer items-center justify-center rounded-lg border-2 border-tertiary bg-primary-container px-4 py-2 text-sm font-bold text-on-primary shadow-label transition-transform hover:rotate-1 hover:scale-[1.02]">
           {busy ? t("uploading") : t("upload")}
           <input
             accept={ACCEPTED_IMAGE_TYPES.join(",")}
@@ -167,14 +167,14 @@ export function MediaUploader({ recipeId, initialMedia, onMediaChange }: MediaUp
       </div>
 
       {media.length === 0 ? (
-        <div className="mt-5 rounded-lg border-2 border-dashed border-outline bg-surface-container-low p-5 text-sm text-on-surface-variant">
+        <div className="scribble-border paper-dots-block mt-5 p-5 text-sm text-on-surface-variant">
           {t("empty")}
         </div>
       ) : (
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {media.map((item) => (
             <article
-              className="overflow-hidden rounded-lg border-2 border-outline bg-surface-container-low"
+              className="overflow-hidden border-2 border-outline bg-white shadow-paper"
               key={item.id}
             >
               <div className="aspect-[4/3] bg-surface-container">

@@ -3,6 +3,8 @@ package br.com.gelu.menu.recipes;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -43,6 +45,13 @@ public class Recipe {
   @Column(name = "video_url", length = 500)
   private String videoUrl;
 
+  @Column(nullable = false)
+  private boolean favorite;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "main_media_type", nullable = false, length = 20)
+  private RecipeMainMediaType mainMediaType = RecipeMainMediaType.IMAGE;
+
   @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
   @OrderBy("position ASC")
   private List<RecipeIngredient> ingredients = new ArrayList<>();
@@ -78,6 +87,8 @@ public class Recipe {
     this.estimatedCalories = estimatedCalories;
     this.servings = servings;
     this.videoUrl = videoUrl;
+    this.favorite = false;
+    this.mainMediaType = RecipeMainMediaType.IMAGE;
     this.createdAt = now;
     this.updatedAt = now;
   }
@@ -97,6 +108,19 @@ public class Recipe {
     this.estimatedCalories = estimatedCalories;
     this.servings = servings;
     this.videoUrl = videoUrl;
+    if (videoUrl == null && mainMediaType == RecipeMainMediaType.VIDEO) {
+      this.mainMediaType = RecipeMainMediaType.IMAGE;
+    }
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  public void setFavorite(boolean favorite) {
+    this.favorite = favorite;
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  public void setMainMediaType(RecipeMainMediaType mainMediaType) {
+    this.mainMediaType = mainMediaType;
     this.updatedAt = LocalDateTime.now();
   }
 
@@ -156,6 +180,14 @@ public class Recipe {
 
   public String getVideoUrl() {
     return videoUrl;
+  }
+
+  public boolean isFavorite() {
+    return favorite;
+  }
+
+  public RecipeMainMediaType getMainMediaType() {
+    return mainMediaType;
   }
 
   public List<RecipeIngredient> getIngredients() {

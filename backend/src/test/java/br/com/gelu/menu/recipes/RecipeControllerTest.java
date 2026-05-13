@@ -149,6 +149,42 @@ class RecipeControllerTest {
   }
 
   @Test
+  void shouldUpdateRecipeFavorite() throws Exception {
+    UUID userId = UUID.randomUUID();
+    UUID recipeId = UUID.randomUUID();
+    mockAuthenticatedUser(userId);
+    when(recipeService.updateFavorite(userId, recipeId, true))
+        .thenReturn(response(recipeId, "Tapioca", true, "IMAGE"));
+
+    mockMvc
+        .perform(
+            put("/api/v1/recipes/{id}/favorite", recipeId)
+                .header("Authorization", "Bearer access-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"favorite\":true}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.favorite").value(true));
+  }
+
+  @Test
+  void shouldUpdateRecipeMainMediaType() throws Exception {
+    UUID userId = UUID.randomUUID();
+    UUID recipeId = UUID.randomUUID();
+    mockAuthenticatedUser(userId);
+    when(recipeService.updateMainMediaType(userId, recipeId, RecipeMainMediaType.VIDEO))
+        .thenReturn(response(recipeId, "Tapioca", false, "VIDEO"));
+
+    mockMvc
+        .perform(
+            put("/api/v1/recipes/{id}/main-media-type", recipeId)
+                .header("Authorization", "Bearer access-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"mainMediaType\":\"VIDEO\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.mainMediaType").value("VIDEO"));
+  }
+
+  @Test
   void shouldDeleteRecipe() throws Exception {
     UUID userId = UUID.randomUUID();
     UUID recipeId = UUID.randomUUID();
@@ -163,6 +199,10 @@ class RecipeControllerTest {
   }
 
   private RecipeResponse response(UUID id, String name) {
+    return response(id, name, false, "IMAGE");
+  }
+
+  private RecipeResponse response(UUID id, String name, boolean favorite, String mainMediaType) {
     return new RecipeResponse(
         id,
         name,
@@ -172,6 +212,8 @@ class RecipeControllerTest {
         new BigDecimal("320"),
         2,
         null,
+        favorite,
+        mainMediaType,
         null,
         List.of(),
         List.of(new RecipeIngredientResponse(UUID.randomUUID(), 1, "Goma", "2", "colheres")),

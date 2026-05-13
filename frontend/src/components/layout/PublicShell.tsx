@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ActionLink } from "@/components/ui/ActionButton";
+import { PageDecor } from "@/components/layout/PageDecor";
 
 export function PublicShell({
   actionHref,
@@ -17,6 +18,7 @@ export function PublicShell({
 
   return (
     <div className="paper-canvas min-h-screen bg-surface text-on-surface">
+      <PageDecor variant="public" />
       <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6">
         <Link className="inline-flex items-end gap-3" href="/">
           <span className="flex h-11 w-11 rotate-[-3deg] items-center justify-center rounded-lg border-2 border-tertiary bg-primary-fixed font-display text-xl font-extrabold text-primary shadow-label">

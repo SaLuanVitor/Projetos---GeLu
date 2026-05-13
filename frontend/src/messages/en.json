@@ -120,7 +120,11 @@
     "ai": "AI Suggestions",
     "help": "Help",
     "profile": "Profile",
-    "footer": "Made to organize the kitchen routine with care."
+    "footer": "Made to organize the kitchen routine with care.",
+    "copyright": "GeLu - Menu © 2024 • Made with care for your family",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "support": "Support"
   },
   "Profile": {
     "title": "Profile and weight",
@@ -152,6 +156,22 @@
     "registerWeight": "Record weight",
     "weight": "Weight (kg)",
     "recordedAt": "Date and time",
+    "customSex": "Other biological sex",
+    "customGoal": "Other goal",
+    "options": {
+      "notInformed": "Prefer not to say",
+      "other": "Other",
+      "sex": {
+        "FEMININO": "Female",
+        "MASCULINO": "Male"
+      },
+      "goals": {
+        "Emagrecer": "Lose weight",
+        "Manter_peso": "Maintain weight",
+        "Ganhar_massa": "Gain muscle",
+        "Melhorar_saude": "Improve health"
+      }
+    },
     "logoutTitle": "Do you really want to sign out?",
     "logoutText": "Your session will end on this device.",
     "cancel": "Cancel",
@@ -231,6 +251,10 @@
     "loadError": "Unable to load recipes.",
     "saveError": "Unable to save recipe.",
     "deleteError": "Unable to delete recipe.",
+    "favoriteError": "Unable to update favorite.",
+    "mainMediaError": "Unable to update recipe highlight.",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
     "emptyTitle": "No recipes yet",
     "emptyText": "Start by saving a simple recipe to build your notebook.",
     "noCategory": "No category",
@@ -250,31 +274,66 @@
       "category": "Category",
       "maxTime": "Max time",
       "maxCalories": "Max calories",
+      "allCategories": "All categories",
+      "anyTime": "Any time",
+      "noCalorieLimit": "No limit",
+      "minutesUpTo": "Up to {count} min",
+      "kcalUpTo": "Up to {count} kcal",
       "apply": "Filter"
     },
     "form": {
       "eyebrow": "Recipe sheet",
       "newTitle": "Create recipe",
       "editTitle": "Edit recipe",
+      "basicInfo": "Basic Information",
       "name": "Name",
       "category": "Category",
       "prepTime": "Time (min)",
       "calories": "Calories",
       "servings": "Servings",
+      "customCategory": "Other category",
       "videoUrl": "Video URL",
       "description": "Description",
       "ingredients": "Ingredients",
       "ingredientName": "Ingredient",
       "quantity": "Quantity",
       "unit": "Unit",
+      "customUnit": "Other unit",
       "addIngredient": "Add ingredient",
       "steps": "Steps",
       "step": "Step {number}",
       "addStep": "Add step",
       "remove": "Remove",
+      "minutesPreset": "{count} min",
+      "servingsPreset": "{count} servings",
+      "kcalPreset": "{count} kcal",
       "save": "Save recipe",
       "saving": "Saving...",
       "cancel": "Cancel"
+    },
+    "options": {
+      "other": "Other",
+      "categories": {
+        "Cafe": "Breakfast",
+        "Almoco": "Lunch",
+        "Jantar": "Dinner",
+        "Lanche": "Snack",
+        "Sobremesa": "Dessert",
+        "Bebidas": "Drinks",
+        "Saudavel": "Healthy",
+        "Familia": "Family"
+      },
+      "units": {
+        "un": "unit",
+        "g": "g",
+        "kg": "kg",
+        "ml": "ml",
+        "l": "l",
+        "colher": "spoon",
+        "xicara": "cup",
+        "pitada": "pinch",
+        "a_gosto": "to taste"
+      }
     },
     "media": {
       "title": "Recipe images",
@@ -293,7 +352,22 @@
       "size": "{size} KB",
       "invalidType": "Use a JPG, PNG or WEBP image.",
       "tooLarge": "The image must be at most 5 MB.",
-      "saveFirst": "After saving the recipe, you can add images on the detail or edit screen."
+      "saveFirst": "After saving the recipe, you can add images on the detail or edit screen.",
+      "mainImageLoadError": "Could not load the featured image."
+    },
+    "mainMedia": {
+      "label": "Featured media",
+      "previewTitle": "Recipe highlight",
+      "image": "Main image",
+      "video": "Video",
+      "videoHint": "Add a video URL to use this option."
+    },
+    "video": {
+      "play": "Play video",
+      "close": "Close",
+      "thumbnailFallback": "Video cover",
+      "fallbackText": "This video could not be played inside Gelu. You can open the original link in another tab.",
+      "openExternal": "Open video"
     }
   },
   "Landing": {

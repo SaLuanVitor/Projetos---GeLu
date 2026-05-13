@@ -38,6 +38,7 @@ Pronto quando:
 - [ ] Toda mensagem visivel ao usuario passa pelos dicionarios `next-intl`
 - [ ] Erros tecnicos da API sao traduzidos no frontend antes de renderizar
 - [ ] Fluxos autenticados usam sessao valida ou renovada antes de chamar endpoint protegido
+- [ ] Formularios priorizam listas, presets e defaults alteraveis para reduzir digitacao
 
 ## Sprint 1 - Autenticacao
 
@@ -83,6 +84,7 @@ Tarefas:
 - [x] Criar tela de perfil
 - [x] Criar tela de evolucao
 - [x] Criar lembrete mensal simples
+- [x] Trocar sexo biologico e objetivo por selecoes com opcao personalizada
 - [x] Criar testes
 
 Pronto quando:
@@ -106,6 +108,8 @@ Tarefas:
 - [x] Criar tela de listagem
 - [x] Criar tela de cadastro
 - [x] Criar tela de detalhe e edicao
+- [x] Criar listas e presets para categoria, unidade, tempo, porcoes e calorias
+- [x] Criar favoritos persistidos e ordenar favoritos primeiro
 - [x] Criar testes
 
 Pronto quando:
@@ -129,6 +133,8 @@ Tarefas:
 - [x] Salvar URL no banco
 - [x] Definir imagem principal
 - [x] Permitir URL de video
+- [x] Permitir escolher imagem ou video como destaque da receita
+- [x] Reproduzir video em modal sem sair do sistema
 - [x] Criar componente `MediaUploader`
 - [x] Criar testes
 

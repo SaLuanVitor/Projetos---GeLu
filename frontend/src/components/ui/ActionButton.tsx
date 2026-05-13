@@ -4,11 +4,11 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 type Variant = "primary" | "secondary" | "outline";
 
 const variants: Record<Variant, string> = {
-  primary: "border-tertiary bg-primary text-on-primary shadow-label hover:bg-primary-container",
+  primary: "border-tertiary bg-primary-container text-on-primary shadow-label hover:bg-primary",
   secondary:
     "border-tertiary bg-secondary text-on-secondary shadow-label hover:bg-secondary-container hover:text-on-secondary-container",
   outline:
-    "border-outline bg-surface-container-low text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed"
+    "border-outline bg-surface-container-lowest text-on-surface hover:bg-primary-fixed hover:text-on-primary-fixed"
 };
 
 const baseClass =

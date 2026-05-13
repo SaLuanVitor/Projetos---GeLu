@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiClientError } from "@/services/auth";
-import { createRecipe, getRecipe, listRecipes, updateRecipe } from "@/services/recipes";
+import {
+  createRecipe,
+  getRecipe,
+  listRecipes,
+  setRecipeFavorite,
+  setRecipeMainMediaType,
+  updateRecipe
+} from "@/services/recipes";
 
 describe("recipes service", () => {
   afterEach(() => {
@@ -52,6 +59,38 @@ describe("recipes service", () => {
       },
       body: JSON.stringify(body)
     });
+  });
+
+  it("updates favorite and main media type", async () => {
+    mockFetch(recipe("Tapioca"));
+
+    await setRecipeFavorite("access-token", "recipe-id", true);
+    await setRecipeMainMediaType("access-token", "recipe-id", "VIDEO");
+
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:8080/api/v1/recipes/recipe-id/favorite",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: "Bearer access-token",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ favorite: true })
+      }
+    );
+    expect(fetch).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:8080/api/v1/recipes/recipe-id/main-media-type",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: "Bearer access-token",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ mainMediaType: "VIDEO" })
+      }
+    );
   });
 
   it("maps API errors to ApiClientError", async () => {
@@ -143,6 +182,8 @@ function recipe(name = "Tapioca") {
     estimatedCalories: 320,
     servings: 2,
     videoUrl: null,
+    favorite: false,
+    mainMediaType: "IMAGE",
     mainImageUrl: null,
     media: [],
     ingredients: [

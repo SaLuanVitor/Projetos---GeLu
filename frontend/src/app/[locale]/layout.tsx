@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro, Bricolage_Grotesque } from "next/font/google";
+import { Be_Vietnam_Pro, Bricolage_Grotesque, Gochi_Hand } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
@@ -22,6 +22,12 @@ const bodyFont = Be_Vietnam_Pro({
   weight: ["400", "500", "600", "700"]
 });
 
+const handFont = Gochi_Hand({
+  subsets: ["latin"],
+  variable: "--font-hand",
+  weight: "400"
+});
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
@@ -40,7 +46,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-      <body className={`${displayFont.variable} ${bodyFont.variable}`}>
+      <body className={`${displayFont.variable} ${bodyFont.variable} ${handFont.variable}`}>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>

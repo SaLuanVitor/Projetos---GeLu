@@ -2,6 +2,8 @@ package br.com.gelu.menu.recipes;
 
 import br.com.gelu.menu.auth.AuthenticatedUser;
 import br.com.gelu.menu.common.api.ApiResponse;
+import br.com.gelu.menu.recipes.dto.RecipeFavoriteRequest;
+import br.com.gelu.menu.recipes.dto.RecipeMainMediaTypeRequest;
 import br.com.gelu.menu.recipes.dto.RecipeRequest;
 import br.com.gelu.menu.recipes.dto.RecipeResponse;
 import br.com.gelu.menu.recipes.dto.RecipeSearchFilter;
@@ -63,6 +65,25 @@ public class RecipeController {
       @PathVariable UUID id,
       @Valid @RequestBody RecipeRequest request) {
     return ApiResponse.ok(recipeService.updateRecipe(user.id(), id, request), "Recipe updated");
+  }
+
+  @PutMapping("/{id}/favorite")
+  public ApiResponse<RecipeResponse> updateFavorite(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @PathVariable UUID id,
+      @Valid @RequestBody RecipeFavoriteRequest request) {
+    return ApiResponse.ok(
+        recipeService.updateFavorite(user.id(), id, request.favorite()), "Recipe favorite updated");
+  }
+
+  @PutMapping("/{id}/main-media-type")
+  public ApiResponse<RecipeResponse> updateMainMediaType(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @PathVariable UUID id,
+      @Valid @RequestBody RecipeMainMediaTypeRequest request) {
+    return ApiResponse.ok(
+        recipeService.updateMainMediaType(user.id(), id, request.mainMediaType()),
+        "Recipe main media updated");
   }
 
   @DeleteMapping("/{id}")

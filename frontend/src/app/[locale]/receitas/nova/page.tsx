@@ -2,7 +2,7 @@
 
 import { RecipeForm } from "@/components/recipes/RecipeForm";
 import { AppShell } from "@/components/layout/AppShell";
-import { PaperCard } from "@/components/ui/PaperCard";
+import { NotebookPageHeader } from "@/components/ui/Notebook";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
@@ -43,24 +43,20 @@ export default function NewRecipePage() {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-5xl px-5 py-8">
-        <PaperCard tape="orange">
-          <p className="text-sm font-bold uppercase tracking-wide text-secondary">
-            {t("form.eyebrow")}
-          </p>
-          <h1 className="mt-2 font-display text-5xl font-extrabold text-primary">
-            {t("form.newTitle")}
-          </h1>
-          <p className="mt-3 text-sm leading-6 text-on-surface-variant">{t("media.saveFirst")}</p>
-          {error ? (
-            <StatusMessage className="mt-5" variant="error">
-              {error}
-            </StatusMessage>
-          ) : null}
-          <div className="mt-7">
-            <RecipeForm loading={loading} onSubmit={handleSubmit} />
-          </div>
-        </PaperCard>
+      <main className="mx-auto max-w-7xl px-5 py-10">
+        <NotebookPageHeader
+          eyebrow={t("form.eyebrow")}
+          subtitle={t("media.saveFirst")}
+          title={t("form.newTitle")}
+        />
+        {error ? (
+          <StatusMessage className="mt-5" variant="error">
+            {error}
+          </StatusMessage>
+        ) : null}
+        <div className="mt-10">
+          <RecipeForm loading={loading} onSubmit={handleSubmit} />
+        </div>
       </main>
     </AppShell>
   );

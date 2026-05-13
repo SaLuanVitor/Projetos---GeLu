@@ -3,7 +3,8 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
-import { TextInput } from "@/components/ui/FormField";
+import { SelectField, TextInput } from "@/components/ui/FormField";
+import { NotebookPageHeader } from "@/components/ui/Notebook";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { getValidSession, handleInvalidSession, logoutUser } from "@/services/auth";
@@ -14,6 +15,10 @@ import type { ProfileResponse } from "@/types/api";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+
+const OTHER_VALUE = "__other__";
+const SEX_VALUES = ["FEMININO", "MASCULINO"];
+const GOAL_VALUES = ["Emagrecer", "Manter peso", "Ganhar massa", "Melhorar saude"];
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -34,6 +39,19 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const sexOptions = [
+    { label: t("options.notInformed"), value: "" },
+    ...SEX_VALUES.map((value) => ({ label: t(`options.sex.${value}`), value })),
+    { label: t("options.other"), value: OTHER_VALUE }
+  ];
+  const goalOptions = [
+    { label: t("options.notInformed"), value: "" },
+    ...GOAL_VALUES.map((value) => ({
+      label: t(`options.goals.${goalKey(value)}`),
+      value
+    })),
+    { label: t("options.other"), value: OTHER_VALUE }
+  ];
 
   const loadProfile = useCallback(
     async (accessToken: string) => {
@@ -101,8 +119,8 @@ export default function ProfilePage() {
         name,
         birthDate: birthDate || null,
         heightCm: toNumberOrNull(heightCm),
-        biologicalSex: biologicalSex || null,
-        goal: goal || null,
+        biologicalSex: textOrNull(biologicalSex),
+        goal: textOrNull(goal),
         basalCalories: toNumberOrNull(basalCalories),
         dailyCalorieGoal: toNumberOrNull(dailyCalorieGoal)
       });
@@ -179,7 +197,7 @@ export default function ProfilePage() {
     return (
       <AppShell>
         <main className="mx-auto max-w-xl px-5 py-10">
-          <PaperCard tape="orange">
+          <PaperCard ink tape="orange">
             <h1 className="font-display text-4xl font-bold text-primary">{t("guestTitle")}</h1>
             <p className="mt-3 text-sm leading-6 text-on-surface-variant">
               {t("guestDescription")}
@@ -195,28 +213,26 @@ export default function ProfilePage() {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-6xl px-5 py-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-secondary">
-              {t("eyebrow")}
-            </p>
-            <h1 className="mt-2 font-display text-5xl font-extrabold text-primary">{t("title")}</h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <LocaleSwitcher />
-            <ActionLink href="/perfil/evolucao" variant="outline">
-              {t("viewEvolution")}
-            </ActionLink>
-            <ActionButton
-              onClick={() => setShowLogoutConfirm(true)}
-              type="button"
-              variant="outline"
-            >
-              {t("logout")}
-            </ActionButton>
-          </div>
-        </div>
+      <main className="mx-auto max-w-6xl px-5 py-10">
+        <NotebookPageHeader
+          action={
+            <div className="flex flex-wrap items-center gap-3">
+              <LocaleSwitcher />
+              <ActionLink href="/perfil/evolucao" variant="outline">
+                {t("viewEvolution")}
+              </ActionLink>
+              <ActionButton
+                onClick={() => setShowLogoutConfirm(true)}
+                type="button"
+                variant="outline"
+              >
+                {t("logout")}
+              </ActionButton>
+            </div>
+          }
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+        />
 
         <div className="mt-6 space-y-3">
           {loading ? <StatusMessage>{t("loading")}</StatusMessage> : null}
@@ -225,7 +241,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
-          <PaperCard tape="green">
+          <PaperCard ink tape="green">
             <form onSubmit={handleProfileSubmit}>
               <h2 className="font-display text-3xl font-bold text-tertiary">{t("personalData")}</h2>
               <p className="mt-2 text-sm text-on-surface-variant">{t("personalDescription")}</p>
@@ -257,13 +273,34 @@ export default function ProfilePage() {
                   value={heightCm}
                   onValueChange={setHeightCm}
                 />
-                <TextInput
+                <SelectField
                   label={t("sex")}
-                  maxLength={20}
-                  value={biologicalSex}
+                  options={sexOptions}
+                  value={selectValue(biologicalSex, SEX_VALUES)}
                   onValueChange={setBiologicalSex}
                 />
-                <TextInput label={t("goal")} maxLength={80} value={goal} onValueChange={setGoal} />
+                <SelectField
+                  label={t("goal")}
+                  options={goalOptions}
+                  value={selectValue(goal, GOAL_VALUES)}
+                  onValueChange={setGoal}
+                />
+                {selectValue(biologicalSex, SEX_VALUES) === OTHER_VALUE ? (
+                  <TextInput
+                    label={t("customSex")}
+                    maxLength={20}
+                    value={biologicalSex === OTHER_VALUE ? "" : biologicalSex}
+                    onValueChange={(value) => setBiologicalSex(value || OTHER_VALUE)}
+                  />
+                ) : null}
+                {selectValue(goal, GOAL_VALUES) === OTHER_VALUE ? (
+                  <TextInput
+                    label={t("customGoal")}
+                    maxLength={80}
+                    value={goal === OTHER_VALUE ? "" : goal}
+                    onValueChange={(value) => setGoal(value || OTHER_VALUE)}
+                  />
+                ) : null}
                 <TextInput
                   label={t("basalCalories")}
                   min="1"
@@ -288,16 +325,14 @@ export default function ProfilePage() {
           </PaperCard>
 
           <aside className="space-y-6">
-            <PaperCard tape="orange" className="bg-recipe-lines bg-[length:100%_32px]">
-              <p className="text-xs font-bold uppercase tracking-wide text-tertiary">
-                {t("currentWeight")}
-              </p>
+            <PaperCard className="paper-lines-block" tape="orange">
+              <p className="text-sm font-bold text-tertiary">{t("currentWeight")}</p>
               <p className="mt-3 font-display text-4xl font-extrabold text-primary">
                 {profile?.currentWeight ? `${profile.currentWeight} kg` : t("notInformed")}
               </p>
             </PaperCard>
 
-            <PaperCard tape="brown">
+            <PaperCard ink tape="brown">
               <form onSubmit={handleWeightSubmit}>
                 <h2 className="font-display text-3xl font-bold text-tertiary">
                   {t("registerWeight")}
@@ -332,7 +367,7 @@ export default function ProfilePage() {
           <div
             aria-labelledby="logout-confirm-title"
             aria-modal="true"
-            className="w-full max-w-md border-2 border-outline bg-surface p-6 shadow-paper"
+            className="notebook-card w-full max-w-md bg-surface p-6 shadow-paper"
             role="dialog"
           >
             <h2 className="font-display text-3xl font-bold text-primary" id="logout-confirm-title">
@@ -364,4 +399,23 @@ function toNumberOrNull(value: string) {
 
 function toInputValue(value: number | null) {
   return value == null ? "" : String(value);
+}
+
+function textOrNull(value: string) {
+  return value && value !== OTHER_VALUE ? value : null;
+}
+
+function selectValue(value: string, options: string[]) {
+  if (!value) {
+    return "";
+  }
+
+  return options.includes(value) ? value : OTHER_VALUE;
+}
+
+function goalKey(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s/g, "_");
 }

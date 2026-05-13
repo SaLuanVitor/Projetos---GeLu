@@ -69,12 +69,12 @@ public class RecipeMediaService {
 
   @Transactional
   public RecipeMediaResponse setMain(UUID userId, UUID recipeId, UUID mediaId) {
-    ensureOwnedRecipe(userId, recipeId);
+    Recipe recipe = ensureOwnedRecipe(userId, recipeId);
     RecipeMedia selected = findOwnedMedia(userId, recipeId, mediaId);
-    recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipeId, userId).stream()
-        .filter(RecipeMedia::isMain)
-        .forEach(RecipeMedia::clearMain);
+    selected.clearMain();
+    recipeMediaRepository.clearMainImages(recipeId, userId);
     selected.markAsMain();
+    recipe.setMainMediaType(RecipeMainMediaType.IMAGE);
     return toResponse(selected);
   }
 
@@ -83,11 +83,16 @@ public class RecipeMediaService {
     ensureOwnedRecipe(userId, recipeId);
     RecipeMedia media = findOwnedMedia(userId, recipeId, mediaId);
     boolean wasMain = media.isMain();
+    if (wasMain) {
+      media.clearMain();
+      recipeMediaRepository.clearMainImages(recipeId, userId);
+    }
     recipeMediaRepository.delete(media);
     objectStorageService.remove(media.getObjectKey());
 
     if (wasMain) {
       recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipeId, userId).stream()
+          .filter(item -> !item.getId().equals(mediaId))
           .findFirst()
           .ifPresent(RecipeMedia::markAsMain);
     }
@@ -118,8 +123,8 @@ public class RecipeMediaService {
         .orElseThrow(() -> new NotFoundException("Recipe image not found"));
   }
 
-  private void ensureOwnedRecipe(UUID userId, UUID recipeId) {
-    recipeRepository
+  private Recipe ensureOwnedRecipe(UUID userId, UUID recipeId) {
+    return recipeRepository
         .findByIdAndUserId(recipeId, userId)
         .orElseThrow(() -> new NotFoundException("Recipe not found"));
   }

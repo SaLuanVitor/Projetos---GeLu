@@ -258,10 +258,25 @@ Endpoints protegidos:
 - `POST /api/v1/recipes`
 - `GET /api/v1/recipes/{id}`
 - `PUT /api/v1/recipes/{id}`
+- `PUT /api/v1/recipes/{id}/favorite`
+- `PUT /api/v1/recipes/{id}/main-media-type`
 - `DELETE /api/v1/recipes/{id}`
 
 Filtros da listagem: `query`, `ingredient`, `category`, `maxPrepTimeMinutes` e `maxCalories`.
-Favoritos, tags e associacao com dieta semanal ficam para sprints futuras.
+Receitas sao listadas com favoritas primeiro e, depois, por criacao mais recente.
+
+Campos de destaque:
+
+- `favorite`: booleano persistido por usuario dono da receita.
+- `mainMediaType`: `IMAGE` ou `VIDEO`. Quando `VIDEO`, a receita precisa ter `videoUrl`.
+- A imagem principal continua vindo de `recipe_media.main`; `mainImageUrl` aponta para o proxy
+  autenticado da imagem.
+
+Tags e associacao com dieta semanal ficam para sprints futuras.
+
+As listas de categoria, unidades, tempo, calorias e objetivos usadas no frontend sao padroes de UX
+para reduzir digitacao. O contrato da API continua aceitando os mesmos campos de texto/numeros, e
+valores antigos ou personalizados seguem validos.
 
 ## Modulo de midias
 
@@ -287,8 +302,9 @@ Regras:
 - Tipos aceitos: `image/jpeg`, `image/png` e `image/webp`.
 - Tamanho maximo inicial: 5 MB por imagem.
 - Cada receita pode ter multiplas imagens e no maximo uma imagem principal.
-- `RecipeResponse` inclui `media` e `mainImageUrl`.
-- Video continua como `videoUrl` externa da receita; upload de video fica fora da Sprint 4.
+- `RecipeResponse` inclui `media`, `mainImageUrl`, `favorite` e `mainMediaType`.
+- Video continua como `videoUrl` externa da receita; upload de video fica fora da Sprint 4. Quando
+  o video for o destaque, o frontend deve abrir a reproducao em modal e nao redirecionar o usuario.
 
 Resposta de erro:
 

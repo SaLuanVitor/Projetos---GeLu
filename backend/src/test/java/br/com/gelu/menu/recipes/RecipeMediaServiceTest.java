@@ -90,19 +90,19 @@ class RecipeMediaServiceTest {
   void shouldSetMainImage() {
     UUID userId = UUID.randomUUID();
     UUID recipeId = UUID.randomUUID();
+    Recipe recipe = recipe(userId);
+    recipe.setMainMediaType(RecipeMainMediaType.VIDEO);
     RecipeMedia current = media(userId, recipeId, true);
     RecipeMedia selected = media(userId, recipeId, false);
-    when(recipeRepository.findByIdAndUserId(recipeId, userId))
-        .thenReturn(Optional.of(recipe(userId)));
+    when(recipeRepository.findByIdAndUserId(recipeId, userId)).thenReturn(Optional.of(recipe));
     when(recipeMediaRepository.findByIdAndRecipeIdAndUserId(selected.getId(), recipeId, userId))
         .thenReturn(Optional.of(selected));
-    when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipeId, userId))
-        .thenReturn(List.of(current, selected));
 
     var response = recipeMediaService.setMain(userId, recipeId, selected.getId());
 
     assertThat(response.main()).isTrue();
-    assertThat(current.isMain()).isFalse();
+    assertThat(recipe.getMainMediaType()).isEqualTo(RecipeMainMediaType.IMAGE);
+    verify(recipeMediaRepository).clearMainImages(recipeId, userId);
   }
 
   @Test
@@ -120,6 +120,7 @@ class RecipeMediaServiceTest {
 
     recipeMediaService.deleteMedia(userId, recipeId, deleted.getId());
 
+    verify(recipeMediaRepository).clearMainImages(recipeId, userId);
     verify(recipeMediaRepository).delete(deleted);
     verify(objectStorageService).remove(deleted.getObjectKey());
     assertThat(next.isMain()).isTrue();

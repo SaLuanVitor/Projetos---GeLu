@@ -2,7 +2,10 @@
 
 import { RecipeForm } from "@/components/recipes/RecipeForm";
 import { AppShell } from "@/components/layout/AppShell";
+import { FeaturedMediaPreview } from "@/components/recipes/FeaturedMediaPreview";
+import { MainMediaSelector } from "@/components/recipes/MainMediaSelector";
 import { MediaUploader } from "@/components/recipes/MediaUploader";
+import { NotebookPageHeader } from "@/components/ui/Notebook";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useRouter } from "@/i18n/navigation";
@@ -63,12 +66,14 @@ export default function EditRecipePage({ params }: { params: { id: string } }) {
   }
 
   function handleMediaChange(media: RecipeMedia[]) {
+    const mainImageUrl = media.find((item) => item.main)?.url ?? null;
     setRecipe((current) =>
       current
         ? {
             ...current,
             media,
-            mainImageUrl: media.find((item) => item.main)?.url ?? null
+            mainImageUrl,
+            mainMediaType: mainImageUrl ? "IMAGE" : current.mainMediaType
           }
         : current
     );
@@ -76,31 +81,44 @@ export default function EditRecipePage({ params }: { params: { id: string } }) {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-5xl px-5 py-8">
-        <PaperCard tape="green">
-          <p className="text-sm font-bold uppercase tracking-wide text-secondary">
-            {t("form.eyebrow")}
-          </p>
-          <h1 className="mt-2 font-display text-5xl font-extrabold text-primary">
-            {t("form.editTitle")}
-          </h1>
-          {loading ? <StatusMessage className="mt-5">{t("loading")}</StatusMessage> : null}
-          {error ? (
-            <StatusMessage className="mt-5" variant="error">
-              {error}
-            </StatusMessage>
-          ) : null}
-          {recipe ? (
-            <div className="mt-7 space-y-8">
-              <RecipeForm initialRecipe={recipe} loading={saving} onSubmit={handleSubmit} />
+      <main className="mx-auto max-w-7xl px-5 py-10">
+        <NotebookPageHeader eyebrow={t("form.eyebrow")} title={t("form.editTitle")} />
+        {loading ? <StatusMessage className="mt-5">{t("loading")}</StatusMessage> : null}
+        {error ? (
+          <StatusMessage className="mt-5" variant="error">
+            {error}
+          </StatusMessage>
+        ) : null}
+        {recipe ? (
+          <div className="mt-10 space-y-8">
+            <RecipeForm initialRecipe={recipe} loading={saving} onSubmit={handleSubmit} />
+            <PaperCard ink tape="green">
+              <div className="mb-6 grid gap-5 lg:grid-cols-[0.9fr_1fr]">
+                <div>
+                  <h2 className="font-display text-3xl font-bold text-tertiary">
+                    {t("mainMedia.previewTitle")}
+                  </h2>
+                  <div className="mt-3 aspect-[4/3] overflow-hidden">
+                    <FeaturedMediaPreview recipe={recipe} />
+                  </div>
+                </div>
+                <div className="self-center">
+                  <MainMediaSelector
+                    hasVideo={Boolean(recipe.videoUrl)}
+                    onChange={setRecipe}
+                    recipeId={recipe.id}
+                    value={recipe.mainMediaType}
+                  />
+                </div>
+              </div>
               <MediaUploader
                 initialMedia={recipe.media}
                 onMediaChange={handleMediaChange}
                 recipeId={recipe.id}
               />
-            </div>
-          ) : null}
-        </PaperCard>
+            </PaperCard>
+          </div>
+        ) : null}
       </main>
     </AppShell>
   );

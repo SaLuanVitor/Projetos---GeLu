@@ -2,6 +2,7 @@
 
 import { AppShell } from "@/components/layout/AppShell";
 import { ActionLink } from "@/components/ui/ActionButton";
+import { NotebookPageHeader } from "@/components/ui/Notebook";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
@@ -91,18 +92,16 @@ export default function WeightEvolutionPage() {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-6xl px-5 py-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-secondary">
-              {t("eyebrow")}
-            </p>
-            <h1 className="mt-2 font-display text-5xl font-extrabold text-primary">{t("title")}</h1>
-          </div>
-          <ActionLink href="/perfil" variant="secondary">
-            {t("registerWeight")}
-          </ActionLink>
-        </div>
+      <main className="mx-auto max-w-6xl px-5 py-10">
+        <NotebookPageHeader
+          action={
+            <ActionLink href="/perfil" variant="secondary">
+              {t("registerWeight")}
+            </ActionLink>
+          }
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+        />
 
         <div className="mt-6 space-y-3">
           {reminder ? <StatusMessage variant="warning">{reminder}</StatusMessage> : null}
@@ -111,26 +110,20 @@ export default function WeightEvolutionPage() {
         </div>
 
         <section className="mt-6 grid gap-4 md:grid-cols-3">
-          <PaperCard tape="orange">
-            <p className="text-xs font-bold uppercase tracking-wide text-tertiary">
-              {t("current")}
-            </p>
+          <PaperCard className="rotate-[-1deg]" tape="orange">
+            <p className="text-sm font-bold text-tertiary">{t("current")}</p>
             <p className="mt-3 font-display text-4xl font-extrabold text-primary">
               {current ? `${current.weightKg} kg` : "--"}
             </p>
           </PaperCard>
           <PaperCard tape="green">
-            <p className="text-xs font-bold uppercase tracking-wide text-tertiary">
-              {t("previous")}
-            </p>
+            <p className="text-sm font-bold text-tertiary">{t("previous")}</p>
             <p className="mt-3 font-display text-4xl font-extrabold text-secondary">
               {previous ? `${previous.weightKg} kg` : "--"}
             </p>
           </PaperCard>
-          <PaperCard tape="brown">
-            <p className="text-xs font-bold uppercase tracking-wide text-tertiary">
-              {t("variation")}
-            </p>
+          <PaperCard className="rotate-[1deg]" tape="brown">
+            <p className="text-sm font-bold text-tertiary">{t("variation")}</p>
             <p className="mt-3 font-display text-4xl font-extrabold text-tertiary">
               {delta == null ? "--" : `${delta > 0 ? "+" : ""}${delta.toFixed(2)} kg`}
             </p>
@@ -138,7 +131,7 @@ export default function WeightEvolutionPage() {
         </section>
 
         <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
-          <PaperCard tape="green">
+          <PaperCard ink tape="green">
             <h2 className="font-display text-3xl font-bold text-tertiary">{t("chart")}</h2>
             <div className="mt-6 flex h-64 items-end gap-3 border-b-2 border-l-2 border-outline p-4">
               {history
@@ -167,7 +160,7 @@ export default function WeightEvolutionPage() {
             </div>
           </PaperCard>
 
-          <PaperCard tape="orange">
+          <PaperCard className="paper-lines-block" ink tape="orange">
             <h2 className="font-display text-3xl font-bold text-tertiary">{t("records")}</h2>
             <div className="mt-5 space-y-3">
               {history.length > 0 ? (

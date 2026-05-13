@@ -2,6 +2,7 @@ import { ApiClientError, getValidSession } from "@/services/auth";
 import type {
   ApiErrorResponse,
   ApiResponse,
+  RecipeMainMediaType,
   RecipeRequest,
   RecipeResponse,
   RecipeSearchFilters
@@ -41,6 +42,28 @@ export async function updateRecipe(
   body: RecipeRequest
 ): Promise<RecipeResponse> {
   return request<RecipeResponse>(`/recipes/${id}`, accessToken, { method: "PUT", body });
+}
+
+export async function setRecipeFavorite(
+  accessToken: string,
+  id: string,
+  favorite: boolean
+): Promise<RecipeResponse> {
+  return request<RecipeResponse>(`/recipes/${id}/favorite`, accessToken, {
+    method: "PUT",
+    body: { favorite }
+  });
+}
+
+export async function setRecipeMainMediaType(
+  accessToken: string,
+  id: string,
+  mainMediaType: RecipeMainMediaType
+): Promise<RecipeResponse> {
+  return request<RecipeResponse>(`/recipes/${id}/main-media-type`, accessToken, {
+    method: "PUT",
+    body: { mainMediaType }
+  });
 }
 
 export async function deleteRecipe(accessToken: string, id: string): Promise<void> {
