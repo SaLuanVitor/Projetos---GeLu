@@ -8,6 +8,7 @@ import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import { getLocalizedApiError } from "@/services/localized-error";
+import { fetchRecipeMediaObjectUrl } from "@/services/recipe-media";
 import { listRecipes } from "@/services/recipes";
 import type { RecipeResponse, RecipeSearchFilters } from "@/types/api";
 import { useTranslations } from "next-intl";
@@ -18,6 +19,7 @@ export default function RecipesPage() {
   const t = useTranslations("Recipes");
   const errors = useTranslations("CommonErrors");
   const [recipes, setRecipes] = useState<RecipeResponse[]>([]);
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [filters, setFilters] = useState<RecipeSearchFilters>({});
   const [query, setQuery] = useState("");
   const [ingredient, setIngredient] = useState("");
@@ -55,6 +57,46 @@ export default function RecipesPage() {
   useEffect(() => {
     void loadRecipes();
   }, [loadRecipes]);
+
+  useEffect(() => {
+    let active = true;
+    const urls: string[] = [];
+
+    getValidSession().then(async (session) => {
+      if (!session) {
+        return;
+      }
+
+      const nextUrls: Record<string, string> = {};
+      await Promise.all(
+        recipes
+          .filter((recipe) => recipe.mainImageUrl)
+          .map(async (recipe) => {
+            try {
+              const url = await fetchRecipeMediaObjectUrl(
+                session.accessToken,
+                recipe.mainImageUrl!
+              );
+              urls.push(url);
+              nextUrls[recipe.id] = url;
+            } catch {
+              nextUrls[recipe.id] = "";
+            }
+          })
+      );
+
+      if (active) {
+        setImageUrls(nextUrls);
+      } else {
+        urls.forEach(URL.revokeObjectURL);
+      }
+    });
+
+    return () => {
+      active = false;
+      urls.forEach(URL.revokeObjectURL);
+    };
+  }, [recipes]);
 
   function handleFilterSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -134,6 +176,14 @@ export default function RecipesPage() {
         <section className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
             <PaperCard key={recipe.id} tape="brown">
+              {imageUrls[recipe.id] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt={recipe.name}
+                  className="-mx-2 -mt-2 mb-4 aspect-[4/3] w-[calc(100%+1rem)] rounded-lg border-2 border-outline object-cover"
+                  src={imageUrls[recipe.id]}
+                />
+              ) : null}
               <p className="text-xs font-bold uppercase tracking-wide text-secondary">
                 {recipe.category ?? t("noCategory")}
               </p>

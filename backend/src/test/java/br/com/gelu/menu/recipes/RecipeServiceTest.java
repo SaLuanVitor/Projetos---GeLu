@@ -3,6 +3,7 @@ package br.com.gelu.menu.recipes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,8 +23,14 @@ class RecipeServiceTest {
 
   private final RecipeRepository recipeRepository =
       org.mockito.Mockito.mock(RecipeRepository.class);
+  private final RecipeMediaRepository recipeMediaRepository =
+      org.mockito.Mockito.mock(RecipeMediaRepository.class);
+  private final RecipeMediaService recipeMediaService =
+      org.mockito.Mockito.mock(RecipeMediaService.class);
   private final UserRepository userRepository = org.mockito.Mockito.mock(UserRepository.class);
-  private final RecipeService recipeService = new RecipeService(recipeRepository, userRepository);
+  private final RecipeService recipeService =
+      new RecipeService(
+          recipeRepository, recipeMediaRepository, recipeMediaService, userRepository);
 
   @Test
   void shouldCreateRecipe() {
@@ -31,6 +38,9 @@ class RecipeServiceTest {
     when(userRepository.existsById(userId)).thenReturn(true);
     when(recipeRepository.save(any(Recipe.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
+    when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(any(), eq(userId)))
+        .thenReturn(List.of());
+    when(recipeMediaService.responses(List.of())).thenReturn(List.of());
 
     var response = recipeService.createRecipe(userId, request(" Tapioca ", "Cafe"));
 
@@ -48,6 +58,9 @@ class RecipeServiceTest {
     when(userRepository.existsById(userId)).thenReturn(true);
     when(recipeRepository.search(userId, "tapioca", "goma", "Cafe", 30, new BigDecimal("400")))
         .thenReturn(List.of(recipe));
+    when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipe.getId(), userId))
+        .thenReturn(List.of());
+    when(recipeMediaService.responses(List.of())).thenReturn(List.of());
 
     var response =
         recipeService.listRecipes(
@@ -65,6 +78,9 @@ class RecipeServiceTest {
     when(userRepository.existsById(userId)).thenReturn(true);
     when(recipeRepository.findByIdAndUserId(recipe.getId(), userId))
         .thenReturn(Optional.of(recipe));
+    when(recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(recipe.getId(), userId))
+        .thenReturn(List.of());
+    when(recipeMediaService.responses(List.of())).thenReturn(List.of());
 
     var response =
         recipeService.updateRecipe(userId, recipe.getId(), request("Crepioca", "Jantar"));
@@ -83,6 +99,7 @@ class RecipeServiceTest {
 
     recipeService.deleteRecipe(userId, recipe.getId());
 
+    verify(recipeMediaService).deleteStorageForRecipe(userId, recipe.getId());
     verify(recipeRepository).delete(recipe);
   }
 

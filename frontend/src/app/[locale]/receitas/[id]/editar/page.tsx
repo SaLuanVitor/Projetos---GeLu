@@ -2,13 +2,14 @@
 
 import { RecipeForm } from "@/components/recipes/RecipeForm";
 import { AppShell } from "@/components/layout/AppShell";
+import { MediaUploader } from "@/components/recipes/MediaUploader";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import { getLocalizedApiError } from "@/services/localized-error";
 import { getRecipe, updateRecipe } from "@/services/recipes";
-import type { RecipeRequest, RecipeResponse } from "@/types/api";
+import type { RecipeMedia, RecipeRequest, RecipeResponse } from "@/types/api";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -61,6 +62,18 @@ export default function EditRecipePage({ params }: { params: { id: string } }) {
     }
   }
 
+  function handleMediaChange(media: RecipeMedia[]) {
+    setRecipe((current) =>
+      current
+        ? {
+            ...current,
+            media,
+            mainImageUrl: media.find((item) => item.main)?.url ?? null
+          }
+        : current
+    );
+  }
+
   return (
     <AppShell>
       <main className="mx-auto max-w-5xl px-5 py-8">
@@ -78,8 +91,13 @@ export default function EditRecipePage({ params }: { params: { id: string } }) {
             </StatusMessage>
           ) : null}
           {recipe ? (
-            <div className="mt-7">
+            <div className="mt-7 space-y-8">
               <RecipeForm initialRecipe={recipe} loading={saving} onSubmit={handleSubmit} />
+              <MediaUploader
+                initialMedia={recipe.media}
+                onMediaChange={handleMediaChange}
+                recipeId={recipe.id}
+              />
             </div>
           ) : null}
         </PaperCard>

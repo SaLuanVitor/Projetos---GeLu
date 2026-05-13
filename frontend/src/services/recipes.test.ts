@@ -143,6 +143,8 @@ function recipe(name = "Tapioca") {
     estimatedCalories: 320,
     servings: 2,
     videoUrl: null,
+    mainImageUrl: null,
+    media: [],
     ingredients: [
       { id: "ingredient-id", position: 1, name: "Goma", quantity: "2", unit: "colheres" }
     ],

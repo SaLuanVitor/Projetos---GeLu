@@ -153,6 +153,16 @@ export type RecipeStep = {
   instruction: string;
 };
 
+export type RecipeMedia = {
+  id: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  main: boolean;
+  url: string;
+  createdAt: string;
+};
+
 export type RecipeResponse = {
   id: string;
   name: string;
@@ -162,6 +172,8 @@ export type RecipeResponse = {
   estimatedCalories: number | null;
   servings: number | null;
   videoUrl: string | null;
+  mainImageUrl: string | null;
+  media: RecipeMedia[];
   ingredients: RecipeIngredient[];
   steps: RecipeStep[];
   createdAt: string;

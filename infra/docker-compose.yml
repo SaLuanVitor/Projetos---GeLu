@@ -29,6 +29,12 @@ services:
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - ./data/minio:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -43,10 +49,18 @@ services:
       JWT_REFRESH_TOKEN_TTL: ${JWT_REFRESH_TOKEN_TTL:-30d}
       EXPOSE_PASSWORD_RESET_TOKEN: ${EXPOSE_PASSWORD_RESET_TOKEN:-true}
       PASSWORD_RESET_TOKEN_TTL: ${PASSWORD_RESET_TOKEN_TTL:-30m}
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT:-http://minio:9000}
+      STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:-gelu_menu}
+      STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-gelu_menu123}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-gelu-menu-media}
+      STORAGE_PROXY_BASE_PATH: ${STORAGE_PROXY_BASE_PATH:-/api/v1/recipes}
+      STORAGE_MAX_IMAGE_SIZE_BYTES: ${STORAGE_MAX_IMAGE_SIZE_BYTES:-5242880}
     ports:
       - "8080:8080"
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
 
   frontend:

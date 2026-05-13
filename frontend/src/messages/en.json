@@ -275,6 +275,25 @@
       "save": "Save recipe",
       "saving": "Saving...",
       "cancel": "Cancel"
+    },
+    "media": {
+      "title": "Recipe images",
+      "description": "Upload JPG, PNG or WEBP photos up to 5 MB. The main image appears on recipe cards.",
+      "upload": "Upload image",
+      "uploading": "Uploading...",
+      "uploaded": "Image uploaded successfully.",
+      "mainUpdated": "Main image updated.",
+      "removed": "Image removed.",
+      "error": "Could not update images.",
+      "empty": "No images added to this recipe yet.",
+      "loadingImage": "Loading image...",
+      "main": "Main",
+      "setMain": "Set as main",
+      "remove": "Remove",
+      "size": "{size} KB",
+      "invalidType": "Use a JPG, PNG or WEBP image.",
+      "tooLarge": "The image must be at most 5 MB.",
+      "saveFirst": "After saving the recipe, you can add images on the detail or edit screen."
     }
   },
   "Landing": {

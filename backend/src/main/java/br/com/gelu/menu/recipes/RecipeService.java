@@ -18,10 +18,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecipeService {
 
   private final RecipeRepository recipeRepository;
+  private final RecipeMediaRepository recipeMediaRepository;
+  private final RecipeMediaService recipeMediaService;
   private final UserRepository userRepository;
 
-  public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository) {
+  public RecipeService(
+      RecipeRepository recipeRepository,
+      RecipeMediaRepository recipeMediaRepository,
+      RecipeMediaService recipeMediaService,
+      UserRepository userRepository) {
     this.recipeRepository = recipeRepository;
+    this.recipeMediaRepository = recipeMediaRepository;
+    this.recipeMediaService = recipeMediaService;
     this.userRepository = userRepository;
   }
 
@@ -83,6 +91,7 @@ public class RecipeService {
   @Transactional
   public void deleteRecipe(UUID userId, UUID recipeId) {
     Recipe recipe = findOwnedRecipe(userId, recipeId);
+    recipeMediaService.deleteStorageForRecipe(userId, recipeId);
     recipeRepository.delete(recipe);
   }
 
@@ -120,6 +129,16 @@ public class RecipeService {
   }
 
   private RecipeResponse toResponse(Recipe recipe) {
+    var media =
+        recipeMediaService.responses(
+            recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(
+                recipe.getId(), recipe.getUserId()));
+    String mainImageUrl =
+        media.stream()
+            .filter(br.com.gelu.menu.recipes.dto.RecipeMediaResponse::main)
+            .findFirst()
+            .map(br.com.gelu.menu.recipes.dto.RecipeMediaResponse::url)
+            .orElse(null);
     return new RecipeResponse(
         recipe.getId(),
         recipe.getName(),
@@ -129,6 +148,8 @@ public class RecipeService {
         recipe.getEstimatedCalories(),
         recipe.getServings(),
         recipe.getVideoUrl(),
+        mainImageUrl,
+        media,
         recipe.getIngredients().stream()
             .map(
                 ingredient ->

@@ -12,6 +12,10 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: ${MEDIA_MAX_FILE_SIZE:5MB}
+      max-request-size: ${MEDIA_MAX_REQUEST_SIZE:6MB}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -30,3 +34,10 @@ gelu:
       secret: ${JWT_SECRET:gelu-menu-local-development-secret-change-me}
       access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:15m}
       refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL:30d}
+  storage:
+    endpoint: ${STORAGE_ENDPOINT:http://localhost:9000}
+    access-key: ${STORAGE_ACCESS_KEY:gelu_menu}
+    secret-key: ${STORAGE_SECRET_KEY:gelu_menu123}
+    bucket: ${STORAGE_BUCKET:gelu-menu-media}
+    proxy-base-path: ${STORAGE_PROXY_BASE_PATH:/api/v1/recipes}
+    max-image-size-bytes: ${STORAGE_MAX_IMAGE_SIZE_BYTES:5242880}

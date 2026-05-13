@@ -118,27 +118,27 @@ Pronto quando:
 
 ## Sprint 4 - Midias
 
-Objetivo: permitir imagens e videos de receitas.
+Objetivo: permitir galeria simples de imagens e URL de video em receitas.
 
 Tarefas:
 
-- [ ] Criar tabela `recipe_media`
-- [ ] Configurar MinIO/S3 no modulo de media
-- [ ] Criar upload de imagem
-- [ ] Validar tipo e tamanho
-- [ ] Salvar URL no banco
-- [ ] Definir imagem principal
-- [ ] Permitir URL de video
-- [ ] Criar componente `MediaUploader`
-- [ ] Criar testes
+- [x] Criar tabela `recipe_media`
+- [x] Configurar MinIO/S3 no modulo de media
+- [x] Criar upload de imagem
+- [x] Validar tipo e tamanho
+- [x] Salvar URL no banco
+- [x] Definir imagem principal
+- [x] Permitir URL de video
+- [x] Criar componente `MediaUploader`
+- [x] Criar testes
 
 Pronto quando:
 
-- [ ] Imagem sobe para storage
-- [ ] URL e salva
-- [ ] Receita exibe imagem
-- [ ] Video por URL funciona
-- [ ] Testes passam
+- [x] Imagem sobe para storage
+- [x] URL e salva
+- [x] Receita exibe imagem
+- [x] Video por URL funciona
+- [x] Testes passam
 
 ## Sprint 5 - Ambiente Familiar
 

@@ -275,6 +275,25 @@
       "save": "Salvar receita",
       "saving": "Salvando...",
       "cancel": "Cancelar"
+    },
+    "media": {
+      "title": "Imagens da receita",
+      "description": "Envie fotos em JPG, PNG ou WEBP com ate 5 MB. A imagem principal aparece nos cards.",
+      "upload": "Enviar imagem",
+      "uploading": "Enviando...",
+      "uploaded": "Imagem enviada com sucesso.",
+      "mainUpdated": "Imagem principal atualizada.",
+      "removed": "Imagem removida.",
+      "error": "Falha ao atualizar imagens.",
+      "empty": "Nenhuma imagem cadastrada para esta receita.",
+      "loadingImage": "Carregando imagem...",
+      "main": "Principal",
+      "setMain": "Definir principal",
+      "remove": "Remover",
+      "size": "{size} KB",
+      "invalidType": "Use uma imagem JPG, PNG ou WEBP.",
+      "tooLarge": "A imagem deve ter no maximo 5 MB.",
+      "saveFirst": "Depois de salvar a receita, voce podera adicionar imagens na tela de detalhe ou edicao."
     }
   },
   "Landing": {

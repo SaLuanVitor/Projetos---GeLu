@@ -1,6 +1,7 @@
 "use client";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { MediaUploader } from "@/components/recipes/MediaUploader";
 import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
@@ -8,7 +9,7 @@ import { useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import { getLocalizedApiError } from "@/services/localized-error";
 import { deleteRecipe, getRecipe } from "@/services/recipes";
-import type { RecipeResponse } from "@/types/api";
+import type { RecipeMedia, RecipeResponse } from "@/types/api";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -70,6 +71,18 @@ export default function RecipeDetailPage({ params }: { params: { id: string } })
     } finally {
       setDeleting(false);
     }
+  }
+
+  function handleMediaChange(media: RecipeMedia[]) {
+    setRecipe((current) =>
+      current
+        ? {
+            ...current,
+            media,
+            mainImageUrl: media.find((item) => item.main)?.url ?? null
+          }
+        : current
+    );
   }
 
   return (
@@ -140,6 +153,14 @@ export default function RecipeDetailPage({ params }: { params: { id: string } })
                   </div>
                 ) : null}
               </dl>
+            </PaperCard>
+
+            <PaperCard className="lg:col-span-2" tape="green">
+              <MediaUploader
+                initialMedia={recipe.media}
+                onMediaChange={handleMediaChange}
+                recipeId={recipe.id}
+              />
             </PaperCard>
 
             <PaperCard className="lg:col-span-1" tape="brown">

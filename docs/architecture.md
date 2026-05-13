@@ -261,7 +261,34 @@ Endpoints protegidos:
 - `DELETE /api/v1/recipes/{id}`
 
 Filtros da listagem: `query`, `ingredient`, `category`, `maxPrepTimeMinutes` e `maxCalories`.
-Upload de imagem, favoritos, tags e associacao com dieta semanal ficam para sprints futuras.
+Favoritos, tags e associacao com dieta semanal ficam para sprints futuras.
+
+## Modulo de midias
+
+O modulo de midias usa storage compativel com S3. Em desenvolvimento, o Docker Compose sobe MinIO.
+As imagens de receitas ficam em bucket privado e sao servidas ao frontend por proxy autenticado do
+backend.
+
+Tabela:
+
+- `recipe_media`
+
+Endpoints protegidos:
+
+- `POST /api/v1/recipes/{recipeId}/media`
+- `GET /api/v1/recipes/{recipeId}/media`
+- `PUT /api/v1/recipes/{recipeId}/media/{mediaId}/main`
+- `DELETE /api/v1/recipes/{recipeId}/media/{mediaId}`
+- `GET /api/v1/recipes/{recipeId}/media/{mediaId}/content`
+
+Regras:
+
+- Somente o usuario dono da receita acessa ou altera as imagens.
+- Tipos aceitos: `image/jpeg`, `image/png` e `image/webp`.
+- Tamanho maximo inicial: 5 MB por imagem.
+- Cada receita pode ter multiplas imagens e no maximo uma imagem principal.
+- `RecipeResponse` inclui `media` e `mainImageUrl`.
+- Video continua como `videoUrl` externa da receita; upload de video fica fora da Sprint 4.
 
 Resposta de erro:
 

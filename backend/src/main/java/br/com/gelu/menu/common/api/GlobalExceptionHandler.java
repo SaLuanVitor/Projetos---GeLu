@@ -1,5 +1,6 @@
 package br.com.gelu.menu.common.api;
 
+import br.com.gelu.menu.common.exception.BadRequestException;
 import br.com.gelu.menu.common.exception.ConflictException;
 import br.com.gelu.menu.common.exception.NotFoundException;
 import br.com.gelu.menu.common.exception.UnauthorizedException;
@@ -29,6 +30,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiErrorResponse> handleConflict(ConflictException exception) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(ApiErrorResponse.of("CONFLICT", exception.getMessage(), List.of()));
+  }
+
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ApiErrorResponse> handleBadRequest(BadRequestException exception) {
+    return ResponseEntity.badRequest()
+        .body(ApiErrorResponse.of("VALIDATION_ERROR", exception.getMessage(), List.of()));
   }
 
   @ExceptionHandler(UnauthorizedException.class)

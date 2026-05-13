@@ -14,6 +14,8 @@ public record RecipeResponse(
     BigDecimal estimatedCalories,
     Integer servings,
     String videoUrl,
+    String mainImageUrl,
+    List<RecipeMediaResponse> media,
     List<RecipeIngredientResponse> ingredients,
     List<RecipeStepResponse> steps,
     LocalDateTime createdAt,

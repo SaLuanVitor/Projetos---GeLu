@@ -51,6 +51,7 @@ export default function NewRecipePage() {
           <h1 className="mt-2 font-display text-5xl font-extrabold text-primary">
             {t("form.newTitle")}
           </h1>
+          <p className="mt-3 text-sm leading-6 text-on-surface-variant">{t("media.saveFirst")}</p>
           {error ? (
             <StatusMessage className="mt-5" variant="error">
               {error}

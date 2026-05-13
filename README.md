@@ -131,6 +131,7 @@ Remove-Item -Recurse -Force -ErrorAction SilentlyContinue infra/data/postgres, i
 - Frontend em ingles: `http://localhost:3000/en`
 - Backend health: `GET http://localhost:8080/api/v1/health`
 - Recipes: `GET http://localhost:8080/api/v1/recipes`
+- Recipe media: `POST http://localhost:8080/api/v1/recipes/{recipeId}/media`
 - AI agents catalog: `GET http://localhost:8080/api/v1/ai/agents`
 - OpenAPI JSON: `GET http://localhost:8080/v3/api-docs`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
@@ -180,6 +181,14 @@ As credenciais abaixo sao apenas defaults de desenvolvimento local e podem ser s
 - PostgreSQL password: `gelu_menu`
 - MinIO user: `gelu_menu`
 - MinIO password: `gelu_menu123`
+- MinIO media bucket: `gelu-menu-media`
+- Max recipe image size: `5 MB`
+
+## Midias de receitas
+
+Receitas podem ter uma galeria simples de imagens. O backend salva os objetos no MinIO/S3 e serve o
+conteudo por proxy autenticado da API, mantendo o bucket privado. Imagens aceitas: JPG, PNG e WEBP
+com ate 5 MB. Videos continuam como URL externa no campo da receita.
 
 ## Quality gates
 

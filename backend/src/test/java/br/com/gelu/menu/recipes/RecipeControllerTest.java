@@ -172,6 +172,8 @@ class RecipeControllerTest {
         new BigDecimal("320"),
         2,
         null,
+        null,
+        List.of(),
         List.of(new RecipeIngredientResponse(UUID.randomUUID(), 1, "Goma", "2", "colheres")),
         List.of(new RecipeStepResponse(UUID.randomUUID(), 1, "Misture tudo.")),
         LocalDateTime.of(2026, 5, 10, 8, 30),
