@@ -77,9 +77,9 @@ const config: Config = {
         "paper-line": "#ecd6c8"
       },
       fontFamily: {
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
-        body: ["var(--font-body)", "system-ui", "sans-serif"],
-        hand: ["var(--font-hand)", "cursive"]
+        display: ["'Bricolage Grotesque'", "system-ui", "-apple-system", "sans-serif"],
+        body: ["'Be Vietnam Pro'", "system-ui", "-apple-system", "sans-serif"],
+        hand: ["cursive"]
       },
       boxShadow: {
         paper: "0 4px 12px rgba(111, 78, 55, 0.08)",

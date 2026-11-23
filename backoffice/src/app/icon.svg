@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="bo-stamp-shadow" x="-15%" y="-15%" width="135%" height="135%">
+      <feDropShadow dx="1.5" dy="2" stdDeviation="1.2" flood-color="#451a03" flood-opacity="0.35"/>
+    </filter>
+    <linearGradient id="bo-stamp-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="50%" stop-color="#ffedd5"/>
+      <stop offset="100%" stop-color="#fed7aa"/>
+    </linearGradient>
+    <linearGradient id="shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+    <linearGradient id="badge-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Carimbo Base GeLu com inclinação de identidade -->
+  <g transform="rotate(-2 32 32)">
+    <!-- Base Selo Postal Kraft com cantos arredondados -->
+    <rect x="5" y="5" width="54" height="54" rx="14" fill="url(#bo-stamp-bg)" stroke="#78350f" stroke-width="2.5" filter="url(#bo-stamp-shadow)"/>
+    
+    <!-- Linha pontilhada interna de governança/costura -->
+    <rect x="8.5" y="8.5" width="47" height="47" rx="10.5" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.9"/>
+
+    <!-- Marca d'água sutil de Escudo de Segurança no fundo das letras -->
+    <path d="M 28 17 C 32 17, 36 15, 36 15 C 36 15, 40 17, 44 17 C 44 26, 40 33, 36 36 C 32 33, 28 26, 28 17 Z" 
+          transform="translate(-8, 3) scale(1.2)" fill="#ea580c" opacity="0.08"/>
+
+    <!-- Iniciais "GL" da marca GeLu -->
+    <text x="28" y="39" font-family="'Bricolage Grotesque', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="900" fill="#7c2d12" text-anchor="middle" letter-spacing="-1">GL</text>
+
+    <!-- Tag / Badge "ADM" elegante abaixo das letras -->
+    <rect x="18" y="43" width="20" height="7.5" rx="3" fill="#7c2d12"/>
+    <text x="28" y="49" font-family="system-ui, -apple-system, sans-serif" font-size="5.5" font-weight="900" fill="#fed7aa" text-anchor="middle" letter-spacing="0.8">ADM</text>
+
+    <!-- Escudo de Administrador / Governança no canto superior direito (substitui o brotinho simples de receita) -->
+    <g transform="translate(37, 7)">
+      <!-- Sombra do Escudo -->
+      <path d="M 10 1.5 C 14 1.5, 18 0, 18 0 C 18 0, 22 1.5, 26 1.5 C 26 10, 22 17, 18 20 C 14 17, 10 10, 10 1.5 Z" 
+            transform="translate(-9, 0) scale(0.85)" fill="#431407" opacity="0.25"/>
+      <!-- Corpo do Escudo -->
+      <path d="M 10 1 C 14 1, 18 0, 18 0 C 18 0, 22 1, 26 1 C 26 9.5, 22 16.5, 18 19.5 C 14 16.5, 10 9.5, 10 1 Z" 
+            transform="translate(-9, 0) scale(0.8)" fill="url(#shield-grad)" stroke="#fff" stroke-width="1.2"/>
+      <!-- Estrela de autoridade / superadmin no centro do escudo -->
+      <polygon points="6.5,4 7.5,6.5 10,6.5 8,8 8.8,10.5 6.5,9 4.2,10.5 5,8 3,6.5 5.5,6.5" fill="#fef08a"/>
+    </g>
+  </g>
+</svg>
