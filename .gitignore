@@ -16,6 +16,7 @@ backoffice/out/
 backoffice/tsconfig.tsbuildinfo
 infra/data/
 *.sql
+!backend/src/main/resources/db/migration/*.sql
 *.backup
 
 # Environment files
