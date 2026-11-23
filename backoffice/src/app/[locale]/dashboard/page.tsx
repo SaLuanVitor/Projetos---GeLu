@@ -542,53 +542,19 @@ export default function BackofficeDashboardPage() {
     URL.revokeObjectURL(url);
   };
 
-  if (loading) {
-    return (
-      <AdminShell>
-        <div className="flex flex-col items-center justify-center py-24">
-          <div className="text-3xl animate-bounce mb-3">🛡️</div>
-          <p className="text-stone-500 font-bold text-sm">Carregando painel administrativo...</p>
-        </div>
-      </AdminShell>
-    );
-  }
-
-  if (isSuperAdmin === false) {
-    return (
-      <AdminShell>
-        <div className="mx-auto max-w-lg py-16 text-center">
-          <PaperCard tape="orange">
-            <span className="text-5xl block mb-4">⛔</span>
-            <h1 className="font-display text-2xl font-black text-stone-900 dark:text-stone-100">
-              Acesso Negado
-            </h1>
-            <p className="mt-3 text-sm text-stone-600 dark:text-stone-300">
-              Esta área é restrita aos administradores do sistema GeLu. A sua conta atual não possui privilégios de <strong>Super Admin</strong>.
-            </p>
-            <div className="mt-6 flex justify-center">
-              <Link
-                href="/login"
-                className="px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs shadow-md hover:bg-primary-hover"
-              >
-                Fazer login como Super Admin
-              </Link>
-            </div>
-          </PaperCard>
-        </div>
-      </AdminShell>
-    );
-  }
-
   
-  const getMemberInitials = (name: string, email: string) => {
+  const getMemberInitials = (name?: string | null, email?: string | null) => {
     if (name && name.trim()) {
       const parts = name.trim().split(" ");
-      if (parts.length >= 2) {
+      if (parts.length >= 2 && parts[0] && parts[parts.length - 1]) {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
       }
       return parts[0].substring(0, 2).toUpperCase();
     }
-    return email.substring(0, 2).toUpperCase();
+    if (email && email.trim()) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    return "OP";
   };
 
   const getTabMeta = (tab: TabType) => {
@@ -641,21 +607,28 @@ export default function BackofficeDashboardPage() {
           title: "Trilha Imutável de Auditoria",
           subtitle: "Registro criptográfico de ações administrativas, acessos a dados sensíveis e eventos de segurança.",
         };
+      default:
+        return {
+          label: "Painel Administrativo",
+          title: "Painel Administrativo do Sistema",
+          subtitle: "Gestão de contas, famílias, helpdesk global, monitoramento de IA e conformidade LGPD.",
+        };
     }
   };
 
-
   const filteredTeam = useMemo(() => {
+    if (!Array.isArray(team)) return [];
     return team.filter((m) => {
+      if (!m) return false;
       if (teamSubTab === "SUPER_ADMIN" && m.role !== "SUPER_ADMIN") return false;
       if (teamSubTab === "ADMIN" && m.role !== "ADMIN") return false;
       if (teamSubTab === "SUPPORT" && m.role !== "SUPPORT" && m.role !== "READ_ONLY") return false;
 
-      if (teamSearch.trim()) {
+      if (teamSearch && teamSearch.trim()) {
         const term = teamSearch.toLowerCase();
-        const matchName = m.name.toLowerCase().includes(term);
-        const matchEmail = m.email.toLowerCase().includes(term);
-        const matchRole = m.role.toLowerCase().includes(term);
+        const matchName = (m.name || "").toLowerCase().includes(term);
+        const matchEmail = (m.email || "").toLowerCase().includes(term);
+        const matchRole = (m.role || "").toLowerCase().includes(term);
         if (!matchName && !matchEmail && !matchRole) return false;
       }
 
@@ -663,10 +636,10 @@ export default function BackofficeDashboardPage() {
       if (teamStatusFilter === "ACTIVE" && !m.active) return false;
       if (teamStatusFilter === "INACTIVE" && m.active) return false;
 
-      if (teamDateFilter === "7D") {
+      if (teamDateFilter === "7D" && m.createdAt) {
         const diffDays = (Date.now() - new Date(m.createdAt).getTime()) / (1000 * 60 * 60 * 24);
         if (diffDays > 7) return false;
-      } else if (teamDateFilter === "30D") {
+      } else if (teamDateFilter === "30D" && m.createdAt) {
         const diffDays = (Date.now() - new Date(m.createdAt).getTime()) / (1000 * 60 * 60 * 24);
         if (diffDays > 30) return false;
       }
@@ -676,32 +649,80 @@ export default function BackofficeDashboardPage() {
   }, [team, teamSubTab, teamSearch, teamRoleFilter, teamStatusFilter, teamDateFilter]);
 
   const ITEMS_PER_PAGE = 8;
-  const totalTeamPages = Math.max(1, Math.ceil(filteredTeam.length / ITEMS_PER_PAGE));
+  const totalTeamPages = Math.max(1, Math.ceil((filteredTeam?.length || 0) / ITEMS_PER_PAGE));
   const paginatedTeam = useMemo(() => {
+    if (!Array.isArray(filteredTeam)) return [];
     const start = (teamPage - 1) * ITEMS_PER_PAGE;
     return filteredTeam.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredTeam, teamPage]);
 
-  const filteredUsers = users.filter((u) => {
-    if (!userSearch) return true;
-    const term = userSearch.toLowerCase();
-    return u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term);
-  });
+  const filteredUsers = useMemo(() => {
+    if (!Array.isArray(users)) return [];
+    return users.filter((u) => {
+      if (!userSearch) return true;
+      const term = userSearch.toLowerCase();
+      return (u.name || "").toLowerCase().includes(term) || (u.email || "").toLowerCase().includes(term);
+    });
+  }, [users, userSearch]);
 
-  const filteredTickets = tickets.filter((t) => {
-    if (ticketStatusFilter === "ALL") return true;
-    return t.status === ticketStatusFilter;
-  });
+  const filteredTickets = useMemo(() => {
+    if (!Array.isArray(tickets)) return [];
+    return tickets.filter((t) => {
+      if (ticketStatusFilter === "ALL") return true;
+      return t.status === ticketStatusFilter;
+    });
+  }, [tickets, ticketStatusFilter]);
 
-  const maxUserTokens = Math.max(...userAiUsage.map((u) => u.totalTokens), 1);
+  const maxUserTokens = useMemo(() => {
+    if (!Array.isArray(userAiUsage) || userAiUsage.length === 0) return 1;
+    return Math.max(...userAiUsage.map((u) => u.totalTokens || 0), 1);
+  }, [userAiUsage]);
+
+
+  if (loading) {
+    return (
+      <AdminShell>
+        <div className="flex flex-col items-center justify-center py-24">
+          <div className="text-3xl animate-bounce mb-3">🛡️</div>
+          <p className="text-stone-500 font-bold text-sm">Carregando painel administrativo...</p>
+        </div>
+      </AdminShell>
+    );
+  }
+
+  if (isSuperAdmin === false) {
+    return (
+      <AdminShell>
+        <div className="mx-auto max-w-lg py-16 text-center">
+          <PaperCard tape="orange">
+            <span className="text-5xl block mb-4">⛔</span>
+            <h1 className="font-display text-2xl font-black text-stone-900 dark:text-stone-100">
+              Acesso Negado
+            </h1>
+            <p className="mt-3 text-sm text-stone-600 dark:text-stone-300">
+              Esta área é restrita aos administradores do sistema GeLu. A sua conta atual não possui privilégios de <strong>Super Admin</strong>.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <Link
+                href="/login"
+                className="px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs shadow-md hover:bg-primary-hover"
+              >
+                Fazer login como Super Admin
+              </Link>
+            </div>
+          </PaperCard>
+        </div>
+      </AdminShell>
+    );
+  }
 
   return (
     <AdminShell
       activeTab={activeTab}
       onTabChange={setActiveTab}
-      openTicketsCount={tickets.filter((t) => t.status === "OPEN").length}
-      usersCount={users.length}
-      teamCount={team.length}
+      openTicketsCount={(tickets || []).filter((t) => t.status === "OPEN").length}
+      usersCount={users?.length || 0}
+      teamCount={team?.length || 0}
       adminRole={currentUserRole}
       onSearch={(term) => {
         setGlobalSearch(term);
@@ -726,10 +747,10 @@ export default function BackofficeDashboardPage() {
           <div className="flex flex-wrap items-center gap-1 border-b border-stone-200/80 dark:border-stone-800 pb-2">
             {[
               { id: "ALL", label: "Visão Geral" },
-              { id: "OPERATORS", label: `Operadores (${team.length})` },
-              { id: "SUPER_ADMIN", label: `Super Admins (${team.filter(m => m.role === "SUPER_ADMIN").length})` },
-              { id: "ADMIN", label: `Admins Operacionais (${team.filter(m => m.role === "ADMIN").length})` },
-              { id: "SUPPORT", label: `Suporte & Leitura (${team.filter(m => m.role === "SUPPORT" || m.role === "READ_ONLY").length})` },
+              { id: "OPERATORS", label: `Operadores (${team?.length || 0})` },
+              { id: "SUPER_ADMIN", label: `Super Admins (${(team || []).filter(m => m.role === "SUPER_ADMIN").length})` },
+              { id: "ADMIN", label: `Admins Operacionais (${(team || []).filter(m => m.role === "ADMIN").length})` },
+              { id: "SUPPORT", label: `Suporte & Leitura (${(team || []).filter(m => m.role === "SUPPORT" || m.role === "READ_ONLY").length})` },
               { id: "SAFEGUARDS", label: "Ações & Salvaguardas" },
             ].map((st) => (
               <button
@@ -1295,7 +1316,7 @@ export default function BackofficeDashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <AdminKpiCard
                 title="Total Operadores"
-                value={team.length}
+                value={team?.length || 0}
                 icon="👥"
                 colorScheme="orange"
                 active={teamSubTab === "ALL" || teamSubTab === "OPERATORS"}
@@ -1303,7 +1324,7 @@ export default function BackofficeDashboardPage() {
               />
               <AdminKpiCard
                 title="Super Admins"
-                value={team.filter((m) => m.role === "SUPER_ADMIN").length}
+                value={(team || []).filter((m) => m.role === "SUPER_ADMIN").length}
                 icon="👑"
                 colorScheme="amber"
                 active={teamSubTab === "SUPER_ADMIN"}
@@ -1311,7 +1332,7 @@ export default function BackofficeDashboardPage() {
               />
               <AdminKpiCard
                 title="Admins Operacionais"
-                value={team.filter((m) => m.role === "ADMIN").length}
+                value={(team || []).filter((m) => m.role === "ADMIN").length}
                 icon="🛡️"
                 colorScheme="blue"
                 active={teamSubTab === "ADMIN"}
@@ -1319,7 +1340,7 @@ export default function BackofficeDashboardPage() {
               />
               <AdminKpiCard
                 title="Suporte & Leitura"
-                value={team.filter((m) => m.role === "SUPPORT" || m.role === "READ_ONLY").length}
+                value={(team || []).filter((m) => m.role === "SUPPORT" || m.role === "READ_ONLY").length}
                 icon="🎧"
                 colorScheme="emerald"
                 active={teamSubTab === "SUPPORT"}
