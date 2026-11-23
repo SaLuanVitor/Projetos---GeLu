@@ -529,3 +529,12 @@ textarea {
 .dark .bg-surface-container-lowest.text-on-surface {
   color: #f5ede4 !important;
 }
+
+/* Utility to hide ugly scrollbars while preserving scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

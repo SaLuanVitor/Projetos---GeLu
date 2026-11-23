@@ -27,7 +27,6 @@ export function AdminShell({
   usersCount = 0,
   teamCount = 0,
   adminRole,
-  onSearch,
 }: AdminShellProps) {
   const router = useRouter();
   const [adminEmail, setAdminEmail] = useState<string>("");
@@ -74,7 +73,6 @@ export function AdminShell({
           adminRole={adminRole}
           onLogout={handleLogout}
           onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
-          onSearch={onSearch}
         />
 
         {/* Scrollable Main Canvas */}

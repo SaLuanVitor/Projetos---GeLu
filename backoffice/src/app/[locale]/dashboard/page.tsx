@@ -724,11 +724,6 @@ export default function BackofficeDashboardPage() {
       usersCount={users?.length || 0}
       teamCount={team?.length || 0}
       adminRole={currentUserRole}
-      onSearch={(term) => {
-        setGlobalSearch(term);
-        setTeamSearch(term);
-        setUserSearch(term);
-      }}
     >
       <div className="space-y-6 pb-12">
         {/* Cabeçalho Enriquecido com Breadcrumbs e Card LGPD */}
@@ -744,20 +739,20 @@ export default function BackofficeDashboardPage() {
         />
         {/* Sub-Abas do Painel Administrativo / Equipe */}
         {activeTab === "TEAM" && (
-          <div className="flex flex-wrap items-center gap-1 border-b border-stone-200/80 dark:border-stone-800 pb-2">
+          <div className="flex items-center gap-1.5 border-b border-stone-200/80 dark:border-stone-800 pb-2 overflow-x-auto no-scrollbar">
             {[
               { id: "ALL", label: "Visão Geral" },
               { id: "OPERATORS", label: `Operadores (${team?.length || 0})` },
-              { id: "SUPER_ADMIN", label: `Super Admins (${(team || []).filter(m => m.role === "SUPER_ADMIN").length})` },
-              { id: "ADMIN", label: `Admins Operacionais (${(team || []).filter(m => m.role === "ADMIN").length})` },
-              { id: "SUPPORT", label: `Suporte & Leitura (${(team || []).filter(m => m.role === "SUPPORT" || m.role === "READ_ONLY").length})` },
-              { id: "SAFEGUARDS", label: "Ações & Salvaguardas" },
+              { id: "SUPER_ADMIN", label: "Super Admins" },
+              { id: "ADMIN", label: "Operacionais" },
+              { id: "SUPPORT", label: "Suporte" },
+              { id: "SAFEGUARDS", label: "Salvaguardas" },
             ].map((st) => (
               <button
                 key={st.id}
                 type="button"
                 onClick={() => setTeamSubTab(st.id as any)}
-                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   teamSubTab === st.id
                     ? "bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30"
                     : "text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800"
@@ -1400,15 +1395,15 @@ export default function BackofficeDashboardPage() {
                 onPrimaryAction={() => setShowCreateTeamModal(true)}
               />
 
-              <div className="overflow-x-auto rounded-xl border border-stone-200/70 dark:border-stone-800">
+              <div className="overflow-x-auto no-scrollbar rounded-xl border border-stone-200/70 dark:border-stone-800">
                 <table className="w-full text-left text-xs text-stone-700 dark:text-stone-300">
                   <thead className="bg-[#FAF6EE] dark:bg-stone-800/80 text-stone-500 uppercase font-bold text-[11px] tracking-wider border-b border-stone-200/70 dark:border-stone-800">
                     <tr>
-                      <th className="px-5 py-3.5">OPERADOR</th>
-                      <th className="px-5 py-3.5">CARGO / PERFIL</th>
-                      <th className="px-5 py-3.5">STATUS</th>
-                      <th className="px-5 py-3.5">CADASTRADO EM</th>
-                      <th className="px-5 py-3.5 text-right">AÇÕES</th>
+                      <th className="px-4 py-3 sm:py-3.5 font-bold">OPERADOR</th>
+                      <th className="px-3 py-3 sm:py-3.5 font-bold whitespace-nowrap">PERFIL</th>
+                      <th className="px-3 py-3 sm:py-3.5 font-bold whitespace-nowrap">STATUS</th>
+                      <th className="px-3 py-3 sm:py-3.5 font-bold whitespace-nowrap">CADASTRADO</th>
+                      <th className="px-4 py-3 sm:py-3.5 text-right font-bold whitespace-nowrap">AÇÕES</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-200/60 dark:divide-stone-800">
@@ -1421,7 +1416,7 @@ export default function BackofficeDashboardPage() {
                     ) : (
                       paginatedTeam.map((member) => (
                         <tr key={member.id} className="hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors">
-                          <td className="px-5 py-3.5">
+                          <td className="px-3.5 py-3 sm:px-4 sm:py-3">
                             <div className="flex items-center gap-3">
                               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-700 dark:text-orange-300 font-black text-xs shrink-0 shadow-2xs">
                                 {getMemberInitials(member.name, member.email)}
@@ -1441,21 +1436,21 @@ export default function BackofficeDashboardPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-5 py-3.5">
+                          <td className="px-3.5 py-3 sm:px-4 sm:py-3">
                             <AdminRoleBadge role={member.role} />
                           </td>
-                          <td className="px-5 py-3.5">
+                          <td className="px-3.5 py-3 sm:px-4 sm:py-3">
                             <AdminStatusBadge active={member.active} />
                           </td>
-                          <td className="px-5 py-3.5 text-xs text-stone-500 dark:text-stone-400 font-medium whitespace-nowrap">
+                          <td className="px-3.5 py-3 text-xs text-stone-500 dark:text-stone-400 font-medium whitespace-nowrap">
                             {new Date(member.createdAt).toLocaleDateString("pt-BR")}
                           </td>
-                          <td className="px-5 py-3.5 text-right">
+                          <td className="px-3.5 py-3 sm:px-4 sm:py-3 text-right">
                             <div className="inline-flex items-center gap-2">
                               <button
                                 type="button"
                                 onClick={() => setSelectedMemberForDetails(member)}
-                                className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:border-orange-400 hover:text-orange-600 shadow-2xs transition-all cursor-pointer"
+                                className="whitespace-nowrap rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:border-orange-400 hover:text-orange-600 shadow-2xs transition-all cursor-pointer"
                               >
                                 Ver detalhes
                               </button>
