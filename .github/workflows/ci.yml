@@ -1,0 +1,126 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  backend:
+    name: Backend CI (Spring Boot & Quality Gates)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: gelu_menu
+          POSTGRES_USER: gelu_menu
+          POSTGRES_PASSWORD: gelu_menu
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Backend Tests & Compilation
+        working-directory: backend
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/gelu_menu
+          SPRING_DATASOURCE_USERNAME: gelu_menu
+          SPRING_DATASOURCE_PASSWORD: gelu_menu
+          GELU_AUTH_JWT_SECRET: ci-test-secret-must-be-very-long-and-secure-for-testing-purposes-12345
+          GELU_SUPER_ADMIN_EMAIL: luanvitors_852@hotmail.com
+        run: mvn -B -q clean test
+
+  frontend:
+    name: Frontend CI (Next.js Quality Gates)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Run TypeScript Check
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Build Frontend Next.js
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+        run: npm run build
+
+  backoffice:
+    name: Backoffice CI (Next.js Quality Gates)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: backoffice/package-lock.json
+
+      - name: Install Backoffice Dependencies
+        working-directory: backoffice
+        run: npm ci
+
+      - name: Run TypeScript Check
+        working-directory: backoffice
+        run: npm run typecheck
+
+      - name: Build Backoffice Next.js
+        working-directory: backoffice
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+        run: npm run build
+
+  infra-validate:
+    name: Infrastructure Docker Compose Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose -f infra/docker-compose.yml config --quiet
