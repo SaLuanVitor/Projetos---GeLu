@@ -15,8 +15,7 @@ public record SupportTicketResponse(
     String status,
     String adminNotes,
     Instant createdAt,
-    Instant updatedAt
-) {
+    Instant updatedAt) {
   public static SupportTicketResponse from(SupportTicket t) {
     return new SupportTicketResponse(
         t.getId(),

@@ -120,7 +120,12 @@ public class FamilySpaceItem {
   }
 
   public void update(
-      String category, String title, String description, String highlightTag, boolean pinned, int orderIndex) {
+      String category,
+      String title,
+      String description,
+      String highlightTag,
+      boolean pinned,
+      int orderIndex) {
     if (category != null && !category.isBlank()) this.category = category.toUpperCase();
     this.title = title;
     this.description = description;

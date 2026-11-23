@@ -133,8 +133,7 @@ public class AdminService {
   public void assertCanManageUsers(UUID adminId) {
     AdminRole role = getRole(adminId);
     if (role != AdminRole.SUPER_ADMIN && role != AdminRole.ADMIN) {
-      throw new ForbiddenException(
-          "Acesso negado: Perfil sem permissão para gerenciar usuários");
+      throw new ForbiddenException("Acesso negado: Perfil sem permissão para gerenciar usuários");
     }
   }
 
@@ -263,8 +262,7 @@ public class AdminService {
               if ("gemini_api_key".equals(s.getKey()) && val != null && val.length() > 8) {
                 val = val.substring(0, 6) + "..." + val.substring(val.length() - 4);
               }
-              return new SystemSettingResponse(
-                  s.getKey(), val, s.getUpdatedAt(), s.getUpdatedBy());
+              return new SystemSettingResponse(s.getKey(), val, s.getUpdatedAt(), s.getUpdatedBy());
             })
         .toList();
   }
@@ -312,18 +310,14 @@ public class AdminService {
             .orElse("gemini-1.5-flash");
 
     String rawKey =
-        systemSettingRepository
-            .findByKey("gemini_api_key")
-            .map(SystemSetting::getValue)
-            .orElse("");
+        systemSettingRepository.findByKey("gemini_api_key").map(SystemSetting::getValue).orElse("");
     boolean hasKey = !rawKey.isBlank();
 
     // Estimativa de custo: No Free Tier = R$ 0,00.
     // Pay-as-you-go: ~$0.075 / 1M prompt, ~$0.30 / 1M output -> em BRL ~5.80
     double costUsd = (promptTokens * 0.000000075) + (completionTokens * 0.00000030);
     double costBrl = costUsd * 5.80;
-    String formattedCost =
-        costBrl == 0 ? "R$ 0,00 (Free Tier)" : String.format("R$ %.4f", costBrl);
+    String formattedCost = costBrl == 0 ? "R$ 0,00 (Free Tier)" : String.format("R$ %.4f", costBrl);
 
     List<AiUsageLogResponse> recentLogs =
         aiUsageLogRepository.findTop50ByOrderByCreatedAtDesc().stream()
@@ -395,7 +389,8 @@ public class AdminService {
               .timeout(Duration.ofSeconds(15))
               .build();
 
-      HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+      HttpResponse<String> response =
+          client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
       long latency = System.currentTimeMillis() - start;
 
       if (response.statusCode() >= 200 && response.statusCode() < 300) {
@@ -451,7 +446,8 @@ public class AdminService {
       UUID uId = entry.getKey();
       List<AiUsageLog> userLogs = entry.getValue();
       User u = userMap.get(uId);
-      String userName = u != null ? u.getName() : "Usuário (" + uId.toString().substring(0, 8) + ")";
+      String userName =
+          u != null ? u.getName() : "Usuário (" + uId.toString().substring(0, 8) + ")";
       String userEmail = u != null ? u.getEmail() : "N/D";
 
       long reqCount = userLogs.size();
@@ -500,14 +496,10 @@ public class AdminService {
             .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
 
     List<String> userFamilies =
-        familyRepository.findAllByMemberUserId(targetUserId).stream()
-            .map(Family::getName)
-            .toList();
+        familyRepository.findAllByMemberUserId(targetUserId).stream().map(Family::getName).toList();
 
     long recipesCount =
-        recipeRepository.findAll().stream()
-            .filter(r -> r.getUserId().equals(targetUserId))
-            .count();
+        recipeRepository.findAll().stream().filter(r -> r.getUserId().equals(targetUserId)).count();
 
     long dietsCount =
         weeklyDietRepository.findAll().stream()
@@ -528,7 +520,11 @@ public class AdminService {
         new SystemAuditLog(
             superAdminEmail,
             "LGPD_EXPORT_USER_DATA",
-            "Exportação de dados pessoais do titular " + target.getEmail() + " (" + targetUserId + ")",
+            "Exportação de dados pessoais do titular "
+                + target.getEmail()
+                + " ("
+                + targetUserId
+                + ")",
             "internal"));
 
     return new UserDataExportResponse(
@@ -567,7 +563,11 @@ public class AdminService {
         new SystemAuditLog(
             superAdminEmail,
             "LGPD_ANONYMIZE_USER",
-            "Usuário " + oldEmail + " (" + targetUserId + ") anonimizado em conformidade com o Art. 18 da LGPD.",
+            "Usuário "
+                + oldEmail
+                + " ("
+                + targetUserId
+                + ") anonimizado em conformidade com o Art. 18 da LGPD.",
             "internal"));
   }
 
@@ -614,8 +614,7 @@ public class AdminService {
         .sorted(Comparator.comparing(User::getCreatedAt))
         .map(
             u -> {
-              AdminRole role =
-                  u.getAdminRole() != null ? u.getAdminRole() : AdminRole.SUPER_ADMIN;
+              AdminRole role = u.getAdminRole() != null ? u.getAdminRole() : AdminRole.SUPER_ADMIN;
               boolean isMaster = isMasterSuperAdmin(u.getEmail());
               boolean isSelf = u.getId().equals(adminId);
               return new AdminTeamMemberResponse(
@@ -632,8 +631,7 @@ public class AdminService {
   }
 
   @Transactional
-  public AdminTeamMemberResponse createTeamMember(
-      UUID adminId, CreateAdminTeamRequest request) {
+  public AdminTeamMemberResponse createTeamMember(UUID adminId, CreateAdminTeamRequest request) {
     assertSuperAdmin(adminId);
     String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
     if (userRepository.existsByEmail(normalizedEmail)) {

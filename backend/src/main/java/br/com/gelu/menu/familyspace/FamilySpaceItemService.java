@@ -95,7 +95,8 @@ public class FamilySpaceItemService {
 
     UUID familyId = item.getFamily().getId();
     itemRepository.delete(item);
-    eventPublisher.publishFamilyEvent(familyId, "FAMILY_SPACE_ITEM_DELETED", Map.of("id", itemId.toString()));
+    eventPublisher.publishFamilyEvent(
+        familyId, "FAMILY_SPACE_ITEM_DELETED", Map.of("id", itemId.toString()));
   }
 
   private void ensureFamilyMember(UUID familyId, UUID userId) {

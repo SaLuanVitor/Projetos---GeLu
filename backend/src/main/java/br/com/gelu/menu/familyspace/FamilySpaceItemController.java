@@ -32,8 +32,7 @@ public class FamilySpaceItemController {
       @AuthenticationPrincipal AuthenticatedUser user,
       @RequestParam UUID familyId,
       @RequestParam(required = false) String category) {
-    List<FamilySpaceItemResponse> items =
-        spaceItemService.listItems(user.id(), familyId, category);
+    List<FamilySpaceItemResponse> items = spaceItemService.listItems(user.id(), familyId, category);
     return ApiResponse.ok(items, "Itens do espaço da família carregados com sucesso");
   }
 

@@ -58,9 +58,10 @@ public class AiAgentController {
 
   @Operation(summary = "Estimate workout calories burned")
   @PostMapping("/workout-calorie-estimate")
-  public ApiResponse<br.com.gelu.menu.ai.dto.WorkoutCalorieEstimateResponse> estimateWorkoutCalories(
-      @AuthenticationPrincipal AuthenticatedUser user,
-      @RequestBody br.com.gelu.menu.ai.dto.WorkoutCalorieEstimateRequest request) {
+  public ApiResponse<br.com.gelu.menu.ai.dto.WorkoutCalorieEstimateResponse>
+      estimateWorkoutCalories(
+          @AuthenticationPrincipal AuthenticatedUser user,
+          @RequestBody br.com.gelu.menu.ai.dto.WorkoutCalorieEstimateRequest request) {
     return ApiResponse.ok(
         suggestionService.estimateWorkoutCalories(user != null ? user.id() : null, request),
         "Workout calorie estimation generated successfully");
@@ -75,5 +76,4 @@ public class AiAgentController {
         suggestionService.generateWeeklyEvolutionSummary(user != null ? user.id() : null, request),
         "Weekly evolution summary generated successfully");
   }
-
 }

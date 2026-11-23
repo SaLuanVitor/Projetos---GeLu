@@ -15,8 +15,7 @@ public class AuditLogService {
   private final AuditLogRepository auditLogRepository;
   private final FamilyRepository familyRepository;
 
-  public AuditLogService(
-      AuditLogRepository auditLogRepository, FamilyRepository familyRepository) {
+  public AuditLogService(AuditLogRepository auditLogRepository, FamilyRepository familyRepository) {
     this.auditLogRepository = auditLogRepository;
     this.familyRepository = familyRepository;
   }

@@ -245,8 +245,7 @@ public class FamilyService {
 
     // Verifica se já é membro
     boolean alreadyMember =
-        family.getMembers().stream()
-            .anyMatch(m -> email.equalsIgnoreCase(m.getUser().getEmail()));
+        family.getMembers().stream().anyMatch(m -> email.equalsIgnoreCase(m.getUser().getEmail()));
     if (alreadyMember) {
       throw new ConflictException("User is already a member of this family");
     }
@@ -267,8 +266,7 @@ public class FamilyService {
     Instant expiresAt = Instant.now().plus(7, ChronoUnit.DAYS);
     FamilyRole role = FamilyRole.fromString(request.role());
 
-    FamilyInvite invite =
-        new FamilyInvite(family, email, currentUser, role, token, expiresAt);
+    FamilyInvite invite = new FamilyInvite(family, email, currentUser, role, token, expiresAt);
     FamilyInvite saved = familyInviteRepository.save(invite);
 
     if (auditLogService != null) {
@@ -431,36 +429,35 @@ public class FamilyService {
     Family family = findFamilyWithMembers(familyId);
     ensureMember(family, requestingUserId);
 
-    List<FamilyMemberEvolutionDto> members = family.getMembers().stream()
-        .map(member -> {
-          User user = member.getUser();
-          List<WeightHistoryItem> history = weightHistoryRepository
-              .findByUserIdOrderByRecordedAtDesc(user.getId())
-              .stream()
-              .map(wh -> new WeightHistoryItem(
-                  wh.getId(),
-                  wh.getWeightKg(),
-                  wh.getRecordedAt(),
-                  wh.getCreatedAt()
-              ))
-              .toList();
+    List<FamilyMemberEvolutionDto> members =
+        family.getMembers().stream()
+            .map(
+                member -> {
+                  User user = member.getUser();
+                  List<WeightHistoryItem> history =
+                      weightHistoryRepository
+                          .findByUserIdOrderByRecordedAtDesc(user.getId())
+                          .stream()
+                          .map(
+                              wh ->
+                                  new WeightHistoryItem(
+                                      wh.getId(),
+                                      wh.getWeightKg(),
+                                      wh.getRecordedAt(),
+                                      wh.getCreatedAt()))
+                          .toList();
 
-          return new FamilyMemberEvolutionDto(
-              user.getId().toString(),
-              user.getName(),
-              user.getEmail(),
-              user.getCurrentWeight(),
-              member.getRole().name(),
-              history
-          );
-        })
-        .toList();
+                  return new FamilyMemberEvolutionDto(
+                      user.getId().toString(),
+                      user.getName(),
+                      user.getEmail(),
+                      user.getCurrentWeight(),
+                      member.getRole().name(),
+                      history);
+                })
+            .toList();
 
-    return new FamilyWeightHistoryResponse(
-        family.getId().toString(),
-        family.getName(),
-        members
-    );
+    return new FamilyWeightHistoryResponse(family.getId().toString(), family.getName(), members);
   }
 
   private Family findFamilyWithMembers(UUID familyId) {

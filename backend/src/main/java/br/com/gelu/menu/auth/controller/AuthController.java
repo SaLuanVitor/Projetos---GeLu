@@ -1,6 +1,8 @@
 package br.com.gelu.menu.auth.controller;
 
+import br.com.gelu.menu.auth.AuthenticatedUser;
 import br.com.gelu.menu.auth.dto.AuthTokenResponse;
+import br.com.gelu.menu.auth.dto.AuthUserResponse;
 import br.com.gelu.menu.auth.dto.ForgotPasswordRequest;
 import br.com.gelu.menu.auth.dto.ForgotPasswordResponse;
 import br.com.gelu.menu.auth.dto.LoginRequest;
@@ -17,11 +19,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import br.com.gelu.menu.auth.AuthenticatedUser;
-import br.com.gelu.menu.auth.dto.AuthUserResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -83,5 +83,4 @@ public class AuthController {
   public ApiResponse<AuthUserResponse> getMe(@AuthenticationPrincipal AuthenticatedUser user) {
     return ApiResponse.ok(authService.getMe(user.id()), "User profile retrieved successfully");
   }
-
 }

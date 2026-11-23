@@ -112,11 +112,17 @@ public class Workout {
     return updatedAt;
   }
 
-  public void update(String title, String category, int caloriesPerHour, int defaultDurationMinutes, String notes) {
+  public void update(
+      String title,
+      String category,
+      int caloriesPerHour,
+      int defaultDurationMinutes,
+      String notes) {
     this.title = title.trim();
     this.category = category != null ? category.trim().toUpperCase() : this.category;
     this.caloriesPerHour = caloriesPerHour > 0 ? caloriesPerHour : this.caloriesPerHour;
-    this.defaultDurationMinutes = defaultDurationMinutes > 0 ? defaultDurationMinutes : this.defaultDurationMinutes;
+    this.defaultDurationMinutes =
+        defaultDurationMinutes > 0 ? defaultDurationMinutes : this.defaultDurationMinutes;
     this.notes = notes;
     this.updatedAt = Instant.now();
   }

@@ -56,9 +56,10 @@ public class SuperAdminInitializer implements CommandLineRunner {
               }
             },
             () -> {
-              String rawPass = (superAdminPassword != null && !superAdminPassword.isBlank())
-                  ? superAdminPassword.trim()
-                  : "admin123456";
+              String rawPass =
+                  (superAdminPassword != null && !superAdminPassword.isBlank())
+                      ? superAdminPassword.trim()
+                      : "admin123456";
               User admin = new User("Super Admin", email, passwordEncoder.encode(rawPass));
               admin.setAdminRole(AdminRole.SUPER_ADMIN);
               userRepository.save(admin);

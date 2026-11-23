@@ -14,5 +14,4 @@ public record MemberWeeklySummary(
     BigDecimal weightChange,
     List<String> wentWell,
     List<String> missedOrAttention,
-    List<String> recommendations
-) {}
+    List<String> recommendations) {}

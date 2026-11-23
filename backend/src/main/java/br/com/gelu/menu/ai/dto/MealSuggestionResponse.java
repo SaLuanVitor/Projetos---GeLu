@@ -12,5 +12,4 @@ public record MealSuggestionResponse(
     String proteinGrams,
     String carbsGrams,
     String fatGrams,
-    String chefTip
-) {}
+    String chefTip) {}

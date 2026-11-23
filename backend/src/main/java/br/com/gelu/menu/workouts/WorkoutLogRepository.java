@@ -16,6 +16,5 @@ public interface WorkoutLogRepository extends JpaRepository<WorkoutLog, UUID> {
 
   @Query(
       "SELECT l FROM WorkoutLog l WHERE (l.user.id = :userId OR l.family.id = :familyId) ORDER BY l.performedAt DESC")
-  List<WorkoutLog> findAllRecent(
-      @Param("userId") UUID userId, @Param("familyId") UUID familyId);
+  List<WorkoutLog> findAllRecent(@Param("userId") UUID userId, @Param("familyId") UUID familyId);
 }

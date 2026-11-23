@@ -17,8 +17,7 @@ public record WorkoutLogResponse(
     Instant performedAt,
     String notes,
     boolean completed,
-    Instant createdAt
-) {
+    Instant createdAt) {
   public static WorkoutLogResponse from(WorkoutLog log) {
     return new WorkoutLogResponse(
         log.getId(),

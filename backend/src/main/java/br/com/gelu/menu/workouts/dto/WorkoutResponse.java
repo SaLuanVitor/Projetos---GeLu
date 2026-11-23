@@ -13,8 +13,7 @@ public record WorkoutResponse(
     int caloriesPerHour,
     int defaultDurationMinutes,
     String notes,
-    Instant createdAt
-) {
+    Instant createdAt) {
   public static WorkoutResponse from(Workout w) {
     return new WorkoutResponse(
         w.getId(),

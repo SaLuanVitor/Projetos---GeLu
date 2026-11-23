@@ -57,9 +57,7 @@ public class WorkoutService {
   @Transactional
   public WorkoutResponse createWorkout(UUID userId, WorkoutRequest request) {
     User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
 
     Family family = null;
     if (request.familyId() != null) {
@@ -109,9 +107,7 @@ public class WorkoutService {
   @Transactional
   public WorkoutLogResponse logWorkout(UUID userId, CreateWorkoutLogRequest request) {
     User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
 
     Family family = null;
     if (request.familyId() != null) {

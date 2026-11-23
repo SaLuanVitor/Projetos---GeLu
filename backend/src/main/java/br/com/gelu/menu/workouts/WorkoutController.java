@@ -42,8 +42,7 @@ public class WorkoutController {
 
   @PostMapping
   public ApiResponse<WorkoutResponse> createWorkout(
-      @AuthenticationPrincipal AuthenticatedUser user,
-      @Valid @RequestBody WorkoutRequest request) {
+      @AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody WorkoutRequest request) {
     return ApiResponse.ok(
         workoutService.createWorkout(user.id(), request), "Workout created successfully");
   }
@@ -74,8 +73,10 @@ public class WorkoutController {
   @GetMapping("/daily-summary")
   public ApiResponse<DailyWorkoutSummaryResponse> getDailySummary(
       @AuthenticationPrincipal AuthenticatedUser user,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+          LocalDate date) {
     return ApiResponse.ok(
-        workoutService.getDailySummary(user.id(), date), "Daily workout summary loaded successfully");
+        workoutService.getDailySummary(user.id(), date),
+        "Daily workout summary loaded successfully");
   }
 }

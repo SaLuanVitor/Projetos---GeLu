@@ -90,7 +90,19 @@ public class ScheduleActivity {
       Recipe recipe,
       User assignedTo,
       int orderIndex) {
-    this(family, null, dayOfWeek, startTime, endTime, title, category, notes, goalTag, recipe, assignedTo, orderIndex);
+    this(
+        family,
+        null,
+        dayOfWeek,
+        startTime,
+        endTime,
+        title,
+        category,
+        notes,
+        goalTag,
+        recipe,
+        assignedTo,
+        orderIndex);
   }
 
   public ScheduleActivity(

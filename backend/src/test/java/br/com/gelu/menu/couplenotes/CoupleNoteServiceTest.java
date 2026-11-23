@@ -69,7 +69,8 @@ class CoupleNoteServiceTest {
     when(noteRepository.findById(noteId)).thenReturn(Optional.of(note));
     when(familyMemberRepository.existsByFamilyIdAndUserId(familyId, partnerId)).thenReturn(true);
     when(userRepository.findById(partnerId)).thenReturn(Optional.of(partner));
-    when(noteRepository.save(any(CoupleNote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    when(noteRepository.save(any(CoupleNote.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
 
     CoupleNoteResponse res = service.acknowledgeNote(partnerId, noteId);
 

@@ -7,5 +7,4 @@ public record AdminMetricsResponse(
     long totalWeeklyDiets,
     long totalWorkoutsLogged,
     long totalAuditLogs,
-    long openSupportTickets
-) {}
+    long openSupportTickets) {}

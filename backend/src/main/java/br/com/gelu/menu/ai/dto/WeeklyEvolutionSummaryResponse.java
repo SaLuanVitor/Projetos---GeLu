@@ -18,5 +18,4 @@ public record WeeklyEvolutionSummaryResponse(
     BigDecimal currentWeight,
     BigDecimal weightChange,
     FamilyScopeSummary familyScope,
-    List<MemberWeeklySummary> memberBreakdown
-) {}
+    List<MemberWeeklySummary> memberBreakdown) {}

@@ -4,43 +4,41 @@ import br.com.gelu.menu.admin.AiUsageLog;
 import br.com.gelu.menu.admin.AiUsageLogRepository;
 import br.com.gelu.menu.admin.SystemSetting;
 import br.com.gelu.menu.admin.SystemSettingRepository;
+import br.com.gelu.menu.ai.dto.FamilyScopeSummary;
+import br.com.gelu.menu.ai.dto.GenerateSuggestionRequest;
+import br.com.gelu.menu.ai.dto.MealSuggestionResponse;
+import br.com.gelu.menu.ai.dto.MemberWeeklySummary;
 import br.com.gelu.menu.ai.dto.NutritionEstimateRequest;
 import br.com.gelu.menu.ai.dto.NutritionEstimateResponse;
 import br.com.gelu.menu.ai.dto.NutritionIngredientItem;
-import br.com.gelu.menu.ai.dto.FamilyScopeSummary;
-import br.com.gelu.menu.ai.dto.MemberWeeklySummary;
 import br.com.gelu.menu.ai.dto.WeeklyEvolutionSummaryResponse;
 import br.com.gelu.menu.ai.dto.WeeklySummaryRequest;
 import br.com.gelu.menu.ai.dto.WorkoutCalorieEstimateRequest;
 import br.com.gelu.menu.ai.dto.WorkoutCalorieEstimateResponse;
+import br.com.gelu.menu.common.exception.BadRequestException;
+import br.com.gelu.menu.family.Family;
+import br.com.gelu.menu.family.FamilyRepository;
 import br.com.gelu.menu.schedule.ScheduleActivity;
 import br.com.gelu.menu.schedule.ScheduleActivityRepository;
+import br.com.gelu.menu.users.User;
+import br.com.gelu.menu.users.UserRepository;
 import br.com.gelu.menu.users.WeightHistory;
 import br.com.gelu.menu.users.WeightHistoryRepository;
 import br.com.gelu.menu.workouts.WorkoutLog;
 import br.com.gelu.menu.workouts.WorkoutLogRepository;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import br.com.gelu.menu.ai.dto.GenerateSuggestionRequest;
-import br.com.gelu.menu.ai.dto.MealSuggestionResponse;
-import br.com.gelu.menu.common.exception.BadRequestException;
-import br.com.gelu.menu.family.Family;
-import br.com.gelu.menu.family.FamilyRepository;
-import br.com.gelu.menu.users.User;
-import br.com.gelu.menu.users.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -59,6 +57,22 @@ public class AiSuggestionService {
   private final ScheduleActivityRepository scheduleActivityRepository;
   private final ObjectMapper objectMapper;
   private final String superAdminEmail;
+  private final java.util.Map<String, CachedAiItem> aiCache =
+      new java.util.concurrent.ConcurrentHashMap<>();
+
+  private static class CachedAiItem {
+    final Object value;
+    final long timestamp;
+
+    CachedAiItem(Object value) {
+      this.value = value;
+      this.timestamp = System.currentTimeMillis();
+    }
+
+    boolean isExpired(long ttlMs) {
+      return (System.currentTimeMillis() - timestamp) > ttlMs;
+    }
+  }
 
   public AiSuggestionService(
       SystemSettingRepository systemSettingRepository,
@@ -89,7 +103,8 @@ public class AiSuggestionService {
     if (userId != null) {
       User user = userRepository.findById(userId).orElse(null);
       if (user != null) {
-        if (superAdminEmail != null && user.getEmail().trim().equalsIgnoreCase(superAdminEmail.trim())) {
+        if (superAdminEmail != null
+            && user.getEmail().trim().equalsIgnoreCase(superAdminEmail.trim())) {
           isSuperAdmin = true;
         }
 
@@ -124,9 +139,29 @@ public class AiSuggestionService {
       }
     }
 
+    // 1.5. Verificação de Cache em Memória
+    String suggestCacheKey =
+        "SUGGEST:"
+            + (request.mealType() != null ? request.mealType() : "")
+            + ":"
+            + (request.goal() != null ? request.goal() : "")
+            + ":"
+            + request.targetCalories()
+            + ":"
+            + (request.preferences() != null ? request.preferences().trim() : "");
+    CachedAiItem cachedSuggest = aiCache.get(suggestCacheKey);
+    if (cachedSuggest != null && !cachedSuggest.isExpired(12 * 3600 * 1000L)) {
+      return (MealSuggestionResponse) cachedSuggest.value;
+    }
+
     // 2. Tenta gerar via Google Gemini se a chave estiver configurada
-    String apiKey = systemSettingRepository.findByKey("gemini_api_key").map(SystemSetting::getValue).orElse("");
-    String model = systemSettingRepository.findByKey("gemini_model").map(SystemSetting::getValue).orElse("gemini-2.5-flash");
+    String apiKey =
+        systemSettingRepository.findByKey("gemini_api_key").map(SystemSetting::getValue).orElse("");
+    String model =
+        systemSettingRepository
+            .findByKey("gemini_model")
+            .map(SystemSetting::getValue)
+            .orElse("gemini-2.5-flash");
 
     long startMs = System.currentTimeMillis();
     MealSuggestionResponse response = null;
@@ -178,6 +213,10 @@ public class AiSuggestionService {
       // Log failure should not break user experience
     }
 
+    if (response != null) {
+      aiCache.put(suggestCacheKey, new CachedAiItem(response));
+    }
+
     return response;
   }
 
@@ -202,34 +241,85 @@ public class AiSuggestionService {
 
     String mealType = request.mealType() != null ? request.mealType() : "Almoço";
     String goal = request.goal() != null ? request.goal() : "Equilíbrio & Saúde";
-    int targetCals = request.targetCalories() != null && request.targetCalories() > 0 ? request.targetCalories() : 450;
-    String preferences = request.preferences() != null ? request.preferences() : "Nenhuma restrição específica";
+    int targetCals =
+        request.targetCalories() != null && request.targetCalories() > 0
+            ? request.targetCalories()
+            : 450;
+    String preferences =
+        request.preferences() != null ? request.preferences() : "Nenhuma restrição específica";
 
     String systemPrompt =
         "Você é o Chef e Nutricionista inteligente do sistema GeLu Menu. "
             + "Crie uma receita saudável e criativa típica brasileira ou balanceada. "
             + "Você DEVE responder ESTRITAMENTE em formato JSON com o seguinte schema:\n"
             + "{\n"
-            + '"' + "title" + '"' + ": \"Nome do prato\",\n"
-            + '"' + "mealType" + '"' + ": \"" + mealType + "\",\n"
-            + '"' + "calories" + '"' + ": " + targetCals + ",\n"
-            + '"' + "prepTimeMinutes" + '"' + ": 25,\n"
-            + '"' + "description" + '"' + ": \"Breve descrição do valor nutricional\",\n"
-            + '"' + "ingredients" + '"' + ": [\"150g frango\", \"4 colheres arroz integral\"],\n"
-            + '"' + "protein" + '"' + ": \"35g\",\n"
-            + '"' + "carbs" + '"' + ": \"40g\",\n"
-            + '"' + "fat" + '"' + ": \"10g\",\n"
-            + '"' + "chefTip" + '"' + ": \"Dica do chef para realçar o sabor\"\n"
+            + '"'
+            + "title"
+            + '"'
+            + ": \"Nome do prato\",\n"
+            + '"'
+            + "mealType"
+            + '"'
+            + ": \""
+            + mealType
+            + "\",\n"
+            + '"'
+            + "calories"
+            + '"'
+            + ": "
+            + targetCals
+            + ",\n"
+            + '"'
+            + "prepTimeMinutes"
+            + '"'
+            + ": 25,\n"
+            + '"'
+            + "description"
+            + '"'
+            + ": \"Breve descrição do valor nutricional\",\n"
+            + '"'
+            + "ingredients"
+            + '"'
+            + ": [\"150g frango\", \"4 colheres arroz integral\"],\n"
+            + '"'
+            + "protein"
+            + '"'
+            + ": \"35g\",\n"
+            + '"'
+            + "carbs"
+            + '"'
+            + ": \"40g\",\n"
+            + '"'
+            + "fat"
+            + '"'
+            + ": \"10g\",\n"
+            + '"'
+            + "chefTip"
+            + '"'
+            + ": \"Dica do chef para realçar o sabor\"\n"
             + "}\n"
             + "Não inclua markdown (sem ```json), responda somente o JSON puro.";
 
     String userPrompt =
-        "Tipo de refeição: " + mealType + ", Alvo calórico: " + targetCals + " kcal, Objetivo: " + goal + ", Preferências: " + preferences;
+        "Tipo de refeição: "
+            + mealType
+            + ", Alvo calórico: "
+            + targetCals
+            + " kcal, Objetivo: "
+            + goal
+            + ", Preferências: "
+            + preferences;
 
     String payload =
-        "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\""
-            + escapeJson(systemPrompt + "\n\n" + userPrompt)
-            + "\"}]}]}";
+        "{"
+            + "\"system_instruction\":{\"parts\":[{\"text\":\""
+            + escapeJson(systemPrompt)
+            + "\"}]},"
+            + "\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\""
+            + escapeJson(userPrompt)
+            + "\"}]}],"
+            + "\"generationConfig\":{\"responseMimeType\":\"application/json\",\"temperature\":0.4}"
+            + "}";
 
     HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     HttpRequest httpRequest =
@@ -240,13 +330,15 @@ public class AiSuggestionService {
             .timeout(Duration.ofSeconds(20))
             .build();
 
-    HttpResponse<String> httpResponse = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+    HttpResponse<String> httpResponse =
+        client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
     if (httpResponse.statusCode() < 200 || httpResponse.statusCode() >= 300) {
       throw new RuntimeException("Gemini API error: " + httpResponse.statusCode());
     }
 
     JsonNode root = objectMapper.readTree(httpResponse.body());
-    JsonNode textNode = root.path("candidates").path(0).path("content").path("parts").path(0).path("text");
+    JsonNode textNode =
+        root.path("candidates").path(0).path("content").path("parts").path(0).path("text");
     if (textNode.isMissingNode()) {
       throw new RuntimeException("Missing text in Gemini response");
     }
@@ -286,7 +378,16 @@ public class AiSuggestionService {
 
     MealSuggestionResponse suggestion =
         new MealSuggestionResponse(
-            title, mealType, calories, prepTime, description, ingredients, protein, carbs, fat, chefTip);
+            title,
+            mealType,
+            calories,
+            prepTime,
+            description,
+            ingredients,
+            protein,
+            carbs,
+            fat,
+            chefTip);
 
     JsonNode usage = root.path("usageMetadata");
     int promptTokens = usage.path("promptTokenCount").asInt(150);
@@ -307,8 +408,14 @@ public class AiSuggestionService {
   }
 
   private MealSuggestionResponse generateLocalSuggestion(GenerateSuggestionRequest request) {
-    String mealType = request.mealType() != null && !request.mealType().isBlank() ? request.mealType().trim() : "Almoço";
-    int targetCals = request.targetCalories() != null && request.targetCalories() > 0 ? request.targetCalories() : 450;
+    String mealType =
+        request.mealType() != null && !request.mealType().isBlank()
+            ? request.mealType().trim()
+            : "Almoço";
+    int targetCals =
+        request.targetCalories() != null && request.targetCalories() > 0
+            ? request.targetCalories()
+            : 450;
 
     if (mealType.toLowerCase().contains("café") || mealType.toLowerCase().contains("manhã")) {
       return new MealSuggestionResponse(
@@ -391,7 +498,11 @@ public class AiSuggestionService {
     final int completionTokens;
     final int totalTokens;
 
-    GeminiResult(MealSuggestionResponse suggestion, int promptTokens, int completionTokens, int totalTokens) {
+    GeminiResult(
+        MealSuggestionResponse suggestion,
+        int promptTokens,
+        int completionTokens,
+        int totalTokens) {
       this.suggestion = suggestion;
       this.promptTokens = promptTokens;
       this.completionTokens = completionTokens;
@@ -399,12 +510,30 @@ public class AiSuggestionService {
     }
   }
 
-  public NutritionEstimateResponse estimateNutrition(UUID userId, NutritionEstimateRequest request) {
+  public NutritionEstimateResponse estimateNutrition(
+      UUID userId, NutritionEstimateRequest request) {
     int servings = (request.servings() != null && request.servings() > 0) ? request.servings() : 1;
     String name = request.name() != null ? request.name().trim() : "Receita";
 
-    String apiKey = systemSettingRepository.findByKey("gemini_api_key").map(SystemSetting::getValue).orElse("");
-    String model = systemSettingRepository.findByKey("gemini_model").map(SystemSetting::getValue).orElse("gemini-2.5-flash");
+    String nutriCacheKey =
+        "NUTRI:"
+            + name
+            + ":"
+            + servings
+            + ":"
+            + (request.ingredients() != null ? request.ingredients().size() : 0);
+    CachedAiItem cachedNutri = aiCache.get(nutriCacheKey);
+    if (cachedNutri != null && !cachedNutri.isExpired(24 * 3600 * 1000L)) {
+      return (NutritionEstimateResponse) cachedNutri.value;
+    }
+
+    String apiKey =
+        systemSettingRepository.findByKey("gemini_api_key").map(SystemSetting::getValue).orElse("");
+    String model =
+        systemSettingRepository
+            .findByKey("gemini_model")
+            .map(SystemSetting::getValue)
+            .orElse("gemini-2.5-flash");
 
     NutritionEstimateResponse response = null;
 
@@ -420,11 +549,16 @@ public class AiSuggestionService {
       response = calculateLocalNutrition(request, servings);
     }
 
+    if (response != null) {
+      aiCache.put(nutriCacheKey, new CachedAiItem(response));
+    }
+
     return response;
   }
 
   private NutritionEstimateResponse callGeminiNutritionApi(
-      String apiKey, String model, NutritionEstimateRequest request, int servings) throws Exception {
+      String apiKey, String model, NutritionEstimateRequest request, int servings)
+      throws Exception {
     String endpoint =
         "https://generativelanguage.googleapis.com/v1beta/models/"
             + model
@@ -434,7 +568,8 @@ public class AiSuggestionService {
     StringBuilder ingredientsList = new StringBuilder();
     if (request.ingredients() != null) {
       for (NutritionIngredientItem ing : request.ingredients()) {
-        ingredientsList.append("- ")
+        ingredientsList
+            .append("- ")
             .append(ing.quantity() != null ? ing.quantity() : "")
             .append(" ")
             .append(ing.unit() != null ? ing.unit() : "")
@@ -446,10 +581,18 @@ public class AiSuggestionService {
 
     String prompt =
         "Você é um nutricionista especialista. Estime os valores nutricionais TOTAIS da receita inteira:\n"
-            + "Nome: " + request.name() + "\n"
-            + "Categoria: " + (request.category() != null ? request.category() : "Geral") + "\n"
-            + "Porções: " + servings + "\n"
-            + "Ingredientes:\n" + ingredientsList.toString() + "\n"
+            + "Nome: "
+            + request.name()
+            + "\n"
+            + "Categoria: "
+            + (request.category() != null ? request.category() : "Geral")
+            + "\n"
+            + "Porções: "
+            + servings
+            + "\n"
+            + "Ingredientes:\n"
+            + ingredientsList.toString()
+            + "\n"
             + "Responda ESTRITAMENTE em formato JSON com este schema exato:\n"
             + "{\n"
             + "  \"totalCalories\": 350.0,\n"
@@ -463,7 +606,7 @@ public class AiSuggestionService {
     String requestBody =
         "{\"contents\":[{\"parts\":[{\"text\":\""
             + prompt.replace("\"", "\\\"").replace("\n", "\\n")
-            + "\"}]}],\"generationConfig\":{\"temperature\":0.2}}";
+            + "\"}]}],\"generationConfig\":{\"responseMimeType\":\"application/json\",\"temperature\":0.2}}";
 
     HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     HttpRequest httpReq =
@@ -484,31 +627,49 @@ public class AiSuggestionService {
         int jsonEnd = text.lastIndexOf('}');
         if (jsonStart >= 0 && jsonEnd > jsonStart) {
           JsonNode json = objectMapper.readTree(text.substring(jsonStart, jsonEnd + 1));
-          BigDecimal totalCals = BigDecimal.valueOf(json.path("totalCalories").asDouble(350.0)).setScale(1, RoundingMode.HALF_UP);
-          BigDecimal carbs = BigDecimal.valueOf(json.path("carbohydrates").asDouble(40.0)).setScale(1, RoundingMode.HALF_UP);
-          BigDecimal protein = BigDecimal.valueOf(json.path("proteins").asDouble(20.0)).setScale(1, RoundingMode.HALF_UP);
-          BigDecimal fats = BigDecimal.valueOf(json.path("fats").asDouble(10.0)).setScale(1, RoundingMode.HALF_UP);
-          BigDecimal fibers = BigDecimal.valueOf(json.path("fibers").asDouble(4.0)).setScale(1, RoundingMode.HALF_UP);
-          BigDecimal sodium = BigDecimal.valueOf(json.path("sodium").asDouble(250.0)).setScale(1, RoundingMode.HALF_UP);
+          BigDecimal totalCals =
+              BigDecimal.valueOf(json.path("totalCalories").asDouble(350.0))
+                  .setScale(1, RoundingMode.HALF_UP);
+          BigDecimal carbs =
+              BigDecimal.valueOf(json.path("carbohydrates").asDouble(40.0))
+                  .setScale(1, RoundingMode.HALF_UP);
+          BigDecimal protein =
+              BigDecimal.valueOf(json.path("proteins").asDouble(20.0))
+                  .setScale(1, RoundingMode.HALF_UP);
+          BigDecimal fats =
+              BigDecimal.valueOf(json.path("fats").asDouble(10.0))
+                  .setScale(1, RoundingMode.HALF_UP);
+          BigDecimal fibers =
+              BigDecimal.valueOf(json.path("fibers").asDouble(4.0))
+                  .setScale(1, RoundingMode.HALF_UP);
+          BigDecimal sodium =
+              BigDecimal.valueOf(json.path("sodium").asDouble(250.0))
+                  .setScale(1, RoundingMode.HALF_UP);
 
           BigDecimal s = BigDecimal.valueOf(servings);
           return new NutritionEstimateResponse(
-              totalCals, carbs, protein, fats, fibers, sodium, servings,
+              totalCals,
+              carbs,
+              protein,
+              fats,
+              fibers,
+              sodium,
+              servings,
               totalCals.divide(s, 1, RoundingMode.HALF_UP),
               carbs.divide(s, 1, RoundingMode.HALF_UP),
               protein.divide(s, 1, RoundingMode.HALF_UP),
               fats.divide(s, 1, RoundingMode.HALF_UP),
               fibers.divide(s, 1, RoundingMode.HALF_UP),
               sodium.divide(s, 1, RoundingMode.HALF_UP),
-              "GEMINI_AI"
-          );
+              "GEMINI_AI");
         }
       }
     }
     return null;
   }
 
-  private NutritionEstimateResponse calculateLocalNutrition(NutritionEstimateRequest request, int servings) {
+  private NutritionEstimateResponse calculateLocalNutrition(
+      NutritionEstimateRequest request, int servings) {
     double totalCals = 0;
     double carbs = 0;
     double protein = 0;
@@ -524,7 +685,8 @@ public class AiSuggestionService {
           if (ing.quantity() != null && !ing.quantity().isBlank()) {
             qty = Double.parseDouble(ing.quantity().replace(",", ".").replaceAll("[^0-9.]", ""));
           }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         if (name.contains("ovo")) {
           totalCals += 75 * qty;
@@ -532,19 +694,28 @@ public class AiSuggestionService {
           fats += 5.0 * qty;
           carbs += 0.5 * qty;
           sodium += 70 * qty;
-        } else if (name.contains("frango") || name.contains("peito") || name.contains("patinho") || name.contains("carne")) {
+        } else if (name.contains("frango")
+            || name.contains("peito")
+            || name.contains("patinho")
+            || name.contains("carne")) {
           double factor = qty > 20 ? (qty / 100.0) : 1.5;
           totalCals += 165 * factor;
           protein += 31 * factor;
           fats += 4.5 * factor;
           sodium += 75 * factor;
-        } else if (name.contains("arroz") || name.contains("penne") || name.contains("massa") || name.contains("batata")) {
+        } else if (name.contains("arroz")
+            || name.contains("penne")
+            || name.contains("massa")
+            || name.contains("batata")) {
           double factor = qty > 20 ? (qty / 100.0) : 1.2;
           totalCals += 130 * factor;
           carbs += 28 * factor;
           protein += 3 * factor;
           fibers += 2 * factor;
-        } else if (name.contains("aveia") || name.contains("granola") || name.contains("pão") || name.contains("torrada")) {
+        } else if (name.contains("aveia")
+            || name.contains("granola")
+            || name.contains("pão")
+            || name.contains("torrada")) {
           double factor = qty > 10 ? (qty / 50.0) : (qty * 0.5);
           totalCals += 120 * factor;
           carbs += 22 * factor;
@@ -556,7 +727,11 @@ public class AiSuggestionService {
           carbs += 24 * qty;
           protein += 1.2 * qty;
           fibers += 3.0 * qty;
-        } else if (name.contains("queijo") || name.contains("ricota") || name.contains("manteiga") || name.contains("azeite") || name.contains("amendoim")) {
+        } else if (name.contains("queijo")
+            || name.contains("ricota")
+            || name.contains("manteiga")
+            || name.contains("azeite")
+            || name.contains("amendoim")) {
           double factor = qty > 10 ? (qty / 30.0) : 1.0;
           totalCals += 100 * factor;
           fats += 8.0 * factor;
@@ -567,7 +742,11 @@ public class AiSuggestionService {
           protein += 7.0 * qty;
           carbs += 9.0 * qty;
           fats += 3.0 * qty;
-        } else if (name.contains("brócolis") || name.contains("espinafre") || name.contains("cenoura") || name.contains("tomate") || name.contains("alface")) {
+        } else if (name.contains("brócolis")
+            || name.contains("espinafre")
+            || name.contains("cenoura")
+            || name.contains("tomate")
+            || name.contains("alface")) {
           totalCals += 30 * qty;
           carbs += 5.0 * qty;
           protein += 2.0 * qty;
@@ -600,47 +779,76 @@ public class AiSuggestionService {
 
     BigDecimal s = BigDecimal.valueOf(servings);
     return new NutritionEstimateResponse(
-        totalCaloriesBd, carbsBd, proteinBd, fatsBd, fibersBd, sodiumBd, servings,
+        totalCaloriesBd,
+        carbsBd,
+        proteinBd,
+        fatsBd,
+        fibersBd,
+        sodiumBd,
+        servings,
         totalCaloriesBd.divide(s, 1, RoundingMode.HALF_UP),
         carbsBd.divide(s, 1, RoundingMode.HALF_UP),
         proteinBd.divide(s, 1, RoundingMode.HALF_UP),
         fatsBd.divide(s, 1, RoundingMode.HALF_UP),
         fibersBd.divide(s, 1, RoundingMode.HALF_UP),
         sodiumBd.divide(s, 1, RoundingMode.HALF_UP),
-        "LOCAL_ENGINE"
-    );
+        "LOCAL_ENGINE");
   }
 
   public WorkoutCalorieEstimateResponse estimateWorkoutCalories(
       UUID userId, WorkoutCalorieEstimateRequest request) {
-    int duration = (request.durationMinutes() != null && request.durationMinutes() > 0)
-        ? request.durationMinutes()
-        : 45;
-    String activity = (request.activity() != null && !request.activity().isBlank())
-        ? request.activity().trim()
-        : "Treino / Atividade Física";
-    String intensity = (request.intensity() != null && !request.intensity().isBlank())
-        ? request.intensity().trim().toUpperCase()
-        : "MODERADO";
+    int duration =
+        (request.durationMinutes() != null && request.durationMinutes() > 0)
+            ? request.durationMinutes()
+            : 45;
+    String activity =
+        (request.activity() != null && !request.activity().isBlank())
+            ? request.activity().trim()
+            : "Treino / Atividade Física";
+    String intensity =
+        (request.intensity() != null && !request.intensity().isBlank())
+            ? request.intensity().trim().toUpperCase()
+            : "MODERADO";
 
     double weightKg = 75.0;
     if (request.userWeightKg() != null && request.userWeightKg().doubleValue() >= 30.0) {
       weightKg = request.userWeightKg().doubleValue();
     } else if (userId != null) {
       var userOpt = userRepository.findById(userId);
-      if (userOpt.isPresent() && userOpt.get().getCurrentWeight() != null
+      if (userOpt.isPresent()
+          && userOpt.get().getCurrentWeight() != null
           && userOpt.get().getCurrentWeight().doubleValue() >= 30.0) {
         weightKg = userOpt.get().getCurrentWeight().doubleValue();
       }
     }
 
-    String apiKey = systemSettingRepository.findByKey("gemini_api_key").map(SystemSetting::getValue).orElse("");
-    String model = systemSettingRepository.findByKey("gemini_model").map(SystemSetting::getValue).orElse("gemini-2.5-flash");
+    String workoutCacheKey =
+        "WORKOUT:"
+            + activity.toLowerCase()
+            + ":"
+            + duration
+            + ":"
+            + intensity.toLowerCase()
+            + ":"
+            + (int) weightKg;
+    CachedAiItem cachedWorkout = aiCache.get(workoutCacheKey);
+    if (cachedWorkout != null && !cachedWorkout.isExpired(24 * 3600 * 1000L)) {
+      return (WorkoutCalorieEstimateResponse) cachedWorkout.value;
+    }
+
+    String apiKey =
+        systemSettingRepository.findByKey("gemini_api_key").map(SystemSetting::getValue).orElse("");
+    String model =
+        systemSettingRepository
+            .findByKey("gemini_model")
+            .map(SystemSetting::getValue)
+            .orElse("gemini-2.5-flash");
 
     WorkoutCalorieEstimateResponse response = null;
     if (apiKey != null && !apiKey.isBlank() && !apiKey.contains("...")) {
       try {
-        response = callGeminiWorkoutApi(apiKey.trim(), model, activity, duration, intensity, weightKg);
+        response =
+            callGeminiWorkoutApi(apiKey.trim(), model, activity, duration, intensity, weightKg);
       } catch (Exception ignored) {
       }
     }
@@ -649,11 +857,16 @@ public class AiSuggestionService {
       response = calculateLocalWorkoutCalories(activity, duration, intensity, weightKg);
     }
 
+    if (response != null) {
+      aiCache.put(workoutCacheKey, new CachedAiItem(response));
+    }
+
     return response;
   }
 
   private WorkoutCalorieEstimateResponse callGeminiWorkoutApi(
-      String apiKey, String model, String activity, int duration, String intensity, double weightKg) throws Exception {
+      String apiKey, String model, String activity, int duration, String intensity, double weightKg)
+      throws Exception {
     String endpoint =
         "https://generativelanguage.googleapis.com/v1beta/models/"
             + model
@@ -663,10 +876,18 @@ public class AiSuggestionService {
     String prompt =
         "Você é um fisiologista do exercício físico e educador físico especialista.\n"
             + "Estime o gasto calórico exato para a seguinte atividade:\n"
-            + "Atividade: " + activity + "\n"
-            + "Duração: " + duration + " minutos\n"
-            + "Intensidade: " + intensity + "\n"
-            + "Peso corporal do praticante: " + weightKg + " kg\n\n"
+            + "Atividade: "
+            + activity
+            + "\n"
+            + "Duração: "
+            + duration
+            + " minutos\n"
+            + "Intensidade: "
+            + intensity
+            + "\n"
+            + "Peso corporal do praticante: "
+            + weightKg
+            + " kg\n\n"
             + "Responda ESTRITAMENTE em formato JSON com o seguinte schema exato:\n"
             + "{\n"
             + "  \"estimatedCalories\": 350,\n"
@@ -678,7 +899,7 @@ public class AiSuggestionService {
     String requestBody =
         "{\"contents\":[{\"parts\":[{\"text\":\""
             + prompt.replace("\"", "\\\"").replace("\n", "\\n")
-            + "\"}]}],\"generationConfig\":{\"temperature\":0.2}}";
+            + "\"}]}],\"generationConfig\":{\"responseMimeType\":\"application/json\",\"temperature\":0.2}}";
 
     HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     HttpRequest httpReq =
@@ -707,10 +928,13 @@ public class AiSuggestionService {
     }
 
     JsonNode data = objectMapper.readTree(cleanJson);
-    int estCals = data.path("estimatedCalories").asInt((int) Math.round(5.5 * weightKg * (duration / 60.0)));
-    int calsPerHour = data.path("caloriesPerHour").asInt((int) Math.round((estCals * 60.0) / duration));
+    int estCals =
+        data.path("estimatedCalories").asInt((int) Math.round(5.5 * weightKg * (duration / 60.0)));
+    int calsPerHour =
+        data.path("caloriesPerHour").asInt((int) Math.round((estCals * 60.0) / duration));
     double met = data.path("met").asDouble(5.5);
-    String explanation = data.path("explanation").asText("Estimativa calculada via IA para " + activity);
+    String explanation =
+        data.path("explanation").asText("Estimativa calculada via IA para " + activity);
 
     return new WorkoutCalorieEstimateResponse(
         activity, duration, estCals, calsPerHour, met, weightKg, intensity, explanation, "GEMINI");
@@ -721,27 +945,58 @@ public class AiSuggestionService {
     String lower = activity.toLowerCase();
     double baseMet = 5.5;
 
-    if (lower.contains("corrida") || lower.contains("correr") || lower.contains("jogging") || lower.contains("esteira")) {
+    if (lower.contains("corrida")
+        || lower.contains("correr")
+        || lower.contains("jogging")
+        || lower.contains("esteira")) {
       baseMet = 9.0;
-    } else if (lower.contains("bike") || lower.contains("ciclismo") || lower.contains("bicicleta") || lower.contains("spinning") || lower.contains("pedalar")) {
+    } else if (lower.contains("bike")
+        || lower.contains("ciclismo")
+        || lower.contains("bicicleta")
+        || lower.contains("spinning")
+        || lower.contains("pedalar")) {
       baseMet = 7.5;
-    } else if (lower.contains("muscul") || lower.contains("força") || lower.contains("hipertrofia") || lower.contains("peso") || lower.contains("calistenia")) {
+    } else if (lower.contains("muscul")
+        || lower.contains("força")
+        || lower.contains("hipertrofia")
+        || lower.contains("peso")
+        || lower.contains("calistenia")) {
       baseMet = 5.5;
     } else if (lower.contains("caminha") || lower.contains("passeio") || lower.contains("passo")) {
       baseMet = 3.8;
-    } else if (lower.contains("funcional") || lower.contains("hiit") || lower.contains("crossfit") || lower.contains("circuito")) {
+    } else if (lower.contains("funcional")
+        || lower.contains("hiit")
+        || lower.contains("crossfit")
+        || lower.contains("circuito")) {
       baseMet = 8.0;
     } else if (lower.contains("nata") || lower.contains("nado") || lower.contains("piscina")) {
       baseMet = 7.0;
-    } else if (lower.contains("futebol") || lower.contains("futsal") || lower.contains("basquete") || lower.contains("volei") || lower.contains("vôlei")) {
+    } else if (lower.contains("futebol")
+        || lower.contains("futsal")
+        || lower.contains("basquete")
+        || lower.contains("volei")
+        || lower.contains("vôlei")) {
       baseMet = 8.0;
-    } else if (lower.contains("luta") || lower.contains("boxe") || lower.contains("jiu") || lower.contains("muay") || lower.contains("artes marciais")) {
+    } else if (lower.contains("luta")
+        || lower.contains("boxe")
+        || lower.contains("jiu")
+        || lower.contains("muay")
+        || lower.contains("artes marciais")) {
       baseMet = 8.5;
-    } else if (lower.contains("yoga") || lower.contains("ioga") || lower.contains("alongamento") || lower.contains("pilates")) {
+    } else if (lower.contains("yoga")
+        || lower.contains("ioga")
+        || lower.contains("alongamento")
+        || lower.contains("pilates")) {
       baseMet = 3.0;
-    } else if (lower.contains("dança") || lower.contains("danca") || lower.contains("zumba") || lower.contains("ritmo")) {
+    } else if (lower.contains("dança")
+        || lower.contains("danca")
+        || lower.contains("zumba")
+        || lower.contains("ritmo")) {
       baseMet = 6.0;
-    } else if (lower.contains("tennis") || lower.contains("tênis") || lower.contains("beach tennis") || lower.contains("squash")) {
+    } else if (lower.contains("tennis")
+        || lower.contains("tênis")
+        || lower.contains("beach tennis")
+        || lower.contains("squash")) {
       baseMet = 7.0;
     }
 
@@ -758,12 +1013,21 @@ public class AiSuggestionService {
     int caloriesPerHour = (int) Math.round(finalMet * weightKg);
     int estimatedCalories = (int) Math.round((caloriesPerHour * duration) / 60.0);
 
-    String explanation = String.format(
-        "Cálculo estimado para %s (Intensidade %s) com base no índice fisiológico de %.1f METs para peso corporal de %.1f kg.",
-        activity, intensity.toLowerCase(), finalMet, weightKg);
+    String explanation =
+        String.format(
+            "Cálculo estimado para %s (Intensidade %s) com base no índice fisiológico de %.1f METs para peso corporal de %.1f kg.",
+            activity, intensity.toLowerCase(), finalMet, weightKg);
 
     return new WorkoutCalorieEstimateResponse(
-        activity, duration, estimatedCalories, caloriesPerHour, finalMet, weightKg, intensity, explanation, "LOCAL_ENGINE");
+        activity,
+        duration,
+        estimatedCalories,
+        caloriesPerHour,
+        finalMet,
+        weightKg,
+        intensity,
+        explanation,
+        "LOCAL_ENGINE");
   }
 
   public WeeklyEvolutionSummaryResponse generateWeeklyEvolutionSummary(
@@ -772,9 +1036,13 @@ public class AiSuggestionService {
     LocalDate monday = today.with(java.time.DayOfWeek.MONDAY);
     LocalDate sunday = monday.plusDays(6);
 
-    String periodLabel = String.format("%02d/%02d a %02d/%02d",
-        monday.getDayOfMonth(), monday.getMonthValue(),
-        sunday.getDayOfMonth(), sunday.getMonthValue());
+    String periodLabel =
+        String.format(
+            "%02d/%02d a %02d/%02d",
+            monday.getDayOfMonth(),
+            monday.getMonthValue(),
+            sunday.getDayOfMonth(),
+            sunday.getMonthValue());
 
     Instant weekStart = monday.atStartOfDay(ZoneId.systemDefault()).toInstant();
     Instant weekEnd = today.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
@@ -782,9 +1050,10 @@ public class AiSuggestionService {
     // 1. Obter treinos da semana
     List<WorkoutLog> workouts;
     if (request != null && request.familyId() != null) {
-      workouts = workoutLogRepository.findAllRecent(userId, request.familyId()).stream()
-          .filter(w -> w.getPerformedAt() != null && !w.getPerformedAt().isBefore(weekStart))
-          .toList();
+      workouts =
+          workoutLogRepository.findAllRecent(userId, request.familyId()).stream()
+              .filter(w -> w.getPerformedAt() != null && !w.getPerformedAt().isBefore(weekStart))
+              .toList();
     } else {
       workouts = workoutLogRepository.findAllByUserAndDateRange(userId, weekStart, weekEnd);
     }
@@ -803,7 +1072,8 @@ public class AiSuggestionService {
     int activitiesCompleted = activities.size();
 
     // 3. Obter histórico de peso recente
-    List<WeightHistory> weightRecords = weightHistoryRepository.findByUserIdOrderByRecordedAtDesc(userId);
+    List<WeightHistory> weightRecords =
+        weightHistoryRepository.findByUserIdOrderByRecordedAtDesc(userId);
     BigDecimal currentWeight = null;
     BigDecimal weightChange = BigDecimal.ZERO;
     String weightProgressNote = "Sem registro recente de peso.";
@@ -814,14 +1084,21 @@ public class AiSuggestionService {
         BigDecimal prev = weightRecords.get(1).getWeightKg();
         weightChange = currentWeight.subtract(prev);
         if (weightChange.compareTo(BigDecimal.ZERO) < 0) {
-          weightProgressNote = String.format("Evolução positiva: redução de %s kg em relação ao registro anterior.", weightChange.abs().toPlainString());
+          weightProgressNote =
+              String.format(
+                  "Evolução positiva: redução de %s kg em relação ao registro anterior.",
+                  weightChange.abs().toPlainString());
         } else if (weightChange.compareTo(BigDecimal.ZERO) > 0) {
-          weightProgressNote = String.format("Aumento de %s kg registrado. Acompanhe a composição corporal e treinos.", weightChange.toPlainString());
+          weightProgressNote =
+              String.format(
+                  "Aumento de %s kg registrado. Acompanhe a composição corporal e treinos.",
+                  weightChange.toPlainString());
         } else {
           weightProgressNote = "Peso estável e mantido em relação ao último registro.";
         }
       } else {
-        weightProgressNote = String.format("Peso atual registrado em %s kg.", currentWeight.toPlainString());
+        weightProgressNote =
+            String.format("Peso atual registrado em %s kg.", currentWeight.toPlainString());
       }
     }
 
@@ -831,17 +1108,29 @@ public class AiSuggestionService {
     List<String> recommendations = new ArrayList<>();
 
     if (workoutsCount >= 3) {
-      wentWell.add(String.format("Excelente consistência esportiva: %d treinos realizados com %d kcal queimadas no total.", workoutsCount, caloriesBurned));
+      wentWell.add(
+          String.format(
+              "Excelente consistência esportiva: %d treinos realizados com %d kcal queimadas no total.",
+              workoutsCount, caloriesBurned));
     } else if (workoutsCount > 0) {
-      wentWell.add(String.format("Movimentou o corpo nesta semana: %d treino(s) totalizando %d minutos de atividade física.", workoutsCount, totalMinutes));
+      wentWell.add(
+          String.format(
+              "Movimentou o corpo nesta semana: %d treino(s) totalizando %d minutos de atividade física.",
+              workoutsCount, totalMinutes));
     }
 
     if (activitiesCompleted > 0) {
-      wentWell.add(String.format("%d tarefas e hábitos essenciais da casa/agenda foram cumpridos com sucesso.", activitiesCompleted));
+      wentWell.add(
+          String.format(
+              "%d tarefas e hábitos essenciais da casa/agenda foram cumpridos com sucesso.",
+              activitiesCompleted));
     }
 
     if (weightChange.compareTo(BigDecimal.ZERO) < 0) {
-      wentWell.add(String.format("Progresso na balança: variação favorável de -%s kg nesta semana.", weightChange.abs().toPlainString()));
+      wentWell.add(
+          String.format(
+              "Progresso na balança: variação favorável de -%s kg nesta semana.",
+              weightChange.abs().toPlainString()));
     }
 
     if (wentWell.isEmpty()) {
@@ -850,35 +1139,50 @@ public class AiSuggestionService {
 
     // Pontos de Atenção / O que faltou
     if (workoutsCount < 2) {
-      missedOrAttention.add("Volume de treinos abaixo da meta ideal recomendada (mínimo de 3 sessões semanais).");
+      missedOrAttention.add(
+          "Volume de treinos abaixo da meta ideal recomendada (mínimo de 3 sessões semanais).");
     }
 
     // Verificar se pesou esta semana (desde segunda)
-    boolean weighedThisWeek = weightRecords.stream()
-        .anyMatch(w -> w.getRecordedAt() != null && !w.getRecordedAt().isBefore(monday.atStartOfDay()));
+    boolean weighedThisWeek =
+        weightRecords.stream()
+            .anyMatch(
+                w ->
+                    w.getRecordedAt() != null
+                        && !w.getRecordedAt().isBefore(monday.atStartOfDay()));
     if (!weighedThisWeek) {
-      missedOrAttention.add("Pesagem semanal ainda pendente! A segunda-feira é o melhor momento para atualizar a balança.");
+      missedOrAttention.add(
+          "Pesagem semanal ainda pendente! A segunda-feira é o melhor momento para atualizar a balança.");
     }
 
     if (missedOrAttention.isEmpty()) {
-      missedOrAttention.add("Sem desvios críticos detectados — mantenha o ritmo na hidratação e sono regular.");
+      missedOrAttention.add(
+          "Sem desvios críticos detectados — mantenha o ritmo na hidratação e sono regular.");
     }
 
     // Recomendações / O que pode melhorar
-    recommendations.add("Definir o horário de pesagem oficial nas manhãs de segunda-feira para manter o histórico contínuo.");
+    recommendations.add(
+        "Definir o horário de pesagem oficial nas manhãs de segunda-feira para manter o histórico contínuo.");
     if (workoutsCount < 3) {
-      recommendations.add("Agendar com antecedência na agenda os 3 dias fixos de treino para proteger esse horário.");
+      recommendations.add(
+          "Agendar com antecedência na agenda os 3 dias fixos de treino para proteger esse horário.");
     } else {
-      recommendations.add("Manter a alternância inteligente de treinos de força e aeróbicos para otimizar a queima calórica.");
+      recommendations.add(
+          "Manter a alternância inteligente de treinos de força e aeróbicos para otimizar a queima calórica.");
     }
-    recommendations.add("Aproveitar a visualização em lista das receitas para planejar refeições equilibradas da semana com boa proteína.");
+    recommendations.add(
+        "Aproveitar a visualização em lista das receitas para planejar refeições equilibradas da semana com boa proteína.");
 
-    String overallStatus = workoutsCount >= 3 && missedOrAttention.size() <= 1 ? "POSITIVO" : (workoutsCount >= 1 ? "MODERADO" : "ATENCAO");
-    String headline = "POSITIVO".equals(overallStatus)
-        ? "Semana de alta consistência e dedicação na rotina saudável!"
-        : ("MODERADO".equals(overallStatus)
-            ? "Bom ritmo mantido, com pequenos ajustes de constância pela frente."
-            : "Momento oportuno para retomar o ritmo e organizar a semana que vem.");
+    String overallStatus =
+        workoutsCount >= 3 && missedOrAttention.size() <= 1
+            ? "POSITIVO"
+            : (workoutsCount >= 1 ? "MODERADO" : "ATENCAO");
+    String headline =
+        "POSITIVO".equals(overallStatus)
+            ? "Semana de alta consistência e dedicação na rotina saudável!"
+            : ("MODERADO".equals(overallStatus)
+                ? "Bom ritmo mantido, com pequenos ajustes de constância pela frente."
+                : "Momento oportuno para retomar o ritmo e organizar a semana que vem.");
 
     // 5. Escopo da Família & Lar (Pontos Coletivos da Casa)
     String famName = "Nossa Casa";
@@ -894,7 +1198,10 @@ public class AiSuggestionService {
     }
 
     if (activitiesCompleted > 0) {
-      famWentWell.add(String.format("%d tarefas, hábitos e acordos da casa mantidos em dia no nosso espaço.", activitiesCompleted));
+      famWentWell.add(
+          String.format(
+              "%d tarefas, hábitos e acordos da casa mantidos em dia no nosso espaço.",
+              activitiesCompleted));
     } else {
       famWentWell.add("Espaço e rotina da casa organizados.");
     }
@@ -906,16 +1213,12 @@ public class AiSuggestionService {
       famMissed.add("Atenção para manter os acordos de convivência e despensa sempre atualizados.");
     }
 
-    famRecs.add("Reservar ao menos uma refeição afetiva juntos na semana para celebrar o progresso da casa.");
+    famRecs.add(
+        "Reservar ao menos uma refeição afetiva juntos na semana para celebrar o progresso da casa.");
     famRecs.add("Alinhar as tarefas e o cardápio da semana logo no domingo ou segunda-feira.");
 
-    FamilyScopeSummary familyScope = new FamilyScopeSummary(
-        famName,
-        activitiesCompleted,
-        famWentWell,
-        famMissed,
-        famRecs
-    );
+    FamilyScopeSummary familyScope =
+        new FamilyScopeSummary(famName, activitiesCompleted, famWentWell, famMissed, famRecs);
 
     // 6. Detalhamento Individual por Membro (Separando o que é de quem!)
     List<MemberWeeklySummary> memberBreakdown = new ArrayList<>();
@@ -925,7 +1228,8 @@ public class AiSuggestionService {
       if (family != null) {
         for (var m : family.getMembers()) {
           User u = m.getUser();
-          var mWorkouts = workoutLogRepository.findAllByUserAndDateRange(u.getId(), weekStart, weekEnd);
+          var mWorkouts =
+              workoutLogRepository.findAllByUserAndDateRange(u.getId(), weekStart, weekEnd);
           int mCount = mWorkouts.size();
           int mMin = mWorkouts.stream().mapToInt(WorkoutLog::getDurationMinutes).sum();
           int mCal = mWorkouts.stream().mapToInt(WorkoutLog::getCaloriesBurned).sum();
@@ -937,7 +1241,12 @@ public class AiSuggestionService {
 
           if (!mWeights.isEmpty()) {
             mCurrentW = mWeights.get(0).getWeightKg();
-            mWeighed = mWeights.stream().anyMatch(w -> w.getRecordedAt() != null && !w.getRecordedAt().isBefore(monday.atStartOfDay()));
+            mWeighed =
+                mWeights.stream()
+                    .anyMatch(
+                        w ->
+                            w.getRecordedAt() != null
+                                && !w.getRecordedAt().isBefore(monday.atStartOfDay()));
             if (mWeights.size() > 1) {
               mDelta = mCurrentW.subtract(mWeights.get(1).getWeightKg());
             }
@@ -948,15 +1257,26 @@ public class AiSuggestionService {
           List<String> mRecs = new ArrayList<>();
 
           if (mCount >= 3) {
-            mWentWell.add(String.format("Alta dedicação esportiva: %d treinos com %d kcal queimadas no total.", mCount, mCal));
+            mWentWell.add(
+                String.format(
+                    "Alta dedicação esportiva: %d treinos com %d kcal queimadas no total.",
+                    mCount, mCal));
           } else if (mCount > 0) {
-            mWentWell.add(String.format("Manteve o corpo em movimento: %d treino(s) totalizando %d minutos de exercício.", mCount, mMin));
+            mWentWell.add(
+                String.format(
+                    "Manteve o corpo em movimento: %d treino(s) totalizando %d minutos de exercício.",
+                    mCount, mMin));
           }
 
           if (mDelta.compareTo(BigDecimal.ZERO) < 0) {
-            mWentWell.add(String.format("Progresso na balança: variação favorável de -%s kg registrada.", mDelta.abs().toPlainString()));
+            mWentWell.add(
+                String.format(
+                    "Progresso na balança: variação favorável de -%s kg registrada.",
+                    mDelta.abs().toPlainString()));
           } else if (mCurrentW != null && mWeights.size() == 1) {
-            mWentWell.add(String.format("Primeiro peso de referência cadastrado: %s kg.", mCurrentW.toPlainString()));
+            mWentWell.add(
+                String.format(
+                    "Primeiro peso de referência cadastrado: %s kg.", mCurrentW.toPlainString()));
           }
 
           if (mWentWell.isEmpty()) {
@@ -964,32 +1284,37 @@ public class AiSuggestionService {
           }
 
           if (mCount < 3) {
-            mMissed.add(String.format("Volume de treinos abaixo da meta ideal (%d de 3 sessões realizadas).", mCount));
+            mMissed.add(
+                String.format(
+                    "Volume de treinos abaixo da meta ideal (%d de 3 sessões realizadas).",
+                    mCount));
           }
           if (!mWeighed) {
             mMissed.add("Ainda não registrou a pesagem oficial desta semana na balança.");
           }
 
-          mRecs.add("Realizar pesagem oficial na manhã de segunda-feira para manter o histórico contínuo.");
+          mRecs.add(
+              "Realizar pesagem oficial na manhã de segunda-feira para manter o histórico contínuo.");
           if (mCount < 3) {
-            mRecs.add("Bloquear na agenda os horários específicos de treino para a próxima semana.");
+            mRecs.add(
+                "Bloquear na agenda os horários específicos de treino para a próxima semana.");
           } else {
             mRecs.add("Manter a intensidade e alternância de grupos musculares.");
           }
 
-          memberBreakdown.add(new MemberWeeklySummary(
-              u.getId().toString(),
-              u.getName(),
-              m.getRole().name(),
-              mCount,
-              mMin,
-              mCal,
-              mCurrentW,
-              mDelta,
-              mWentWell,
-              mMissed,
-              mRecs
-          ));
+          memberBreakdown.add(
+              new MemberWeeklySummary(
+                  u.getId().toString(),
+                  u.getName(),
+                  m.getRole().name(),
+                  mCount,
+                  mMin,
+                  mCal,
+                  mCurrentW,
+                  mDelta,
+                  mWentWell,
+                  mMissed,
+                  mRecs));
         }
       }
     }
@@ -1001,19 +1326,19 @@ public class AiSuggestionService {
       List<String> mMissed = new ArrayList<>(missedOrAttention);
       List<String> mRecs = new ArrayList<>(recommendations);
 
-      memberBreakdown.add(new MemberWeeklySummary(
-          userId.toString(),
-          name,
-          "TITULAR",
-          workoutsCount,
-          totalMinutes,
-          caloriesBurned,
-          currentWeight,
-          weightChange,
-          mWentWell,
-          mMissed,
-          mRecs
-      ));
+      memberBreakdown.add(
+          new MemberWeeklySummary(
+              userId.toString(),
+              name,
+              "TITULAR",
+              workoutsCount,
+              totalMinutes,
+              caloriesBurned,
+              currentWeight,
+              weightChange,
+              mWentWell,
+              mMissed,
+              mRecs));
     }
 
     return new WeeklyEvolutionSummaryResponse(
@@ -1031,8 +1356,6 @@ public class AiSuggestionService {
         currentWeight,
         weightChange,
         familyScope,
-        memberBreakdown
-    );
+        memberBreakdown);
   }
-
 }

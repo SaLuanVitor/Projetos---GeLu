@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "system_audit_logs")
 public class SystemAuditLog {
 
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
   @Column(name = "actor_email", nullable = false)
   private String actorEmail;

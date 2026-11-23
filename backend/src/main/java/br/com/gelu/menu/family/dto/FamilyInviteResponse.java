@@ -16,8 +16,7 @@ public record FamilyInviteResponse(
     String status,
     boolean expired,
     Instant expiresAt,
-    Instant createdAt
-) {
+    Instant createdAt) {
   public static FamilyInviteResponse from(FamilyInvite invite) {
     return new FamilyInviteResponse(
         invite.getId(),

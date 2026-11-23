@@ -7,5 +7,4 @@ public record FamilyScopeSummary(
     int collectiveActivitiesCount,
     List<String> wentWell,
     List<String> missedOrAttention,
-    List<String> recommendations
-) {}
+    List<String> recommendations) {}

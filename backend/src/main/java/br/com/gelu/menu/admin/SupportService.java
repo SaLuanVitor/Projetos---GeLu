@@ -42,11 +42,31 @@ public class SupportService {
 
   @Transactional(readOnly = true)
   public PublicSupportSettingsResponse getPublicSettings() {
-    String email = systemSettingRepository.findByKey("support_email").map(SystemSetting::getValue).orElse("suporte@gelu.com.br");
-    String phone = systemSettingRepository.findByKey("support_phone").map(SystemSetting::getValue).orElse("(11) 99999-9999");
-    String whatsapp = systemSettingRepository.findByKey("support_whatsapp").map(SystemSetting::getValue).orElse("5511999999999");
-    String hours = systemSettingRepository.findByKey("support_hours").map(SystemSetting::getValue).orElse("Segunda a Sexta, das 09:00 às 18:00");
-    String banner = systemSettingRepository.findByKey("system_broadcast_banner").map(SystemSetting::getValue).orElse("");
+    String email =
+        systemSettingRepository
+            .findByKey("support_email")
+            .map(SystemSetting::getValue)
+            .orElse("suporte@gelu.com.br");
+    String phone =
+        systemSettingRepository
+            .findByKey("support_phone")
+            .map(SystemSetting::getValue)
+            .orElse("(11) 99999-9999");
+    String whatsapp =
+        systemSettingRepository
+            .findByKey("support_whatsapp")
+            .map(SystemSetting::getValue)
+            .orElse("5511999999999");
+    String hours =
+        systemSettingRepository
+            .findByKey("support_hours")
+            .map(SystemSetting::getValue)
+            .orElse("Segunda a Sexta, das 09:00 às 18:00");
+    String banner =
+        systemSettingRepository
+            .findByKey("system_broadcast_banner")
+            .map(SystemSetting::getValue)
+            .orElse("");
 
     return new PublicSupportSettingsResponse(email, phone, whatsapp, hours, banner);
   }
@@ -63,16 +83,15 @@ public class SupportService {
       }
     }
 
-    List<SupportTicket> tickets = supportTicketRepository.findAllByUserIds(new ArrayList<>(memberIds));
+    List<SupportTicket> tickets =
+        supportTicketRepository.findAllByUserIds(new ArrayList<>(memberIds));
     return tickets.stream().map(SupportTicketResponse::from).toList();
   }
 
   @Transactional
   public SupportTicketResponse createTicket(UUID userId, CreateSupportTicketRequest request) {
     User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
 
     SupportTicket ticket =
         new SupportTicket(user, request.subject(), request.category(), request.description());

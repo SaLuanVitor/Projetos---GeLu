@@ -114,8 +114,7 @@ public class FamilyController {
 
   @GetMapping("/{familyId}/weight-history")
   public ApiResponse<FamilyWeightHistoryResponse> getFamilyWeightHistory(
-      @AuthenticationPrincipal AuthenticatedUser user,
-      @PathVariable UUID familyId) {
+      @AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID familyId) {
     return ApiResponse.ok(
         familyService.getFamilyWeightHistory(user.id(), familyId),
         "Family weight history loaded successfully");

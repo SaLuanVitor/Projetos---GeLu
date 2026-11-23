@@ -5,10 +5,8 @@ import java.util.UUID;
 
 public record WorkoutRequest(
     UUID familyId,
-    @NotBlank(message = "O título do treino é obrigatório")
-    String title,
+    @NotBlank(message = "O título do treino é obrigatório") String title,
     String category,
     Integer caloriesPerHour,
     Integer defaultDurationMinutes,
-    String notes
-) {}
+    String notes) {}

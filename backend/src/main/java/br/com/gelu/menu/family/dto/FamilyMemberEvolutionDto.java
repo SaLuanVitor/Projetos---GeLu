@@ -10,5 +10,4 @@ public record FamilyMemberEvolutionDto(
     String userEmail,
     BigDecimal currentWeight,
     String role,
-    List<WeightHistoryItem> history
-) {}
+    List<WeightHistoryItem> history) {}

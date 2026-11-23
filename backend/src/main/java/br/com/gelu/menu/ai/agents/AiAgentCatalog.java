@@ -83,7 +83,20 @@ public class AiAgentCatalog {
               "Reduce prompts and context while preserving intent and constraints.",
               List.of("original text", "goal", "output format", "constraints"),
               List.of("waste diagnosis", "optimized prompt", "applied savings"),
-              ".codex/agents/token_optimizer_agent.md"));
+              ".codex/agents/token_optimizer_agent.md"),
+          new AiAgentDescriptor(
+              "food-vision",
+              "FoodVisionAgent",
+              "Analyze meal photos using multimodal vision to identify foods, estimate portions and compute nutritional macros.",
+              List.of("meal photo (image bytes/base64)", "meal type hint", "user observations"),
+              List.of(
+                  "dish name",
+                  "identified food items",
+                  "portion estimates",
+                  "total calories",
+                  "macronutrients",
+                  "nutrition notes"),
+              ".codex/agents/food_vision_agent.md"));
 
   public List<AiAgentDescriptor> listAgents() {
     return agents;

@@ -76,7 +76,8 @@ public class ScheduleService {
       // Modo individual / pessoal
       activities =
           (dayOfWeek != null && !dayOfWeek.isBlank())
-              ? activityRepository.findByUserIdAndFamilyIsNullAndDayOfWeek(userId, dayOfWeek.toUpperCase())
+              ? activityRepository.findByUserIdAndFamilyIsNullAndDayOfWeek(
+                  userId, dayOfWeek.toUpperCase())
               : activityRepository.findAllByUserIdAndFamilyIsNull(userId);
       completions = completionRepository.findByUserIdAndDateRange(userId, targetDate, targetDate);
     }
@@ -92,9 +93,7 @@ public class ScheduleService {
   @Transactional
   public ScheduleActivityResponse createActivity(UUID userId, ScheduleActivityRequest request) {
     User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
 
     Family family = null;
     if (request.familyId() != null) {
@@ -309,9 +308,7 @@ public class ScheduleService {
   @Transactional
   public FamilyWeeklyGoalResponse createGoal(UUID userId, FamilyWeeklyGoalRequest request) {
     User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
 
     Family family = null;
     if (request.familyId() != null) {

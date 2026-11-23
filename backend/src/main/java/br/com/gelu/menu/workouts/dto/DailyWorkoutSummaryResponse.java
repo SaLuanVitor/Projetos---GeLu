@@ -9,5 +9,4 @@ public record DailyWorkoutSummaryResponse(
     int totalDurationMinutes,
     int workoutCount,
     boolean completedToday,
-    List<WorkoutLogResponse> logs
-) {}
+    List<WorkoutLogResponse> logs) {}

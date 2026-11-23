@@ -11,8 +11,7 @@ import java.util.UUID;
 @Table(name = "ai_usage_logs")
 public class AiUsageLog {
 
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
   @Column(name = "user_id")
   private UUID userId;
