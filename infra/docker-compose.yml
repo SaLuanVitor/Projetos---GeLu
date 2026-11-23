@@ -2,6 +2,8 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: gelu-menu-postgres
+    env_file:
+      - ../.env
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-gelu_menu}
       POSTGRES_USER: ${POSTGRES_USER:-gelu_menu}
@@ -9,7 +11,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - gelu_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gelu_menu} -d ${POSTGRES_DB:-gelu_menu}"]
       start_period: 30s
@@ -18,8 +20,10 @@ services:
       retries: 5
 
   minio:
-    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
     container_name: gelu-menu-minio
+    env_file:
+      - ../.env
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-gelu_menu}
@@ -40,6 +44,8 @@ services:
     build:
       context: ../backend
     container_name: gelu-menu-backend
+    env_file:
+      - ../.env
     environment:
       DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-gelu_menu}
       DATABASE_USERNAME: ${POSTGRES_USER:-gelu_menu}
@@ -55,8 +61,11 @@ services:
       STORAGE_BUCKET: ${STORAGE_BUCKET:-gelu-menu-media}
       STORAGE_PROXY_BASE_PATH: ${STORAGE_PROXY_BASE_PATH:-/api/v1/recipes}
       STORAGE_MAX_IMAGE_SIZE_BYTES: ${STORAGE_MAX_IMAGE_SIZE_BYTES:-5242880}
+      GELU_SUPER_ADMIN_EMAIL: ${GELU_SUPER_ADMIN_EMAIL:-luanvitors_852@hotmail.com}
+      GELU_SUPER_ADMIN_PASSWORD: ${GELU_SUPER_ADMIN_PASSWORD:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -67,9 +76,32 @@ services:
     build:
       context: ../frontend
     container_name: gelu-menu-frontend
+    env_file:
+      - ../.env
     environment:
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080/api/v1}
     ports:
-      - "3000:3000"
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
     depends_on:
       - backend
+
+  backoffice:
+    build:
+      context: ../backoffice
+    container_name: gelu-menu-backoffice
+    env_file:
+      - ../.env
+    environment:
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080/api/v1}
+    ports:
+      - "127.0.0.1:${BACKOFFICE_PORT:-3001}:3000"
+    depends_on:
+      - backend
+
+volumes:
+  gelu_postgres_data:
+

@@ -1,5 +1,6 @@
 package br.com.gelu.menu.auth.service;
 
+import br.com.gelu.menu.admin.AdminRole;
 import br.com.gelu.menu.auth.dto.AuthTokenResponse;
 import br.com.gelu.menu.auth.dto.AuthUserResponse;
 import br.com.gelu.menu.auth.dto.ForgotPasswordRequest;
@@ -51,15 +52,17 @@ public class AuthService {
   private final SecureRandom secureRandom;
   private final Duration passwordResetTokenTtl;
   private final boolean exposePasswordResetToken;
+  private final String superAdminEmail;
 
-  public AuthService(
+    public AuthService(
       UserRepository userRepository,
       RefreshTokenRepository refreshTokenRepository,
       PasswordResetTokenRepository passwordResetTokenRepository,
       PasswordEncoder passwordEncoder,
       JwtTokenService jwtTokenService,
       @Value("${gelu.auth.password-reset-token-ttl}") Duration passwordResetTokenTtl,
-      @Value("${gelu.auth.expose-password-reset-token}") boolean exposePasswordResetToken) {
+      @Value("${gelu.auth.expose-password-reset-token}") boolean exposePasswordResetToken,
+      @Value("${gelu.super-admin-email:luanvitors_852@hotmail.com}") String superAdminEmail) {
     this.userRepository = userRepository;
     this.refreshTokenRepository = refreshTokenRepository;
     this.passwordResetTokenRepository = passwordResetTokenRepository;
@@ -68,7 +71,10 @@ public class AuthService {
     this.secureRandom = new SecureRandom();
     this.passwordResetTokenTtl = passwordResetTokenTtl;
     this.exposePasswordResetToken = exposePasswordResetToken;
+    this.superAdminEmail = superAdminEmail;
   }
+
+
 
   @Transactional
   public RegisterResponse register(RegisterRequest request) {
@@ -103,12 +109,14 @@ public class AuthService {
     }
 
     TokenPair tokenPair = jwtTokenService.issueTokenPair(user);
+    boolean isSuper = isSuperAdminUser(user);
+    AdminRole role = resolveAdminRole(user);
     return new AuthTokenResponse(
         tokenPair.accessToken(),
         tokenPair.refreshToken(),
         jwtTokenService.getTokenType(),
         tokenPair.expiresIn(),
-        new AuthUserResponse(user.getId(), user.getName(), user.getEmail(), user.isActive()));
+        new AuthUserResponse(user.getId(), user.getName(), user.getEmail(), user.isActive(), isSuper, role));
   }
 
   @Transactional
@@ -224,4 +232,39 @@ public class AuthService {
       throw new IllegalStateException("SHA-256 is not available", exception);
     }
   }
+
+  public boolean isSuperAdmin(String email) {
+    if (email == null || superAdminEmail == null) return false;
+    return email.trim().equalsIgnoreCase(superAdminEmail.trim());
+  }
+
+  private boolean isSuperAdminUser(User user) {
+    if (user == null) return false;
+    if (user.getAdminRole() == AdminRole.SUPER_ADMIN) return true;
+    return isSuperAdmin(user.getEmail());
+  }
+
+  private AdminRole resolveAdminRole(User user) {
+    if (user == null) return null;
+    if (user.getAdminRole() != null) return user.getAdminRole();
+    if (isSuperAdmin(user.getEmail())) return AdminRole.SUPER_ADMIN;
+    return null;
+  }
+
+  @Transactional(readOnly = true)
+  public AuthUserResponse getMe(UUID userId) {
+    User user =
+        userRepository
+            .findById(userId)
+            .filter(User::isActive)
+            .orElseThrow(() -> new UnauthorizedException("User not found or inactive"));
+    return new AuthUserResponse(
+        user.getId(),
+        user.getName(),
+        user.getEmail(),
+        user.isActive(),
+        isSuperAdminUser(user),
+        resolveAdminRole(user));
+  }
+
 }

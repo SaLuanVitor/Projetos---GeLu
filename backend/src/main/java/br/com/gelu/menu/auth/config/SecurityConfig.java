@@ -4,6 +4,7 @@ import br.com.gelu.menu.common.api.ApiErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -44,10 +45,15 @@ public class SecurityConfig {
                         "/api/v1/auth/forgot-password",
                         "/api/v1/auth/reset-password",
                         "/api/v1/health",
-                        "/api/v1/ai/agents",
+                        "/api/v1/support/settings",
+                        "/api/v1/ai/**",
+                        "/ws/**",
+                        "/ws-raw/**",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/invites/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
@@ -73,7 +79,11 @@ public class SecurityConfig {
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(
-        java.util.List.of("http://localhost:3000", "http://127.0.0.1:3000"));
+        java.util.List.of(
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3001"));
     configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type"));
     configuration.setExposedHeaders(java.util.List.of("Authorization"));

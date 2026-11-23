@@ -1,7 +1,10 @@
 package br.com.gelu.menu.users;
 
+import br.com.gelu.menu.admin.AdminRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
@@ -47,6 +50,10 @@ public class User {
 
   @Column(nullable = false)
   private boolean active;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "admin_role", length = 30)
+  private AdminRole adminRole;
 
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
@@ -145,5 +152,41 @@ public class User {
 
   public BigDecimal getDailyCalorieGoal() {
     return dailyCalorieGoal;
+  }
+
+  public AdminRole getAdminRole() {
+    return adminRole;
+  }
+
+  public void setAdminRole(AdminRole adminRole) {
+    this.adminRole = adminRole;
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  public boolean hasAdminAccess() {
+    return this.adminRole != null;
+  }
+
+  public boolean isSuperAdminRole() {
+    return this.adminRole == AdminRole.SUPER_ADMIN;
+  }
+
+  public void anonymizeLgpd() {
+    this.name = "Usuário Anonimizado (LGPD)";
+    this.email = "anon_" + this.id.toString().substring(0, 8) + "@gelu.local";
+    this.birthDate = null;
+    this.heightCm = null;
+    this.currentWeight = null;
+    this.biologicalSex = null;
+    this.goal = null;
+    this.basalCalories = null;
+    this.dailyCalorieGoal = null;
+    this.active = false;
+    this.updatedAt = LocalDateTime.now();
   }
 }
