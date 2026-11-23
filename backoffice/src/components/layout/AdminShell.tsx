@@ -1,26 +1,44 @@
 "use client";
 
-import type { ReactNode } from "react";
-import Link from "next/link";
+import React, { type ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ThemeHeaderButton } from "@/components/theme/ThemeHeaderButton";
-import { ActionButton } from "@/components/ui/ActionButton";
 import { getCurrentUser } from "@/services/auth";
 import { clearSession } from "@/services/session";
-import { useEffect, useState } from "react";
+import { AdminSidebar, type AdminTabType } from "@/components/layout/AdminSidebar";
+import { AdminTopbar } from "@/components/layout/AdminTopbar";
+import type { AdminRole } from "@/types/api";
 
 interface AdminShellProps {
   children: ReactNode;
+  activeTab?: AdminTabType;
+  onTabChange?: (tab: AdminTabType) => void;
+  openTicketsCount?: number;
+  usersCount?: number;
+  teamCount?: number;
+  adminRole?: AdminRole | null;
+  onSearch?: (term: string) => void;
 }
 
-export function AdminShell({ children }: AdminShellProps) {
+export function AdminShell({
+  children,
+  activeTab = "OVERVIEW",
+  onTabChange,
+  openTicketsCount = 0,
+  usersCount = 0,
+  teamCount = 0,
+  adminRole,
+  onSearch,
+}: AdminShellProps) {
   const router = useRouter();
   const [adminEmail, setAdminEmail] = useState<string>("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    getCurrentUser().then((u) => {
-      if (u) setAdminEmail(u.email);
-    }).catch(() => {});
+    getCurrentUser()
+      .then((u) => {
+        if (u) setAdminEmail(u.email);
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogout = () => {
@@ -28,52 +46,44 @@ export function AdminShell({ children }: AdminShellProps) {
     router.push("/login");
   };
 
+  const handleTabSelect = (tab: AdminTabType) => {
+    if (onTabChange) {
+      onTabChange(tab);
+    }
+  };
+
   return (
-    <div className="paper-canvas min-h-screen bg-surface text-on-surface">
-      <header className="sticky top-0 z-30 border-b border-surface-variant bg-surface/96 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🛡️</span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-display text-xl font-black text-primary">
-                  GeLu Backoffice
-                </span>
-                <span className="rounded-full bg-amber-500/15 border border-amber-500/40 px-2 py-0.5 text-[10px] font-extrabold uppercase text-amber-700 dark:text-amber-300">
-                  Super Admin
-                </span>
-              </div>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                Governança, Métricas, Suporte e Configuração Global
-              </p>
-            </div>
+    <div className="flex h-screen w-screen overflow-hidden bg-[#FAF6EE] dark:bg-[#181512] text-stone-900 dark:text-stone-100 font-body">
+      {/* Sidebar Navigation */}
+      <AdminSidebar
+        activeTab={activeTab}
+        onTabChange={handleTabSelect}
+        openTicketsCount={openTicketsCount}
+        usersCount={usersCount}
+        teamCount={teamCount}
+        userRole={adminRole}
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
+      />
+
+      {/* Main Container */}
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+        {/* Topbar */}
+        <AdminTopbar
+          adminEmail={adminEmail || "luanvitors_852@hotmail.com"}
+          adminRole={adminRole}
+          onLogout={handleLogout}
+          onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onSearch={onSearch}
+        />
+
+        {/* Scrollable Main Canvas */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-7xl">
+            {children}
           </div>
-
-          <div className="flex items-center gap-3">
-            <ThemeHeaderButton />
-            {adminEmail && (
-              <span className="hidden sm:inline-block text-xs font-semibold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 px-2.5 py-1 rounded-lg border border-stone-200 dark:border-stone-700">
-                👤 {adminEmail}
-              </span>
-            )}
-            <ActionButton
-              onClick={handleLogout}
-              variant="outline"
-            >
-              Sair
-            </ActionButton>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
-        {children}
-      </main>
-
-      <footer className="mt-14 border-t border-dashed border-stone-200 dark:border-stone-800 px-5 py-6 text-center text-xs text-stone-500">
-        <p>🛡️ <strong>GeLu Plataforma</strong> — Console de Governança & Administração do Sistema</p>
-        <p className="mt-1 text-[11px] text-stone-400">Acesso restrito e auditado • Painel exclusivo para contas Super Admin</p>
-      </footer>
+        </main>
+      </div>
     </div>
   );
 }

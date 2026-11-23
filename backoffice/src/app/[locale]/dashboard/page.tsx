@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AdminShell } from "@/components/layout/AdminShell";
+import { AdminPageHeader } from "@/components/layout/AdminPageHeader";
+import { AdminKpiCard } from "@/components/ui/AdminKpiCard";
+import { AdminFilterToolbar } from "@/components/ui/AdminFilterToolbar";
+import { AdminRoleBadge, AdminStatusBadge } from "@/components/ui/AdminRoleBadge";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { NotebookPageHeader } from "@/components/ui/Notebook";
@@ -65,7 +69,16 @@ export default function BackofficeDashboardPage() {
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<AdminRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>("OVERVIEW");
+  const [activeTab, setActiveTab] = useState<TabType>("TEAM");
+  const [globalSearch, setGlobalSearch] = useState<string>("");
+  const [teamSubTab, setTeamSubTab] = useState<"ALL" | "OPERATORS" | "SUPER_ADMIN" | "ADMIN" | "SUPPORT" | "SAFEGUARDS">("ALL");
+  const [teamSearch, setTeamSearch] = useState<string>("");
+  const [teamRoleFilter, setTeamRoleFilter] = useState<string>("ALL");
+  const [teamStatusFilter, setTeamStatusFilter] = useState<string>("ALL");
+  const [teamDateFilter, setTeamDateFilter] = useState<string>("ALL");
+  const [teamPage, setTeamPage] = useState<number>(1);
+  const [selectedMemberForDetails, setSelectedMemberForDetails] = useState<AdminTeamMemberResponse | null>(null);
+  const [actionMenuMemberId, setActionMenuMemberId] = useState<string | null>(null);
 
   // Modo Privacidade LGPD (Data Masking)
   const [lgpdPrivacyMode, setLgpdPrivacyMode] = useState<boolean>(true);
@@ -566,6 +579,109 @@ export default function BackofficeDashboardPage() {
     );
   }
 
+  
+  const getMemberInitials = (name: string, email: string) => {
+    if (name && name.trim()) {
+      const parts = name.trim().split(" ");
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+    return email.substring(0, 2).toUpperCase();
+  };
+
+  const getTabMeta = (tab: TabType) => {
+    switch (tab) {
+      case "TEAM":
+        return {
+          label: "Painel Administrativo",
+          title: "Painel Administrativo do Sistema",
+          subtitle: "Gestão de contas, famílias, helpdesk global, monitoramento de IA e conformidade LGPD.",
+        };
+      case "OVERVIEW":
+        return {
+          label: "Visão Geral & Health",
+          title: "Visão Geral & Saúde da Plataforma",
+          subtitle: "Métricas consolidadas de engajamento, integridade de serviços e atalhos operacionais.",
+        };
+      case "AI_METRICS":
+        return {
+          label: "Consumo & Métricas IA",
+          title: "Monitoramento de Inteligência Artificial",
+          subtitle: "Consumo de tokens, latência de inferência, custo estimado e diagnóstico de conectividade Gemini.",
+        };
+      case "USERS_FAMILIES":
+        return {
+          label: "Usuários & Famílias",
+          title: "Gestão de Contas & Espaços Familiares",
+          subtitle: "Inspeção de membros cadastrados, relações de parentesco e auditoria de perfis.",
+        };
+      case "LGPD_GOVERNANCE":
+        return {
+          label: "Governança & LGPD",
+          title: "Central de Governança & Salvaguardas LGPD",
+          subtitle: "Controle estrito de privacidade, portabilidade de dados e descarte seguro (Lei 13.709/2018).",
+        };
+      case "TICKETS":
+        return {
+          label: "Chamados Globais",
+          title: "Central de Suporte & Atendimento ao Cliente",
+          subtitle: "Acompanhe e responda chamados de suporte abertos pelos usuários em tempo real.",
+        };
+      case "SETTINGS":
+        return {
+          label: "Configurações Globais",
+          title: "Configurações da Plataforma",
+          subtitle: "Canais de contato oficial, chave de API do Google Gemini e parâmetros operacionais.",
+        };
+      case "AUDIT":
+        return {
+          label: "Auditoria do Sistema",
+          title: "Trilha Imutável de Auditoria",
+          subtitle: "Registro criptográfico de ações administrativas, acessos a dados sensíveis e eventos de segurança.",
+        };
+    }
+  };
+
+
+  const filteredTeam = useMemo(() => {
+    return team.filter((m) => {
+      if (teamSubTab === "SUPER_ADMIN" && m.role !== "SUPER_ADMIN") return false;
+      if (teamSubTab === "ADMIN" && m.role !== "ADMIN") return false;
+      if (teamSubTab === "SUPPORT" && m.role !== "SUPPORT" && m.role !== "READ_ONLY") return false;
+
+      if (teamSearch.trim()) {
+        const term = teamSearch.toLowerCase();
+        const matchName = m.name.toLowerCase().includes(term);
+        const matchEmail = m.email.toLowerCase().includes(term);
+        const matchRole = m.role.toLowerCase().includes(term);
+        if (!matchName && !matchEmail && !matchRole) return false;
+      }
+
+      if (teamRoleFilter !== "ALL" && m.role !== teamRoleFilter) return false;
+      if (teamStatusFilter === "ACTIVE" && !m.active) return false;
+      if (teamStatusFilter === "INACTIVE" && m.active) return false;
+
+      if (teamDateFilter === "7D") {
+        const diffDays = (Date.now() - new Date(m.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+        if (diffDays > 7) return false;
+      } else if (teamDateFilter === "30D") {
+        const diffDays = (Date.now() - new Date(m.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+        if (diffDays > 30) return false;
+      }
+
+      return true;
+    });
+  }, [team, teamSubTab, teamSearch, teamRoleFilter, teamStatusFilter, teamDateFilter]);
+
+  const ITEMS_PER_PAGE = 8;
+  const totalTeamPages = Math.max(1, Math.ceil(filteredTeam.length / ITEMS_PER_PAGE));
+  const paginatedTeam = useMemo(() => {
+    const start = (teamPage - 1) * ITEMS_PER_PAGE;
+    return filteredTeam.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredTeam, teamPage]);
+
   const filteredUsers = users.filter((u) => {
     if (!userSearch) return true;
     const term = userSearch.toLowerCase();
@@ -580,95 +696,57 @@ export default function BackofficeDashboardPage() {
   const maxUserTokens = Math.max(...userAiUsage.map((u) => u.totalTokens), 1);
 
   return (
-    <AdminShell>
-      <div className="mx-auto max-w-6xl space-y-6 pb-12">
-        {/* Cabeçalho do Painel */}
-        <NotebookPageHeader
-          eyebrow="PORTAL DE GOVERNANÇA & SUPER ADMIN"
-          title="Painel Administrativo do Sistema"
-          subtitle="Gestão de contas, famílias, helpdesk global, monitoramento de IA e conformidade LGPD."
+    <AdminShell
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      openTicketsCount={tickets.filter((t) => t.status === "OPEN").length}
+      usersCount={users.length}
+      teamCount={team.length}
+      adminRole={currentUserRole}
+      onSearch={(term) => {
+        setGlobalSearch(term);
+        setTeamSearch(term);
+        setUserSearch(term);
+      }}
+    >
+      <div className="space-y-6 pb-12">
+        {/* Cabeçalho Enriquecido com Breadcrumbs e Card LGPD */}
+        <AdminPageHeader
+          breadcrumbs={[
+            { label: "Painel Administrativo", active: activeTab === "TEAM" },
+            ...(activeTab !== "TEAM" ? [{ label: getTabMeta(activeTab).label, active: true }] : [])
+          ]}
+          title={getTabMeta(activeTab).title}
+          subtitle={getTabMeta(activeTab).subtitle}
+          onViewLgpdDetails={() => setActiveTab("LGPD_GOVERNANCE")}
+          isLgpdActive={lgpdPrivacyMode}
         />
-
-        {/* Barra de Governança LGPD (Toggle de Privacidade) */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-stone-200 dark:border-stone-800 bg-surface dark:bg-[#1f1a16] p-4 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/60 text-lg border border-amber-300 dark:border-amber-800 shrink-0">
-              🔒
-            </span>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  Proteção de Dados Pessoais (LGPD)
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
-                    lgpdPrivacyMode
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
-                      : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800"
-                  }`}
-                >
-                  {lgpdPrivacyMode ? "● Mascaramento Ativo" : "○ Dados Revelados (Auditado)"}
-                </span>
-              </div>
-              <p className="text-xs font-bold text-stone-800 dark:text-stone-200 mt-0.5">
-                {lgpdPrivacyMode
-                  ? "E-mails, nomes completos e endereços IP mascarados para atender à Lei 13.709/2018."
-                  : "Atenção: Os dados pessoais dos titulares estão visíveis na tela. Ação registrada no log."}
-              </p>
-            </div>
+        {/* Sub-Abas do Painel Administrativo / Equipe */}
+        {activeTab === "TEAM" && (
+          <div className="flex flex-wrap items-center gap-1 border-b border-stone-200/80 dark:border-stone-800 pb-2">
+            {[
+              { id: "ALL", label: "Visão Geral" },
+              { id: "OPERATORS", label: `Operadores (${team.length})` },
+              { id: "SUPER_ADMIN", label: `Super Admins (${team.filter(m => m.role === "SUPER_ADMIN").length})` },
+              { id: "ADMIN", label: `Admins Operacionais (${team.filter(m => m.role === "ADMIN").length})` },
+              { id: "SUPPORT", label: `Suporte & Leitura (${team.filter(m => m.role === "SUPPORT" || m.role === "READ_ONLY").length})` },
+              { id: "SAFEGUARDS", label: "Ações & Salvaguardas" },
+            ].map((st) => (
+              <button
+                key={st.id}
+                type="button"
+                onClick={() => setTeamSubTab(st.id as any)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                  teamSubTab === st.id
+                    ? "bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30"
+                    : "text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800"
+                }`}
+              >
+                {st.label}
+              </button>
+            ))}
           </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (lgpdPrivacyMode) {
-                setShowPiiReasonModal(true);
-              } else {
-                setLgpdPrivacyMode(true);
-                setRevealSecondsLeft(0);
-                showToast("Modo Privacidade LGPD reativado com mascaramento total.", "success");
-              }
-            }}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-              lgpdPrivacyMode
-                ? "border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
-                : "border-amber-400 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 hover:bg-amber-100 animate-pulse"
-            }`}
-          >
-            <span>
-              {lgpdPrivacyMode
-                ? "👁️ Revelar Dados Pessoais"
-                : `🔒 Ocultar Dados (${formatCountdown(revealSecondsLeft)})`}
-            </span>
-          </button>
-        </div>
-
-        {/* Abas de Navegação — Sem Barra de Rolagem Horizontal */}
-        <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-stone-200 dark:border-stone-800">
-          {[
-            { id: "OVERVIEW", label: "📊 Visão Geral & Health" },
-            { id: "AI_METRICS", label: `📈 Consumo & Métricas IA` },
-            { id: "USERS_FAMILIES", label: `👥 Usuários (${users.length}) & Famílias (${families.length})` },
-            { id: "LGPD_GOVERNANCE", label: "🔒 Governança & LGPD" },
-            { id: "TEAM", label: `👔 Equipe & Acessos (${team.length})` },
-            { id: "TICKETS", label: `💬 Chamados Globais (${tickets.length})` },
-            { id: "SETTINGS", label: "⚙️ Configurações Globais" },
-            { id: "AUDIT", label: "📜 Auditoria do Sistema" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === tab.id
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-surface dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:border-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        )}
 
         {/* ABA 1: VISÃO GERAL & HEALTHCHECK */}
         {activeTab === "OVERVIEW" && (
@@ -1210,191 +1288,253 @@ export default function BackofficeDashboardPage() {
           </div>
         )}
 
-        {/* ABA: EQUIPE & ACESSOS (RBAC) */}
+        {/* ABA: PAINEL ADMINISTRATIVO / EQUIPE & ACESSOS (RBAC) */}
         {activeTab === "TEAM" && (
           <div className="space-y-6">
-            <PaperCard tape="orange">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-surface-variant">
-                <div>
-                  <h2 className="font-display text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                    <span>👔</span> Gestão da Equipe & Controle de Acesso (RBAC)
-                  </h2>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                    Crie contas de operadores com perfis granulares, proteja o Super Admin e gerencie salvaguardas de acesso.
-                  </p>
-                </div>
+            {/* KPI Cards com Ondas Gradientes em SVG */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <AdminKpiCard
+                title="Total Operadores"
+                value={team.length}
+                icon="👥"
+                colorScheme="orange"
+                active={teamSubTab === "ALL" || teamSubTab === "OPERATORS"}
+                onClick={() => setTeamSubTab("OPERATORS")}
+              />
+              <AdminKpiCard
+                title="Super Admins"
+                value={team.filter((m) => m.role === "SUPER_ADMIN").length}
+                icon="👑"
+                colorScheme="amber"
+                active={teamSubTab === "SUPER_ADMIN"}
+                onClick={() => setTeamSubTab("SUPER_ADMIN")}
+              />
+              <AdminKpiCard
+                title="Admins Operacionais"
+                value={team.filter((m) => m.role === "ADMIN").length}
+                icon="🛡️"
+                colorScheme="blue"
+                active={teamSubTab === "ADMIN"}
+                onClick={() => setTeamSubTab("ADMIN")}
+              />
+              <AdminKpiCard
+                title="Suporte & Leitura"
+                value={team.filter((m) => m.role === "SUPPORT" || m.role === "READ_ONLY").length}
+                icon="🎧"
+                colorScheme="emerald"
+                active={teamSubTab === "SUPPORT"}
+                onClick={() => setTeamSubTab("SUPPORT")}
+              />
+            </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowCreateTeamModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white shadow-md hover:bg-primary-hover transition-all cursor-pointer"
-                >
-                  <span>+ Novo Operador</span>
-                </button>
+            {/* Painel de Salvaguardas se selecionado na sub-aba */}
+            {teamSubTab === "SAFEGUARDS" && (
+              <div className="rounded-2xl border border-stone-200/90 dark:border-stone-800 bg-white/90 dark:bg-stone-900/90 p-5 sm:p-6 shadow-2xs space-y-4">
+                <h3 className="font-display text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                  <span>🛡️</span> Regras de Governança & Salvaguardas de Acesso (RBAC)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/40 dark:bg-amber-950/20">
+                    <div className="font-bold text-xs text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                      <span>👑</span> Conta Raiz (Inviolável)
+                    </div>
+                    <p className="mt-1 text-[11px] text-amber-800/80 dark:text-amber-300/80 leading-relaxed">
+                      A conta mestre original de Super Admin é protegida pelo sistema. Nenhum operador, mesmo outro Super Admin, pode excluí-la ou rebaixá-la.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-sky-200 dark:border-sky-900/50 bg-sky-50/40 dark:bg-sky-950/20">
+                    <div className="font-bold text-xs text-sky-900 dark:text-sky-200 flex items-center gap-1.5">
+                      <span>🔒</span> Bloqueio de Auto-Exclusão
+                    </div>
+                    <p className="mt-1 text-[11px] text-sky-800/80 dark:text-sky-300/80 leading-relaxed">
+                      O operador logado atualmente não pode excluir sua própria conta, desativar seu acesso ou rebaixar seu próprio privilégio de acesso.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/40 dark:bg-emerald-950/20">
+                    <div className="font-bold text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                      <span>📜</span> Auditoria Criptográfica
+                    </div>
+                    <p className="mt-1 text-[11px] text-emerald-800/80 dark:text-emerald-300/80 leading-relaxed">
+                      Toda criação, alteração de perfil e exclusão de operador gera log imutável no banco com IP de origem, timestamp ISO e identificação do autor.
+                    </p>
+                  </div>
+                </div>
               </div>
+            )}
 
-              {/* Cards de Resumo da Equipe */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-5">
-                <div className="p-3.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60">
-                  <div className="text-[11px] font-bold text-stone-500 uppercase">Total Operadores</div>
-                  <div className="text-2xl font-black text-stone-900 dark:text-stone-100 mt-1">{team.length}</div>
-                </div>
-                <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20">
-                  <div className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase">Super Admins</div>
-                  <div className="text-2xl font-black text-amber-900 dark:text-amber-200 mt-1">
-                    {team.filter((m) => m.role === "SUPER_ADMIN").length}
-                  </div>
-                </div>
-                <div className="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/20">
-                  <div className="text-[11px] font-bold text-blue-700 dark:text-blue-400 uppercase">Admins Operacionais</div>
-                  <div className="text-2xl font-black text-blue-900 dark:text-blue-200 mt-1">
-                    {team.filter((m) => m.role === "ADMIN").length}
-                  </div>
-                </div>
-                <div className="p-3.5 rounded-xl border border-teal-200 dark:border-teal-900/50 bg-teal-50/50 dark:bg-teal-950/20">
-                  <div className="text-[11px] font-bold text-teal-700 dark:text-teal-400 uppercase">Suporte & Leitura</div>
-                  <div className="text-2xl font-black text-teal-900 dark:text-teal-200 mt-1">
-                    {team.filter((m) => m.role === "SUPPORT" || m.role === "READ_ONLY").length}
-                  </div>
-                </div>
-              </div>
+            {/* Tabela de Operadores do Sistema */}
+            <div className="rounded-2xl border border-stone-200/90 dark:border-stone-800 bg-white/90 dark:bg-stone-900/90 p-5 sm:p-6 shadow-2xs space-y-5">
+              <AdminFilterToolbar
+                title="Operadores do Sistema"
+                subtitle="Gerencie os operadores, cargos e permissões de acesso."
+                searchTerm={teamSearch}
+                onSearchChange={setTeamSearch}
+                selectedRoleFilter={teamRoleFilter}
+                onRoleFilterChange={setTeamRoleFilter}
+                selectedStatusFilter={teamStatusFilter}
+                onStatusFilterChange={setTeamStatusFilter}
+                selectedDateFilter={teamDateFilter}
+                onDateFilterChange={setTeamDateFilter}
+                primaryActionLabel="Novo Operador"
+                onPrimaryAction={() => setShowCreateTeamModal(true)}
+              />
 
-              {/* Tabela de Membros da Equipe */}
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto rounded-xl border border-stone-200/70 dark:border-stone-800">
                 <table className="w-full text-left text-xs text-stone-700 dark:text-stone-300">
-                  <thead className="bg-stone-100 dark:bg-stone-800 text-stone-500 uppercase font-semibold">
+                  <thead className="bg-[#FAF6EE] dark:bg-stone-800/80 text-stone-500 uppercase font-bold text-[11px] tracking-wider border-b border-stone-200/70 dark:border-stone-800">
                     <tr>
-                      <th className="p-3">Operador</th>
-                      <th className="p-3">Cargo / Perfil</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3">Cadastrado em</th>
-                      <th className="p-3 text-right">Ações & Salvaguardas</th>
+                      <th className="px-5 py-3.5">OPERADOR</th>
+                      <th className="px-5 py-3.5">CARGO / PERFIL</th>
+                      <th className="px-5 py-3.5">STATUS</th>
+                      <th className="px-5 py-3.5">CADASTRADO EM</th>
+                      <th className="px-5 py-3.5 text-right">AÇÕES</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-200 dark:divide-stone-800">
-                    {team.length === 0 ? (
+                  <tbody className="divide-y divide-stone-200/60 dark:divide-stone-800">
+                    {paginatedTeam.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-stone-400">
-                          {loadingTeam ? "Carregando equipe..." : "Nenhum operador cadastrado além do Super Admin."}
+                        <td colSpan={5} className="px-5 py-12 text-center text-stone-400">
+                          {loadingTeam ? "Carregando equipe..." : "Nenhum operador encontrado com os filtros selecionados."}
                         </td>
                       </tr>
                     ) : (
-                      team.map((member) => {
-                        const roleBadges: Record<AdminRole, { label: string; cls: string; desc: string }> = {
-                          SUPER_ADMIN: {
-                            label: "👑 Super Admin",
-                            cls: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700",
-                            desc: "Acesso irrestrito a configurações, chaves de IA e gestão de equipe",
-                          },
-                          ADMIN: {
-                            label: "🛡️ Admin Operacional",
-                            cls: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-700",
-                            desc: "Gestão completa de usuários, famílias, receitas e chamados",
-                          },
-                          SUPPORT: {
-                            label: "🎧 Suporte & Atendimento",
-                            cls: "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300 border border-teal-300 dark:border-teal-700",
-                            desc: "Moderação e resposta a chamados de suporte do sistema",
-                          },
-                          READ_ONLY: {
-                            label: "👁️ Somente Leitura / Auditor",
-                            cls: "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-300 dark:border-purple-700",
-                            desc: "Consulta a métricas e relatórios sem permissão de edição",
-                          },
-                        };
+                      paginatedTeam.map((member) => (
+                        <tr key={member.id} className="hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors">
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 text-orange-700 dark:text-orange-300 font-black text-xs shrink-0 shadow-2xs">
+                                {getMemberInitials(member.name, member.email)}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-1.5 font-bold text-stone-900 dark:text-stone-100 text-xs sm:text-sm">
+                                  <span>{member.name}</span>
+                                  {member.isSelf && (
+                                    <span className="rounded-md bg-stone-200/80 dark:bg-stone-700 px-1.5 py-0.5 text-[10px] font-bold text-stone-600 dark:text-stone-300">
+                                      (Você)
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[11px] text-stone-500 dark:text-stone-400 font-mono">
+                                  {maskEmail(member.email)}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <AdminRoleBadge role={member.role} />
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <AdminStatusBadge active={member.active} />
+                          </td>
+                          <td className="px-5 py-3.5 text-xs text-stone-500 dark:text-stone-400 font-medium whitespace-nowrap">
+                            {new Date(member.createdAt).toLocaleDateString("pt-BR")}
+                          </td>
+                          <td className="px-5 py-3.5 text-right">
+                            <div className="inline-flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedMemberForDetails(member)}
+                                className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:border-orange-400 hover:text-orange-600 shadow-2xs transition-all cursor-pointer"
+                              >
+                                Ver detalhes
+                              </button>
 
-                        const badge = roleBadges[member.role] || roleBadges.SUPPORT;
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  onClick={() => setActionMenuMemberId(actionMenuMemberId === member.id ? null : member.id)}
+                                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-stone-200 shadow-2xs cursor-pointer text-xs"
+                                >
+                                  •••
+                                </button>
 
-                        return (
-                          <tr key={member.id} className="hover:bg-stone-50 dark:hover:bg-stone-900/40">
-                            <td className="p-3">
-                              <div className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-                                <span>{member.name}</span>
-                                {member.isSelf && (
-                                  <span className="px-1.5 py-0.2 rounded text-[10px] font-black bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300">
-                                    (Você)
-                                  </span>
+                                {actionMenuMemberId === member.id && (
+                                  <div className="absolute right-0 mt-1 w-48 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-1.5 shadow-xl z-30">
+                                    <button
+                                      type="button"
+                                      disabled={member.isMasterSuperAdmin}
+                                      onClick={() => {
+                                        setMemberToEditRole(member);
+                                        setSelectedRole(member.role);
+                                        setActionMenuMemberId(null);
+                                      }}
+                                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40"
+                                    >
+                                      ✏️ Alterar Cargo
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={member.isMasterSuperAdmin || member.isSelf}
+                                      onClick={() => {
+                                        handleToggleMemberStatus(member);
+                                        setActionMenuMemberId(null);
+                                      }}
+                                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-40"
+                                    >
+                                      {member.active ? "⏸️ Desativar Conta" : "▶️ Reativar Conta"}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={member.isMasterSuperAdmin || member.isSelf}
+                                      onClick={() => {
+                                        setMemberToDelete(member);
+                                        setActionMenuMemberId(null);
+                                      }}
+                                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-40"
+                                    >
+                                      🗑️ Excluir Operador
+                                    </button>
+                                  </div>
                                 )}
                               </div>
-                              <div className="font-mono text-stone-500 dark:text-stone-400 text-[11px]">
-                                {maskEmail(member.email)}
-                              </div>
-                            </td>
-
-                            <td className="p-3">
-                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${badge.cls}`}>
-                                {badge.label}
-                              </span>
-                            </td>
-
-                            <td className="p-3">
-                              <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                                  member.active
-                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                                    : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-                                }`}
-                              >
-                                {member.active ? "● Ativo" : "○ Inativo"}
-                              </span>
-                            </td>
-
-                            <td className="p-3 text-stone-500 whitespace-nowrap">
-                              {new Date(member.createdAt).toLocaleDateString("pt-BR")}
-                            </td>
-
-                            <td className="p-3 text-right">
-                              {member.isMasterSuperAdmin ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                                  👑 Dono do Sistema (Inviolável)
-                                </span>
-                              ) : member.isSelf ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-stone-100 dark:bg-stone-800 text-stone-500 border border-stone-200 dark:border-stone-700">
-                                  🔒 Sua Conta (Auto-protegida)
-                                </span>
-                              ) : (
-                                <div className="inline-flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setMemberToEditRole(member);
-                                      setSelectedRole(member.role);
-                                    }}
-                                    className="px-2.5 py-1 rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 font-semibold text-xs cursor-pointer"
-                                  >
-                                    Editar Perfil
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    onClick={() => handleToggleMemberStatus(member)}
-                                    className={`px-2.5 py-1 rounded-lg border font-semibold text-xs cursor-pointer ${
-                                      member.active
-                                        ? "border-amber-300 text-amber-800 dark:text-amber-400 hover:bg-amber-50"
-                                        : "border-emerald-300 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-50"
-                                    }`}
-                                  >
-                                    {member.active ? "Desativar" : "Ativar"}
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    onClick={() => setMemberToDelete(member)}
-                                    className="px-2.5 py-1 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 font-semibold text-xs cursor-pointer"
-                                  >
-                                    Excluir
-                                  </button>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })
+                            </div>
+                          </td>
+                        </tr>
+                      ))
                     )}
                   </tbody>
                 </table>
               </div>
-            </PaperCard>
+
+              {/* Rodapé da Tabela com Paginação */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-stone-500">
+                <div>
+                  Mostrando {paginatedTeam.length} de {filteredTeam.length} registro{filteredTeam.length === 1 ? "" : "s"}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    disabled={teamPage <= 1}
+                    onClick={() => setTeamPage((p) => Math.max(1, p - 1))}
+                    className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-2.5 py-1 text-xs font-bold text-stone-700 dark:text-stone-300 disabled:opacity-40 hover:bg-stone-50 cursor-pointer"
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalTeamPages }).map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setTeamPage(i + 1)}
+                      className={`rounded-xl px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
+                        teamPage === i + 1
+                          ? "bg-orange-600 text-white shadow-2xs"
+                          : "border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50"
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    disabled={teamPage >= totalTeamPages}
+                    onClick={() => setTeamPage((p) => Math.min(totalTeamPages, p + 1))}
+                    className="rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-2.5 py-1 text-xs font-bold text-stone-700 dark:text-stone-300 disabled:opacity-40 hover:bg-stone-50 cursor-pointer"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1833,6 +1973,76 @@ export default function BackofficeDashboardPage() {
             </div>
           </form>
         </Modal>
+
+        {/* Modal de Detalhes do Operador */}
+        {selectedMemberForDetails && (
+          <Modal
+            isOpen={!!selectedMemberForDetails}
+            onClose={() => setSelectedMemberForDetails(null)}
+            title="Ficha do Operador"
+            subtitle="Detalhes cadastrais, cargo, status e privilégios no sistema."
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-stone-50 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-700">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white font-black text-lg shadow-sm">
+                  {getMemberInitials(selectedMemberForDetails.name, selectedMemberForDetails.email)}
+                </div>
+                <div>
+                  <h3 className="font-bold text-stone-900 dark:text-stone-100 text-base">{selectedMemberForDetails.name}</h3>
+                  <p className="text-xs text-stone-500 font-mono">{maskEmail(selectedMemberForDetails.email)}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900">
+                  <span className="text-[11px] text-stone-400 block font-semibold">Perfil Atual</span>
+                  <div className="mt-1">
+                    <AdminRoleBadge role={selectedMemberForDetails.role} />
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900">
+                  <span className="text-[11px] text-stone-400 block font-semibold">Status</span>
+                  <div className="mt-1">
+                    <AdminStatusBadge active={selectedMemberForDetails.active} />
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900">
+                  <span className="text-[11px] text-stone-400 block font-semibold">Data de Cadastro</span>
+                  <div className="mt-1 font-bold text-stone-800 dark:text-stone-200">
+                    {new Date(selectedMemberForDetails.createdAt).toLocaleString("pt-BR")}
+                  </div>
+                </div>
+                <div className="p-3 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900">
+                  <span className="text-[11px] text-stone-400 block font-semibold">Tipo de Conta</span>
+                  <div className="mt-1 font-bold text-stone-800 dark:text-stone-200">
+                    {selectedMemberForDetails.isMasterSuperAdmin ? "👑 Conta Raiz" : selectedMemberForDetails.isSelf ? "👤 Sua Conta" : "Operador Delegado"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-stone-200 dark:border-stone-800 p-3.5 bg-stone-50/50 dark:bg-stone-800/40 text-xs">
+                <span className="font-bold text-stone-700 dark:text-stone-300 block mb-1">Escopo de Acesso:</span>
+                <p className="text-stone-500 leading-relaxed text-[11px]">
+                  {selectedMemberForDetails.role === "SUPER_ADMIN"
+                    ? "Acesso irrestrito a configurações globais, chaves de IA, exclusão de dados e gerenciamento de equipe."
+                    : selectedMemberForDetails.role === "ADMIN"
+                    ? "Gestão operacional de usuários, famílias, receitas e chamados com auditoria em todas as ações."
+                    : "Acesso somente leitura para moderação e atendimento a chamados com dados sensíveis mascarados."}
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-stone-100 dark:border-stone-800">
+                <button
+                  type="button"
+                  onClick={() => setSelectedMemberForDetails(null)}
+                  className="rounded-xl border border-stone-200 dark:border-stone-700 px-4 py-2 text-xs font-bold text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
 
         {/* Modal de Criação de Operador */}
         <Modal
