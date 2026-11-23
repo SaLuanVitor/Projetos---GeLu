@@ -6,6 +6,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Modal } from "@/components/ui/Modal";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { useToast } from "@/components/ui/Toast";
+import { FoodVisionScannerModal } from "@/components/meals/FoodVisionScannerModal";
 import { Link, useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import {
@@ -68,6 +69,8 @@ export default function WeeklyDietPage() {
 
   const [recipes, setRecipes] = useState<RecipeResponse[]>([]);
   const [diet, setDiet] = useState<WeeklyDietResponse | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [foodVisionOpen, setFoodVisionOpen] = useState(false);
   const [currentWeekStart, setCurrentWeekStart] = useState<string>(() =>
     getMondayOfDate(new Date())
   );
@@ -117,6 +120,7 @@ export default function WeeklyDietPage() {
         router.replace("/login");
         return;
       }
+      setSessionToken(session.accessToken);
 
       // 1. Carregar Dieta da Semana para família ativa ou contexto pessoal
       const familyIdToUse = isPersonal ? undefined : activeFamily?.id;
@@ -492,13 +496,24 @@ export default function WeeklyDietPage() {
               </p>
             </div>
 
-            <ActionButton
-              type="button"
-              onClick={() => handleOpenNewMeal()}
-              className="self-start sm:self-auto shadow-md"
-            >
-              + Adicionar Refeição
-            </ActionButton>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setFoodVisionOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-xs font-bold shadow-xs transition-all cursor-pointer"
+              >
+                <span>📷</span>
+                <span>Escanear com IA</span>
+              </button>
+
+              <ActionButton
+                type="button"
+                onClick={() => handleOpenNewMeal()}
+                className="self-start sm:self-auto shadow-md"
+              >
+                + Adicionar Refeição
+              </ActionButton>
+            </div>
           </div>
 
           {/* Atalhos Rápidos para Refeições Clássicas */}
@@ -989,6 +1004,16 @@ export default function WeeklyDietPage() {
             </div>
           </form>
         </Modal>
+
+        {/* Modal de Escanear Prato com IA (Food Vision) */}
+        {foodVisionOpen && sessionToken && (
+          <FoodVisionScannerModal
+            isOpen={foodVisionOpen}
+            onClose={() => setFoodVisionOpen(false)}
+            accessToken={sessionToken}
+            onMealSaved={loadData}
+          />
+        )}
       </main>
     </AppShell>
   );

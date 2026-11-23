@@ -7,6 +7,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ActionLink } from "@/components/ui/ActionButton";
 import { CoupleNotesCard } from "@/components/dashboard/CoupleNotesCard";
 import { WorkoutSection } from "@/components/dashboard/WorkoutSection";
+import { DailyMealDiaryCard } from "@/components/meals/DailyMealDiaryCard";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
@@ -14,11 +15,13 @@ import { getLocalizedApiError } from "@/services/localized-error";
 import { getProfile } from "@/services/profile";
 import { getOrCreateWeeklyDiet } from "@/services/diet";
 import { getDailyWorkoutSummary } from "@/services/workouts";
+import { getDailyMealSummary } from "@/services/meals";
 import { listScheduleActivities, toggleScheduleActivityCompletion } from "@/services/schedule";
 import { useFamilyContext } from "@/contexts/FamilyContext";
 import { subscribeToFamilyEvents } from "@/hooks/useFamilySocket";
 import type { StoredSession } from "@/services/session";
 import type {
+  DailyMealSummaryResponse,
   DailyWorkoutSummaryResponse,
   DietMealResponse,
   ProfileResponse,
@@ -53,6 +56,7 @@ export default function DashboardPage() {
   const [session, setSession] = useState<StoredSession | null>(null);
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [todayMeals, setTodayMeals] = useState<DietMealResponse[]>([]);
+  const [dailyMealSummary, setDailyMealSummary] = useState<DailyMealSummaryResponse | null>(null);
   const [workoutSummary, setWorkoutSummary] = useState<DailyWorkoutSummaryResponse | null>(null);
   const [todayActivities, setTodayActivities] = useState<ScheduleActivityResponse[]>([]);
   const [error, setError] = useState("");
@@ -92,8 +96,8 @@ export default function DashboardPage() {
       const familyIdToUse = isPersonal ? undefined : activeFamily?.id;
       const todayDateIso = new Date().toISOString().split("T")[0];
 
-      // Carregar perfil, treinos, dieta e agenda do dia em paralelo
-      const [profileData, workoutsData, currentDiet, activitiesData] = await Promise.all([
+      // Carregar perfil, treinos, dieta, diário fotográfico e agenda do dia em paralelo
+      const [profileData, workoutsData, currentDiet, activitiesData, mealsSummaryData] = await Promise.all([
         getProfile(validSession.accessToken).catch(() => null),
         getDailyWorkoutSummary(validSession.accessToken).catch(() => null),
         getOrCreateWeeklyDiet(validSession.accessToken, familyIdToUse).catch(() => null),
@@ -103,10 +107,12 @@ export default function DashboardPage() {
           currentDayKey,
           todayDateIso
         ).catch(() => []),
+        getDailyMealSummary(validSession.accessToken, todayDateIso).catch(() => null),
       ]);
 
       if (profileData) setProfile(profileData);
       if (workoutsData) setWorkoutSummary(workoutsData);
+      if (mealsSummaryData) setDailyMealSummary(mealsSummaryData);
 
       if (currentDiet && currentDiet.meals) {
         const mealsOfToday = currentDiet.meals.filter(
@@ -169,8 +175,13 @@ export default function DashboardPage() {
 
   // Cálculos de Calorias
   const totalConsumedCalories = useMemo(() => {
+    // Se o usuário registrou refeições reais no diário com IA hoje, prioriza o consumo real registrado
+    const realCalories = dailyMealSummary?.totalCalories || 0;
+    if (realCalories > 0) {
+      return Math.round(realCalories);
+    }
     return todayMeals.reduce((acc, m) => acc + (m.totalEstimatedCalories || 0), 0);
-  }, [todayMeals]);
+  }, [dailyMealSummary, todayMeals]);
 
   const totalBurnedCalories = useMemo(() => {
     return workoutSummary?.totalCaloriesBurned ?? 0;
@@ -255,6 +266,16 @@ export default function DashboardPage() {
                 accessToken={session.accessToken}
                 summary={workoutSummary}
                 onRefresh={loadDashboardData}
+              />
+            )}
+          </div>
+
+          {/* Diário Fotográfico de Refeições com IA (Food Vision) */}
+          <div className="lg:col-span-12">
+            {session?.accessToken && (
+              <DailyMealDiaryCard
+                accessToken={session.accessToken}
+                onMealsUpdated={loadDashboardData}
               />
             )}
           </div>

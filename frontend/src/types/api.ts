@@ -765,3 +765,77 @@ export type SystemAuditLogResponse = {
   ipAddress?: string | null;
   createdAt: string;
 };
+
+// -------------------------------------------------------------
+// Food Vision & Meal Logs (Diário Fotográfico com IA)
+// -------------------------------------------------------------
+
+export type FoodItemIdentified = {
+  name: string;
+  estimatedGrams?: number | null;
+  calories?: number | null;
+  proteins?: number | null;
+  carbohydrates?: number | null;
+  fats?: number | null;
+};
+
+export type AnalyzeMealPhotoResponse = {
+  photoKey: string;
+  photoUrl: string;
+  dishName: string;
+  confidence: "HIGH" | "MEDIUM" | "LOW" | "NONE" | string;
+  totalCalories: number;
+  proteins: number;
+  carbohydrates: number;
+  fats: number;
+  fibers?: number | null;
+  sodium?: number | null;
+  items: FoodItemIdentified[];
+  aiNotes?: string | null;
+};
+
+export type CreateMealLogRequest = {
+  mealType: "BREAKFAST" | "MORNING_SNACK" | "LUNCH" | "AFTERNOON_SNACK" | "DINNER" | "SUPPER" | "SNACK" | string;
+  dishName: string;
+  photoUrl?: string;
+  totalCalories?: number;
+  proteins?: number;
+  carbohydrates?: number;
+  fats?: number;
+  fibers?: number;
+  sodium?: number;
+  items?: FoodItemIdentified[];
+  aiNotes?: string;
+  consumedAt?: string;
+};
+
+export type MealLogResponse = {
+  id: string;
+  userId: string;
+  familyId?: string | null;
+  mealType: string;
+  dishName: string;
+  photoUrl?: string | null;
+  totalCalories: number;
+  proteins: number;
+  carbohydrates: number;
+  fats: number;
+  fibers?: number | null;
+  sodium?: number | null;
+  items: FoodItemIdentified[];
+  aiNotes?: string | null;
+  consumedAt: string;
+  createdAt: string;
+};
+
+export type DailyMealSummaryResponse = {
+  date: string;
+  mealsCount: number;
+  totalCalories: number;
+  totalProteins: number;
+  totalCarbohydrates: number;
+  totalFats: number;
+  totalFibers: number;
+  totalSodium: number;
+  meals: MealLogResponse[];
+};
