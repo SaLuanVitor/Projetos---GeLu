@@ -1,10 +1,11 @@
-import type { ReactNode } from "react";
+import type { ReactNode, MouseEventHandler } from "react";
 
 type PaperCardProps = {
   children: ReactNode;
   className?: string;
   ink?: boolean;
   tape?: "orange" | "green" | "brown" | "none";
+  onClick?: MouseEventHandler<HTMLElement>;
 };
 
 const tapeColors = {
@@ -18,10 +19,12 @@ export function PaperCard({
   children,
   className = "",
   ink = false,
-  tape = "orange"
+  tape = "orange",
+  onClick
 }: PaperCardProps) {
   return (
     <section
+      onClick={onClick}
       className={`notebook-card ${ink ? "notebook-card-ink" : ""} relative p-5 ${className}`}
     >
       <span aria-hidden="true" className={`washi-tape ${tapeColors[tape]}`} />

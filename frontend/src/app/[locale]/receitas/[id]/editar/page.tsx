@@ -54,7 +54,7 @@ export default function EditRecipePage({ params }: { params: { id: string } }) {
 
     try {
       const updatedRecipe = await updateRecipe(session.accessToken, params.id, request);
-      router.push(`/receitas/${updatedRecipe.id}`);
+      router.push(`/receitas/${updatedRecipe.slug || updatedRecipe.id}`);
     } catch (requestError) {
       if (handleInvalidSession(requestError, () => router.replace("/login"))) {
         return;

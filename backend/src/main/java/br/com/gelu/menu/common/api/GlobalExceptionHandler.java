@@ -2,9 +2,12 @@ package br.com.gelu.menu.common.api;
 
 import br.com.gelu.menu.common.exception.BadRequestException;
 import br.com.gelu.menu.common.exception.ConflictException;
+import br.com.gelu.menu.common.exception.ForbiddenException;
 import br.com.gelu.menu.common.exception.NotFoundException;
 import br.com.gelu.menu.common.exception.UnauthorizedException;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -25,6 +28,12 @@ public class GlobalExceptionHandler {
 
     return ResponseEntity.badRequest()
         .body(ApiErrorResponse.of("VALIDATION_ERROR", "Invalid request data", details));
+  }
+
+  @ExceptionHandler(ForbiddenException.class)
+  public ResponseEntity<ApiErrorResponse> handleForbidden(ForbiddenException exception) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(ApiErrorResponse.of("FORBIDDEN", exception.getMessage(), List.of()));
   }
 
   @ExceptionHandler(ConflictException.class)
@@ -58,9 +67,12 @@ public class GlobalExceptionHandler {
         .body(ApiErrorResponse.of("NOT_FOUND", exception.getMessage(), List.of()));
   }
 
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiErrorResponse> handleUnexpected(Exception exception) {
+    log.error("Unhandled exception: ", exception);
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ApiErrorResponse.of("INTERNAL_ERROR", "Unexpected server error", List.of()));
+        .body(ApiErrorResponse.of("INTERNAL_ERROR", "Unexpected server error: " + exception.getMessage(), List.of()));
   }
 }

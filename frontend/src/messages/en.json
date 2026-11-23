@@ -113,6 +113,7 @@
   },
   "Shell": {
     "home": "Home",
+    "schedule": "Couple's Schedule",
     "recipes": "Recipes",
     "weeklyDiet": "Weekly Diet",
     "family": "Family",
@@ -227,10 +228,26 @@
     "viewFamily": "View family",
     "smartSuggestions": "Smart suggestions",
     "meals": [
-      { "name": "Tapioca breakfast", "tag": "morning", "calories": "320 kcal" },
-      { "name": "Mediterranean bowl", "tag": "lunch", "calories": "540 kcal" },
-      { "name": "Fruit with yogurt", "tag": "snack", "calories": "210 kcal" },
-      { "name": "Pumpkin soup", "tag": "dinner", "calories": "390 kcal" }
+      {
+        "name": "Tapioca breakfast",
+        "tag": "morning",
+        "calories": "320 kcal"
+      },
+      {
+        "name": "Mediterranean bowl",
+        "tag": "lunch",
+        "calories": "540 kcal"
+      },
+      {
+        "name": "Fruit with yogurt",
+        "tag": "snack",
+        "calories": "210 kcal"
+      },
+      {
+        "name": "Pumpkin soup",
+        "tag": "dinner",
+        "calories": "390 kcal"
+      }
     ],
     "suggestions": [
       "Swap the snack for an option with more protein.",
@@ -383,10 +400,22 @@
     "progress": "Progress",
     "progressText": "Record weight and goals without losing the feeling of a personal planner.",
     "meals": [
-      { "name": "Tapioca breakfast", "tag": "morning" },
-      { "name": "Mediterranean bowl", "tag": "lunch" },
-      { "name": "Fruit snack", "tag": "snack" },
-      { "name": "Pumpkin soup", "tag": "dinner" }
+      {
+        "name": "Tapioca breakfast",
+        "tag": "morning"
+      },
+      {
+        "name": "Mediterranean bowl",
+        "tag": "lunch"
+      },
+      {
+        "name": "Fruit snack",
+        "tag": "snack"
+      },
+      {
+        "name": "Pumpkin soup",
+        "tag": "dinner"
+      }
     ],
     "features": [
       {
@@ -402,6 +431,77 @@
         "description": "Plan meals, workouts and smart suggestions in the same place."
       }
     ]
+  },
+  "Family": {
+    "title": "Family",
+    "subtitle": "Manage your family, members and permissions.",
+    "loading": "Loading families...",
+    "createFamily": "Create family",
+    "newFamily": "New family",
+    "familyNamePlaceholder": "Family name...",
+    "creating": "Creating...",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "members": "Members",
+    "addMember": "Add member",
+    "addMemberPlaceholder": "Member email...",
+    "adding": "Adding...",
+    "remove": "Remove",
+    "noFamilies": "No family created yet.",
+    "noFamiliesHint": "Create a family to start sharing recipes and meals.",
+    "familyName": "Family Name",
+    "editFamily": "Edit Family"
+  },
+  "Schedule": {
+    "title": "Weekly Schedule",
+    "subtitle": "Couple routine, study, workouts and life planning",
+    "now": "Now",
+    "next": "Next activity",
+    "dayOver": "Day concluded",
+    "restMessage": "Rest well. The schedule continues tomorrow.",
+    "timeLeft": "{time} left",
+    "after": "After: {title} at {time}",
+    "newActivity": "New activity",
+    "editActivity": "Edit activity",
+    "activityTitle": "Activity",
+    "activityPlaceholder": "E.g.: Walk with Ellie, Study session...",
+    "startTime": "Start",
+    "endTime": "End",
+    "category": "Category",
+    "goalTag": "Counts towards goal",
+    "notes": "Details / Notes",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "completed": "completed",
+    "studyTime": "of study",
+    "weeklyGoals": "Weekly Goals",
+    "dayNotes": "Daily Notes",
+    "dayNotesPlaceholder": "Unexpected events, overtime, pending items...",
+    "categories": {
+      "TRABALHO": "Work",
+      "ESTUDO": "Study",
+      "SAUDE": "Health",
+      "CASA": "Home",
+      "PESSOAS": "Couple & Family"
+    }
+  },
+  "CoupleNotes": {
+    "title": "Couple's Notice Board",
+    "subtitle": "Quick notes and affectionate reminders for each other",
+    "placeholder": "Write a sweet reminder or note (e.g.: Left dinner in the fridge ❤️)...",
+    "post": "Leave note",
+    "posting": "Posting...",
+    "seenWithLove": "Seen with ❤️",
+    "markSeen": "Mark as seen",
+    "resolve": "Resolve",
+    "resolved": "Resolved",
+    "empty": "No active notes on the board. Why not leave a little note today?"
   },
   "Placeholder": {
     "back": "Back to dashboard",

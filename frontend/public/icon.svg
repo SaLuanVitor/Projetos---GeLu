@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <filter id="stamp-shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="2.5" stdDeviation="1" flood-color="#79573f" flood-opacity="0.3"/>
+    </filter>
+    <linearGradient id="stamp-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffebd9"/>
+      <stop offset="100%" stop-color="#ffd5c0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Carimbo Afetivo Inclinado (-3 graus) idêntico ao logo da marca -->
+  <g transform="rotate(-3 32 32)">
+    <!-- Base Selo Postal Kraft com cantos arredondados -->
+    <rect x="5" y="5" width="54" height="54" rx="14" fill="url(#stamp-bg)" stroke="#79573f" stroke-width="3" filter="url(#stamp-shadow)"/>
+    
+    <!-- Linha pontilhada interna de costura / caderno -->
+    <rect x="9" y="9" width="46" height="46" rx="10" fill="none" stroke="#e86d2d" stroke-width="1.5" stroke-dasharray="3.5 2" opacity="0.85"/>
+
+    <!-- Iniciais "GL" com peso 900 e espaçamento perfeito -->
+    <text x="30" y="40" font-family="'Bricolage Grotesque', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="25" font-weight="900" fill="#a23f00" text-anchor="middle" letter-spacing="-1">GL</text>
+
+    <!-- Brotinho verde orgânico no canto superior direito -->
+    <circle cx="46" cy="15" r="4.5" fill="#39693b"/>
+    <path d="M 46 12.5 C 48.5 14, 48.5 17.5, 46 19 C 43.5 17.5, 43.5 14, 46 12.5 Z" fill="#baf0b6"/>
+  </g>
+</svg>

@@ -2,29 +2,40 @@ import type {
   InputHTMLAttributes,
   ReactNode,
   SelectHTMLAttributes,
-  TextareaHTMLAttributes
+  TextareaHTMLAttributes,
 } from "react";
 
 export const fieldClassName =
-  "mt-2 w-full border-0 border-b-2 border-paper-line bg-transparent px-1 py-2 text-base text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/55 focus:border-primary disabled:bg-surface-container disabled:text-on-surface-variant";
+  "w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-white/95 dark:bg-[#28221d] px-3.5 py-2.5 text-sm font-medium text-stone-900 dark:text-stone-100 shadow-sm placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:border-amber-600 focus:bg-white dark:focus:bg-[#2f2823] focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:bg-stone-100 dark:disabled:bg-stone-800 disabled:text-stone-400 dark:disabled:text-stone-500 transition-all";
 
 export function FormField({
   children,
   hint,
-  label
+  label,
+  error,
+  containerClassName,
 }: {
   children: ReactNode;
   hint?: string;
-  label: string;
+  label?: string;
+  error?: string;
+  containerClassName?: string;
 }) {
   return (
-    <label className="block text-sm font-bold text-tertiary">
-      {label}
-      {children}
-      {hint ? (
-        <span className="mt-1 block text-xs normal-case text-on-surface-variant">{hint}</span>
+    <div className={`block text-left ${containerClassName ?? ""}`}>
+      {label ? (
+        <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5">
+          {label}
+        </label>
       ) : null}
-    </label>
+      {children}
+      {hint && !error ? (
+        <span className="mt-1 block text-xs normal-case text-stone-500 dark:text-stone-400">{hint}</span>
+      ) : null}
+      {error ? (
+        <span className="mt-1 block text-xs font-semibold text-red-600">{error}</span>
+      ) : null}
+    </div>
   );
 }
 
@@ -32,16 +43,31 @@ export function TextInput({
   label,
   onValueChange,
   value,
+  containerClassName,
+  className,
+  error,
+  hint,
   ...props
 }: {
-  label: string;
+  label?: string;
   onValueChange: (value: string) => void;
   value: string;
+  containerClassName?: string;
+  className?: string;
+  error?: string;
+  hint?: string;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">) {
   return (
-    <FormField label={label}>
+    <FormField
+      label={label}
+      hint={hint}
+      error={error}
+      containerClassName={containerClassName}
+    >
       <input
-        className={fieldClassName}
+        className={`${fieldClassName} ${
+          error ? "border-red-400 focus:border-red-600 focus:ring-red-500/20" : ""
+        } ${className ?? ""}`}
         onChange={(event) => onValueChange(event.target.value)}
         value={value}
         {...props}
@@ -54,16 +80,31 @@ export function TextAreaField({
   label,
   onValueChange,
   value,
+  containerClassName,
+  className,
+  error,
+  hint,
   ...props
 }: {
-  label: string;
+  label?: string;
   onValueChange: (value: string) => void;
   value: string;
+  containerClassName?: string;
+  className?: string;
+  error?: string;
+  hint?: string;
 } & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "onChange" | "value">) {
   return (
-    <FormField label={label}>
+    <FormField
+      label={label}
+      hint={hint}
+      error={error}
+      containerClassName={containerClassName}
+    >
       <textarea
-        className={`${fieldClassName} min-h-24 resize-y`}
+        className={`${fieldClassName} min-h-24 resize-y ${
+          error ? "border-red-400 focus:border-red-600 focus:ring-red-500/20" : ""
+        } ${className ?? ""}`}
         onChange={(event) => onValueChange(event.target.value)}
         value={value}
         {...props}
@@ -77,23 +118,42 @@ export function SelectField({
   onValueChange,
   options,
   value,
+  containerClassName,
+  className,
+  error,
+  hint,
   ...props
 }: {
-  label: string;
+  label?: string;
   onValueChange: (value: string) => void;
   options: Array<{ label: string; value: string }>;
   value: string;
+  containerClassName?: string;
+  className?: string;
+  error?: string;
+  hint?: string;
 } & Omit<SelectHTMLAttributes<HTMLSelectElement>, "onChange" | "value">) {
   return (
-    <FormField label={label}>
+    <FormField
+      label={label}
+      hint={hint}
+      error={error}
+      containerClassName={containerClassName}
+    >
       <select
-        className={`${fieldClassName} cursor-pointer`}
+        className={`${fieldClassName} cursor-pointer ${
+          error ? "border-red-400 focus:border-red-600 focus:ring-red-500/20" : ""
+        } ${className ?? ""}`}
         onChange={(event) => onValueChange(event.target.value)}
         value={value}
         {...props}
       >
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option
+            key={option.value}
+            value={option.value}
+            className="dark:bg-[#28221d] dark:text-stone-100"
+          >
             {option.label}
           </option>
         ))}
@@ -106,7 +166,7 @@ export function SegmentedChoice({
   label,
   onValueChange,
   options,
-  value
+  value,
 }: {
   label: string;
   onValueChange: (value: string) => void;
@@ -115,16 +175,16 @@ export function SegmentedChoice({
 }) {
   return (
     <div>
-      <p className="text-sm font-bold text-tertiary">{label}</p>
+      <p className="text-xs font-bold uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5">{label}</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => {
           const active = value === option.value;
           return (
             <button
-              className={`rounded-full border-2 px-3 py-1.5 text-sm font-bold transition-transform hover:rotate-1 ${
+              className={`rounded-full border-2 px-3.5 py-1.5 text-xs font-bold transition-all hover:scale-105 cursor-pointer ${
                 active
-                  ? "border-secondary bg-secondary-fixed text-secondary"
-                  : "border-outline-variant bg-surface-container-lowest text-on-surface-variant"
+                  ? "border-amber-600 dark:border-amber-500 bg-amber-500/15 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 shadow-sm"
+                  : "border-stone-300 dark:border-stone-700 bg-white/90 dark:bg-[#28221d] text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-600"
               }`}
               key={option.value}
               onClick={() => onValueChange(option.value)}
@@ -145,7 +205,7 @@ export function PresetNumberField({
   onValueChange,
   presets,
   step,
-  value
+  value,
 }: {
   label: string;
   min?: string;
@@ -167,10 +227,10 @@ export function PresetNumberField({
       <div className="mt-2 flex flex-wrap gap-2">
         {presets.map((preset) => (
           <button
-            className={`rounded-full border px-2.5 py-1 text-xs font-bold transition-colors ${
+            className={`rounded-full border px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
               value === preset.value
-                ? "border-primary bg-primary-fixed text-primary"
-                : "border-outline-variant bg-surface-container-lowest text-on-surface-variant"
+                ? "border-amber-600 dark:border-amber-500 bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200"
+                : "border-stone-300 dark:border-stone-700 bg-white/90 dark:bg-[#28221d] text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-600"
             }`}
             key={preset.value}
             onClick={() => onValueChange(preset.value)}

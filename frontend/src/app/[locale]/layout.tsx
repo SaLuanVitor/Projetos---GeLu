@@ -3,11 +3,18 @@ import { Be_Vietnam_Pro, Bricolage_Grotesque, Gochi_Hand } from "next/font/googl
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { ToastProvider } from "@/components/ui/Toast";
+import { FamilyProvider } from "@/contexts/FamilyContext";
 import "../globals.css";
 
 export const metadata: Metadata = {
   title: "Gelu - Menu",
-  description: "Organizacao familiar de receitas, dietas, treinos e sugestoes assistivas."
+  description: "Organizacao familiar de receitas, dietas, treinos e sugestoes assistivas.",
+  icons: [
+    { rel: "icon", url: "/icon.svg", type: "image/svg+xml" },
+    { rel: "icon", url: "/favicon.ico" },
+    { rel: "apple-touch-icon", url: "/icon.svg" },
+  ],
 };
 
 const displayFont = Bricolage_Grotesque({
@@ -47,7 +54,11 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className={`${displayFont.variable} ${bodyFont.variable} ${handFont.variable}`}>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <ToastProvider>
+            <FamilyProvider>{children}</FamilyProvider>
+          </ToastProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

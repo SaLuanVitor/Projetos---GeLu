@@ -25,6 +25,9 @@ public class Recipe {
   @Column(name = "user_id", nullable = false)
   private UUID userId;
 
+  @Column(length = 180, unique = true)
+  private String slug;
+
   @Column(nullable = false, length = 150)
   private String name;
 
@@ -39,6 +42,12 @@ public class Recipe {
 
   @Column(name = "estimated_calories")
   private BigDecimal estimatedCalories;
+
+  private BigDecimal carbohydrates;
+  private BigDecimal proteins;
+  private BigDecimal fats;
+  private BigDecimal fibers;
+  private BigDecimal sodium;
 
   private Integer servings;
 
@@ -77,9 +86,28 @@ public class Recipe {
       BigDecimal estimatedCalories,
       Integer servings,
       String videoUrl) {
+    this(userId, null, name, description, category, prepTimeMinutes, estimatedCalories, servings, videoUrl, null, null, null, null, null);
+  }
+
+  public Recipe(
+      UUID userId,
+      String slug,
+      String name,
+      String description,
+      String category,
+      Integer prepTimeMinutes,
+      BigDecimal estimatedCalories,
+      Integer servings,
+      String videoUrl,
+      BigDecimal carbohydrates,
+      BigDecimal proteins,
+      BigDecimal fats,
+      BigDecimal fibers,
+      BigDecimal sodium) {
     LocalDateTime now = LocalDateTime.now();
     this.id = UUID.randomUUID();
     this.userId = userId;
+    this.slug = slug;
     this.name = name;
     this.description = description;
     this.category = category;
@@ -87,6 +115,11 @@ public class Recipe {
     this.estimatedCalories = estimatedCalories;
     this.servings = servings;
     this.videoUrl = videoUrl;
+    this.carbohydrates = carbohydrates;
+    this.proteins = proteins;
+    this.fats = fats;
+    this.fibers = fibers;
+    this.sodium = sodium;
     this.favorite = false;
     this.mainMediaType = RecipeMainMediaType.IMAGE;
     this.createdAt = now;
@@ -101,6 +134,22 @@ public class Recipe {
       BigDecimal estimatedCalories,
       Integer servings,
       String videoUrl) {
+    update(name, description, category, prepTimeMinutes, estimatedCalories, servings, videoUrl, this.carbohydrates, this.proteins, this.fats, this.fibers, this.sodium);
+  }
+
+  public void update(
+      String name,
+      String description,
+      String category,
+      Integer prepTimeMinutes,
+      BigDecimal estimatedCalories,
+      Integer servings,
+      String videoUrl,
+      BigDecimal carbohydrates,
+      BigDecimal proteins,
+      BigDecimal fats,
+      BigDecimal fibers,
+      BigDecimal sodium) {
     this.name = name;
     this.description = description;
     this.category = category;
@@ -108,9 +157,19 @@ public class Recipe {
     this.estimatedCalories = estimatedCalories;
     this.servings = servings;
     this.videoUrl = videoUrl;
+    this.carbohydrates = carbohydrates;
+    this.proteins = proteins;
+    this.fats = fats;
+    this.fibers = fibers;
+    this.sodium = sodium;
     if (videoUrl == null && mainMediaType == RecipeMainMediaType.VIDEO) {
       this.mainMediaType = RecipeMainMediaType.IMAGE;
     }
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  public void setSlug(String slug) {
+    this.slug = slug;
     this.updatedAt = LocalDateTime.now();
   }
 
@@ -154,6 +213,10 @@ public class Recipe {
     return userId;
   }
 
+  public String getSlug() {
+    return slug;
+  }
+
   public String getName() {
     return name;
   }
@@ -172,6 +235,26 @@ public class Recipe {
 
   public BigDecimal getEstimatedCalories() {
     return estimatedCalories;
+  }
+
+  public BigDecimal getCarbohydrates() {
+    return carbohydrates;
+  }
+
+  public BigDecimal getProteins() {
+    return proteins;
+  }
+
+  public BigDecimal getFats() {
+    return fats;
+  }
+
+  public BigDecimal getFibers() {
+    return fibers;
+  }
+
+  public BigDecimal getSodium() {
+    return sodium;
   }
 
   public Integer getServings() {

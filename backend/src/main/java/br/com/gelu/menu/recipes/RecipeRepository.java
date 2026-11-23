@@ -9,4 +9,8 @@ public interface RecipeRepository
     extends JpaRepository<Recipe, UUID>, JpaSpecificationExecutor<Recipe> {
 
   Optional<Recipe> findByIdAndUserId(UUID id, UUID userId);
+
+  Optional<Recipe> findBySlug(String slug);
+
+  Optional<Recipe> findBySlugAndUserId(String slug, UUID userId);
 }

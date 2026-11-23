@@ -17,5 +17,25 @@ public record RecipeRequest(
     @Min(1) BigDecimal estimatedCalories,
     @Min(1) Integer servings,
     @Size(max = 500) @URL String videoUrl,
+    @Size(max = 180) String slug,
+    BigDecimal carbohydrates,
+    BigDecimal proteins,
+    BigDecimal fats,
+    BigDecimal fibers,
+    BigDecimal sodium,
     @NotEmpty @Size(max = 40) List<@Valid RecipeIngredientRequest> ingredients,
-    @NotEmpty @Size(max = 40) List<@Valid RecipeStepRequest> steps) {}
+    @NotEmpty @Size(max = 40) List<@Valid RecipeStepRequest> steps) {
+
+  public RecipeRequest(
+      String name,
+      String description,
+      String category,
+      Integer prepTimeMinutes,
+      BigDecimal estimatedCalories,
+      Integer servings,
+      String videoUrl,
+      List<RecipeIngredientRequest> ingredients,
+      List<RecipeStepRequest> steps) {
+    this(name, description, category, prepTimeMinutes, estimatedCalories, servings, videoUrl, null, null, null, null, null, null, ingredients, steps);
+  }
+}

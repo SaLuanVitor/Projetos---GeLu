@@ -3,6 +3,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ActionButton, ActionLink } from "@/components/ui/ActionButton";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { SelectField, TextInput } from "@/components/ui/FormField";
 import { NotebookPageHeader } from "@/components/ui/Notebook";
 import { PaperCard } from "@/components/ui/PaperCard";
@@ -218,6 +219,9 @@ export default function ProfilePage() {
           action={
             <div className="flex flex-wrap items-center gap-3">
               <LocaleSwitcher />
+              <ActionLink href="/perfil/auditoria" variant="outline">
+                📜 Auditoria
+              </ActionLink>
               <ActionLink href="/perfil/evolucao" variant="outline">
                 {t("viewEvolution")}
               </ActionLink>
@@ -359,36 +363,38 @@ export default function ProfilePage() {
                 </ActionButton>
               </form>
             </PaperCard>
+
+            <PaperCard tape="green">
+              <h3 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                <span>💬</span> Central de Ajuda & Suporte
+              </h3>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                Tire dúvidas, envie sugestões de melhorias ou fale diretamente com a equipe do GeLu.
+              </p>
+              <div className="mt-4 flex flex-col gap-2">
+                <ActionLink href="/suporte" className="w-full justify-center">
+                  💬 Acessar Ajuda & Chamados
+                </ActionLink>
+                {session?.user?.isSuperAdmin && (
+                  <ActionLink href="/admin" className="w-full justify-center border-primary bg-primary text-white font-bold hover:opacity-90">
+                    🛡️ Painel Super Admin
+                  </ActionLink>
+                )}
+              </div>
+            </PaperCard>
           </aside>
         </div>
       </main>
-      {showLogoutConfirm ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/35 px-5 py-8">
-          <div
-            aria-labelledby="logout-confirm-title"
-            aria-modal="true"
-            className="notebook-card w-full max-w-md bg-surface p-6 shadow-paper"
-            role="dialog"
-          >
-            <h2 className="font-display text-3xl font-bold text-primary" id="logout-confirm-title">
-              {t("logoutTitle")}
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-on-surface-variant">{t("logoutText")}</p>
-            <div className="mt-6 flex flex-wrap justify-end gap-3">
-              <ActionButton
-                onClick={() => setShowLogoutConfirm(false)}
-                type="button"
-                variant="outline"
-              >
-                {t("cancel")}
-              </ActionButton>
-              <ActionButton onClick={handleLogoutConfirm} type="button">
-                {t("logoutConfirm")}
-              </ActionButton>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogoutConfirm}
+        title={t("logoutTitle")}
+        description={t("logoutText")}
+        cancelLabel={t("cancel")}
+        confirmLabel={t("logoutConfirm")}
+        variant="danger"
+      />
     </AppShell>
   );
 }

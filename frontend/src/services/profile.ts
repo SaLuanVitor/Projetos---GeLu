@@ -3,8 +3,10 @@ import type {
   ApiErrorResponse,
   ApiResponse,
   CreateWeightRecordRequest,
+  FamilyWeightHistoryResponse,
   ProfileResponse,
   UpdateProfileRequest,
+  WeeklyEvolutionSummaryResponse,
   WeightHistoryItem
 } from "@/types/api";
 
@@ -35,6 +37,23 @@ export async function createWeightRecord(
   return request<WeightHistoryItem>("/profile/weight-history", accessToken, {
     method: "POST",
     body
+  });
+}
+
+export async function getFamilyWeightHistory(
+  accessToken: string,
+  familyId: string
+): Promise<FamilyWeightHistoryResponse> {
+  return request<FamilyWeightHistoryResponse>(`/families/${familyId}/weight-history`, accessToken);
+}
+
+export async function getWeeklyEvolutionSummary(
+  accessToken: string,
+  familyId?: string
+): Promise<WeeklyEvolutionSummaryResponse> {
+  return request<WeeklyEvolutionSummaryResponse>("/ai/weekly-summary", accessToken, {
+    method: "POST",
+    body: familyId ? { familyId } : {}
   });
 }
 

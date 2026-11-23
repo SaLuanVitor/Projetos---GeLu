@@ -55,14 +55,14 @@ public class RecipeController {
 
   @GetMapping("/{id}")
   public ApiResponse<RecipeResponse> getRecipe(
-      @AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID id) {
+      @AuthenticationPrincipal AuthenticatedUser user, @PathVariable String id) {
     return ApiResponse.ok(recipeService.getRecipe(user.id(), id), "Recipe loaded successfully");
   }
 
   @PutMapping("/{id}")
   public ApiResponse<RecipeResponse> updateRecipe(
       @AuthenticationPrincipal AuthenticatedUser user,
-      @PathVariable UUID id,
+      @PathVariable String id,
       @Valid @RequestBody RecipeRequest request) {
     return ApiResponse.ok(recipeService.updateRecipe(user.id(), id, request), "Recipe updated");
   }
@@ -70,7 +70,7 @@ public class RecipeController {
   @PutMapping("/{id}/favorite")
   public ApiResponse<RecipeResponse> updateFavorite(
       @AuthenticationPrincipal AuthenticatedUser user,
-      @PathVariable UUID id,
+      @PathVariable String id,
       @Valid @RequestBody RecipeFavoriteRequest request) {
     return ApiResponse.ok(
         recipeService.updateFavorite(user.id(), id, request.favorite()), "Recipe favorite updated");
@@ -79,7 +79,7 @@ public class RecipeController {
   @PutMapping("/{id}/main-media-type")
   public ApiResponse<RecipeResponse> updateMainMediaType(
       @AuthenticationPrincipal AuthenticatedUser user,
-      @PathVariable UUID id,
+      @PathVariable String id,
       @Valid @RequestBody RecipeMainMediaTypeRequest request) {
     return ApiResponse.ok(
         recipeService.updateMainMediaType(user.id(), id, request.mainMediaType()),
@@ -88,7 +88,7 @@ public class RecipeController {
 
   @DeleteMapping("/{id}")
   public ApiResponse<Void> deleteRecipe(
-      @AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID id) {
+      @AuthenticationPrincipal AuthenticatedUser user, @PathVariable String id) {
     recipeService.deleteRecipe(user.id(), id);
     return ApiResponse.ok(null, "Recipe deleted");
   }

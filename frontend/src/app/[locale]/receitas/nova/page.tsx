@@ -30,7 +30,7 @@ export default function NewRecipePage() {
 
     try {
       const recipe = await createRecipe(session.accessToken, request);
-      router.push(`/receitas/${recipe.id}`);
+      router.push(`/receitas/${recipe.slug || recipe.id}`);
     } catch (requestError) {
       if (handleInvalidSession(requestError, () => router.replace("/login"))) {
         return;

@@ -66,6 +66,7 @@ export default function RegisterPage() {
             type="email"
             value={email}
             onValueChange={setEmail}
+            autoComplete="email"
           />
           <AuthTextInput
             label={t("password")}
@@ -76,6 +77,7 @@ export default function RegisterPage() {
             type="password"
             value={password}
             onValueChange={setPassword}
+            autoComplete="new-password"
           />
         </div>
 

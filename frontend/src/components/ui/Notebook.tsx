@@ -51,7 +51,7 @@ export function SketchIcon({ children }: { children: ReactNode }) {
 
 export function RecipePhotoPlaceholder({ label }: { label: string }) {
   return (
-    <div className="paper-dots-block flex h-full min-h-56 flex-col items-center justify-center gap-3 border-2 border-dashed border-outline text-center text-sm font-bold text-outline">
+    <div className="paper-dots-block flex h-full min-h-56 flex-col items-center justify-center gap-3 border-2 border-dashed border-outline/70 dark:border-stone-700 text-center text-sm font-bold text-outline dark:text-stone-300">
       <span className="text-4xl">+</span>
       <span>{label}</span>
     </div>

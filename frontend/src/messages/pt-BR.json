@@ -113,6 +113,7 @@
   },
   "Shell": {
     "home": "Inicio",
+    "schedule": "Agenda do Casal",
     "recipes": "Receitas",
     "weeklyDiet": "Dieta Semanal",
     "family": "Familia",
@@ -227,10 +228,26 @@
     "viewFamily": "Ver familia",
     "smartSuggestions": "Sugestoes inteligentes",
     "meals": [
-      { "name": "Café com tapioca", "tag": "manhã", "calories": "320 kcal" },
-      { "name": "Bowl mediterraneo", "tag": "almoco", "calories": "540 kcal" },
-      { "name": "Frutas com iogurte", "tag": "lanche", "calories": "210 kcal" },
-      { "name": "Sopa de abobora", "tag": "jantar", "calories": "390 kcal" }
+      {
+        "name": "Café com tapioca",
+        "tag": "manhã",
+        "calories": "320 kcal"
+      },
+      {
+        "name": "Bowl mediterraneo",
+        "tag": "almoco",
+        "calories": "540 kcal"
+      },
+      {
+        "name": "Frutas com iogurte",
+        "tag": "lanche",
+        "calories": "210 kcal"
+      },
+      {
+        "name": "Sopa de abobora",
+        "tag": "jantar",
+        "calories": "390 kcal"
+      }
     ],
     "suggestions": [
       "Trocar o lanche por uma opcao com mais proteina.",
@@ -383,10 +400,22 @@
     "progress": "Evolucao",
     "progressText": "Registre peso e metas sem perder a sensacao de planner pessoal.",
     "meals": [
-      { "name": "Café com tapioca", "tag": "manhã" },
-      { "name": "Bowl mediterraneo", "tag": "almoco" },
-      { "name": "Lanche de frutas", "tag": "lanche" },
-      { "name": "Sopa de abobora", "tag": "jantar" }
+      {
+        "name": "Café com tapioca",
+        "tag": "manhã"
+      },
+      {
+        "name": "Bowl mediterraneo",
+        "tag": "almoco"
+      },
+      {
+        "name": "Lanche de frutas",
+        "tag": "lanche"
+      },
+      {
+        "name": "Sopa de abobora",
+        "tag": "jantar"
+      }
     ],
     "features": [
       {
@@ -402,6 +431,77 @@
         "description": "Planeje refeições, treinos e sugestões inteligentes no mesmo lugar."
       }
     ]
+  },
+  "Family": {
+    "title": "Familia",
+    "subtitle": "Gerencie sua familia, membros e permissoes.",
+    "loading": "Carregando familias...",
+    "createFamily": "Criar familia",
+    "newFamily": "Nova familia",
+    "familyNamePlaceholder": "Nome da familia...",
+    "creating": "Criando...",
+    "create": "Criar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "members": "Membros",
+    "addMember": "Adicionar membro",
+    "addMemberPlaceholder": "E-mail do membro...",
+    "adding": "Adicionando...",
+    "remove": "Remover",
+    "noFamilies": "Nenhuma familia criada ainda.",
+    "noFamiliesHint": "Crie uma familia para comecar a compartilhar receitas e refeicoes.",
+    "familyName": "Nome da Família",
+    "editFamily": "Editar Família"
+  },
+  "Schedule": {
+    "title": "Agenda da semana",
+    "subtitle": "Organização do casal, estudos, treinos e rotina",
+    "now": "Agora",
+    "next": "Próxima atividade",
+    "dayOver": "Dia encerrado",
+    "restMessage": "Descanse. Amanhã a agenda continua.",
+    "timeLeft": "Faltam {time}",
+    "after": "Depois: {title} às {time}",
+    "newActivity": "Nova atividade",
+    "editActivity": "Editar atividade",
+    "activityTitle": "Atividade",
+    "activityPlaceholder": "Ex.: Caminhada com a Ellie, Estudo concurso...",
+    "startTime": "Início",
+    "endTime": "Fim",
+    "category": "Categoria",
+    "goalTag": "Conta como meta",
+    "notes": "Detalhes / Anotações",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "completed": "concluídas",
+    "studyTime": "de estudo",
+    "weeklyGoals": "Metas da semana",
+    "dayNotes": "Anotações do dia",
+    "dayNotesPlaceholder": "Imprevistos, hora extra, o que ficou pendente...",
+    "categories": {
+      "TRABALHO": "Trabalho",
+      "ESTUDO": "Estudo",
+      "SAUDE": "Saúde",
+      "CASA": "Casa",
+      "PESSOAS": "Casal & Pessoas"
+    }
+  },
+  "CoupleNotes": {
+    "title": "Mural de Avisos do Casal",
+    "subtitle": "Recados rápidos e bilhetinhos de um para o outro",
+    "placeholder": "Escreva um recado carinhoso ou aviso (ex.: Deixei o jantar na geladeira ❤️)...",
+    "post": "Deixar aviso",
+    "posting": "Enviando...",
+    "seenWithLove": "Visto com ❤️",
+    "markSeen": "Marcar como visto",
+    "resolve": "Resolver",
+    "resolved": "Resolvido",
+    "empty": "Nenhum recado pendente no mural. Que tal deixar um bilhetinho hoje?"
   },
   "Placeholder": {
     "back": "Voltar ao painel",

@@ -2,8 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
 :root {
   color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Scrollbar-hide utilities (cross-browser Windows, Chrome, Edge, Safari, Firefox) */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
+/* Custom discreet scrollbars across Windows & modern browsers */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(160, 140, 120, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(160, 140, 120, 0.6);
 }
 
 body {
@@ -11,6 +50,12 @@ body {
   background: #fef9ed;
   color: #1d1c15;
   font-family: var(--font-body), system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body {
+  background: #181512;
+  color: #ede8dc;
 }
 
 a {
@@ -36,13 +81,15 @@ textarea {
   background-color: #fef9ed;
 }
 
-.paper-canvas > :not(.page-decor) {
+.paper-canvas > :not(.page-decor):not(header) {
   position: relative;
   z-index: 2;
 }
 
 .paper-canvas > header {
-  z-index: 30;
+  position: sticky;
+  top: 0;
+  z-index: 100 !important;
 }
 
 .page-decor {
@@ -362,11 +409,129 @@ textarea {
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 2px 0 rgba(121, 87, 63, 0.12);
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.notebook-card-ink {
-  border-color: #8b7267;
-  background: rgba(248, 243, 231, 0.88);
+.dark .paper-canvas,
+.dark body {
+  background-color: #181512 !important;
+  color: #f5f0e6 !important;
+}
+
+.dark header {
+  background-color: rgba(24, 21, 18, 0.96) !important;
+  border-color: #3d342d !important;
+}
+
+.dark header a.text-primary {
+  color: #f27c38 !important;
+}
+
+/* Links do menu superior no modo escuro */
+.dark nav a:not(.bg-primary-container) {
+  color: #e8e1d5 !important;
+}
+
+.dark nav a:not(.bg-primary-container):hover {
+  background-color: #2b2520 !important;
+  border-color: #635449 !important;
+}
+
+/* Adaptação das superfícies e textos Semânticos no modo escuro */
+.dark .text-on-surface {
+  color: #f5f0e6 !important;
+}
+
+.dark .text-on-surface-variant {
+  color: #c4b6a8 !important;
+}
+
+.dark .text-tertiary {
+  color: #ffb595 !important;
+}
+
+.dark .border-surface-variant {
+  border-color: #3f362e !important;
+}
+
+.dark .bg-surface-container {
+  background-color: #25201b !important;
+}
+
+.dark .bg-surface-container-low {
+  background-color: #1f1a16 !important;
+}
+
+.dark .bg-surface-container-high {
+  background-color: #2d2621 !important;
+}
+
+/* Blocos de Papelaria no Modo Escuro */
+.dark .paper-grid-block {
+  background-color: rgba(33, 28, 24, 0.96) !important;
+  background-image: linear-gradient(rgba(74, 62, 53, 0.45) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 62, 53, 0.45) 1px, transparent 1px) !important;
+}
+
+.dark .paper-dots-block {
+  background-color: rgba(33, 28, 24, 0.96) !important;
+  background-image: radial-gradient(circle at 1px 1px, rgba(242, 124, 56, 0.2) 1px, transparent 0) !important;
+}
+
+.dark .paper-lines-block {
+  background-color: rgba(33, 28, 24, 0.96) !important;
+  background-image: linear-gradient(to bottom, transparent 38px, rgba(74, 62, 53, 0.6) 39px) !important;
+}
+
+.dark .scribble-border {
+  border-color: #5c4e43 !important;
+}
+
+.dark .notebook-card {
+  border-color: #4a3e35 !important;
+  background: rgba(33, 28, 24, 0.96) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+  color: #ede8dc !important;
+}
+
+.dark .notebook-card-ink {
+  border-color: #5c4e43 !important;
+  background: rgba(38, 32, 28, 0.98) !important;
+  color: #ede8dc !important;
+}
+
+.dark .notebook-card h1,
+.dark .notebook-card h2,
+.dark .notebook-card h3,
+.dark .notebook-card h4,
+.dark .notebook-card h5,
+.dark .notebook-card h6 {
+  color: #fdfbf7;
+}
+
+/* Blindagem dos Post-its físicos do Mural de Recados:
+   São notas físicas adesivas de papel colorido com tinta escura de caneta */
+.post-it-note {
+  color: #1c1917 !important;
+}
+
+.post-it-note p,
+.post-it-note .font-hand {
+  color: #1c1917 !important;
+}
+
+/* Inputs no modo escuro */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #28221d;
+  border-color: #4d4036;
+  color: #fdfbf7;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #8f8275;
 }
 
 .washi-tape {
@@ -404,4 +569,13 @@ textarea {
   .decor-shape {
     display: none;
   }
+}
+
+
+.dark .bg-surface-container-lowest {
+  background-color: #241e19 !important;
+}
+
+.dark .bg-surface-container-lowest.text-on-surface {
+  color: #f5ede4 !important;
 }

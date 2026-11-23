@@ -33,8 +33,18 @@ export default function LoginPage() {
     setStatus("");
 
     try {
-      const auth = await loginUser({ email, password });
+      const auth = await loginUser({
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+      });
       saveSession(auth);
+
+      if (auth.user?.isSuperAdmin) {
+        setStatus("Conta Super Admin detectada. Redirecionando para o Backoffice...");
+        window.location.href = "http://localhost:3001";
+        return;
+      }
+
       setStatus(t("success"));
       router.push("/dashboard");
     } catch (requestError) {
@@ -58,6 +68,7 @@ export default function LoginPage() {
             type="email"
             value={email}
             onValueChange={setEmail}
+            autoComplete="email"
           />
           <AuthTextInput
             label={t("password")}
@@ -73,6 +84,7 @@ export default function LoginPage() {
             type="password"
             value={password}
             onValueChange={setPassword}
+            autoComplete="current-password"
           />
         </div>
 

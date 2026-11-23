@@ -15,6 +15,7 @@ import { useTranslations } from "next-intl";
 import { ChangeEvent, useEffect, useState } from "react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { StatusMessage } from "@/components/ui/StatusMessage";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -34,6 +35,7 @@ export function MediaUploader({ recipeId, initialMedia, onMediaChange }: MediaUp
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const [mediaToDelete, setMediaToDelete] = useState<RecipeMedia | null>(null);
 
   useEffect(() => {
     setMedia(initialMedia);
@@ -214,7 +216,7 @@ export function MediaUploader({ recipeId, initialMedia, onMediaChange }: MediaUp
                   </ActionButton>
                   <ActionButton
                     disabled={busy}
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => setMediaToDelete(item)}
                     type="button"
                     variant="outline"
                   >
@@ -226,6 +228,24 @@ export function MediaUploader({ recipeId, initialMedia, onMediaChange }: MediaUp
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!mediaToDelete}
+        onClose={() => setMediaToDelete(null)}
+        onConfirm={async () => {
+          if (mediaToDelete) {
+            const id = mediaToDelete.id;
+            setMediaToDelete(null);
+            await handleDelete(id);
+          }
+        }}
+        title="Remover foto da receita?"
+        description="Tem certeza que deseja excluir esta foto da receita?"
+        confirmLabel="Sim, remover"
+        cancelLabel="Cancelar"
+        variant="danger"
+        loading={busy}
+      />
     </section>
   );
 }

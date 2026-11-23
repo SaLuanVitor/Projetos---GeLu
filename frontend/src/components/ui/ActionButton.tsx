@@ -8,7 +8,7 @@ const variants: Record<Variant, string> = {
   secondary:
     "border-tertiary bg-secondary text-on-secondary shadow-label hover:bg-secondary-container hover:text-on-secondary-container",
   outline:
-    "border-outline bg-surface-container-lowest text-on-surface hover:bg-primary-fixed hover:text-on-primary-fixed"
+    "border-stone-400 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary"
 };
 
 const baseClass =

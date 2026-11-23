@@ -6,12 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "format:check": "prettier --check .",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0 -p 3000",
     "test": "vitest run",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.5.0",
     "next": "14.2.17",
     "next-intl": "^4.11.2",
     "react": "18.3.1",

@@ -41,3 +41,9 @@ gelu:
     bucket: ${STORAGE_BUCKET:gelu-menu-media}
     proxy-base-path: ${STORAGE_PROXY_BASE_PATH:/api/v1/recipes}
     max-image-size-bytes: ${STORAGE_MAX_IMAGE_SIZE_BYTES:5242880}
+
+  super-admin-email: ${GELU_SUPER_ADMIN_EMAIL:luanvitors_852@hotmail.com}
+  super-admin-password: ${GELU_SUPER_ADMIN_PASSWORD:}
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-2.5-flash}

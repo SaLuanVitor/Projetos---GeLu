@@ -169,3 +169,33 @@ async function readPayload<T>(response: Response): Promise<ApiResponse<T> | ApiE
     );
   }
 }
+
+export async function getCurrentUser(token: string): Promise<import("@/types/api").AuthUser> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}/auth/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  } catch {
+    throw new ApiClientError(
+      `Nao foi possivel conectar ao backend. Verifique se a API esta rodando em ${API_URL}.`,
+      "NETWORK_ERROR",
+      []
+    );
+  }
+
+  const payload = await readPayload<import("@/types/api").AuthUser>(response);
+  if (!response.ok || !payload.success) {
+    const error = "error" in payload ? payload.error : undefined;
+    throw new ApiClientError(
+      error?.message ?? "Nao foi possivel obter dados do usuario.",
+      error?.code ?? "REQUEST_ERROR",
+      error?.details ?? []
+    );
+  }
+
+  return payload.data;
+}

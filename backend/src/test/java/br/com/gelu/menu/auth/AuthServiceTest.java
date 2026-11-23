@@ -49,7 +49,8 @@ class AuthServiceTest {
           passwordEncoder,
           jwtTokenService,
           Duration.ofMinutes(30),
-          true);
+          true,
+          "luanvitors_852@hotmail.com");
 
   @Test
   void shouldHashPasswordAndNormalizeEmail() {

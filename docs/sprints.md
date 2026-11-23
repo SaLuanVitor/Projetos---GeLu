@@ -148,198 +148,299 @@ Pronto quando:
 
 ## Sprint 5 - Ambiente Familiar
 
+**Status: CONCLUIDA**
+
 Objetivo: criar ambiente familiar e membros.
 
 Tarefas:
 
-- [ ] Criar tabelas `families` e `family_members`
-- [ ] Criar CRUD de ambiente familiar
-- [ ] Criar permissoes `ADMIN`, `EDITOR` e `VIEWER`
-- [ ] Criar tela de familia
-- [ ] Criar testes de permissao
+- [x] Criar tabelas `families` e `family_members`
+- [x] Criar CRUD de ambiente familiar
+- [x] Criar permissoes `ADMIN`, `EDITOR` e `VIEWER`
+- [x] Criar tela de familia
+- [x] Criar testes de permissao
 
 Pronto quando:
 
-- [ ] Usuario cria familia
-- [ ] Usuario ve membros
-- [ ] Permissoes funcionam
-- [ ] Testes passam
+- [x] Usuario cria familia
+- [x] Usuario ve membros
+- [x] Permissoes funcionam
+- [x] Testes passam
 
-## Sprint 6 - Convites por E-mail
+## Sprint 5.1 - Agenda do Casal & Mural de Avisos
 
-Objetivo: permitir convidar membros.
+**Status: CONCLUIDA**
+
+Objetivo: transformar o Gelu em um hub do casal com agenda semanal, bloco "Agora", metas e mural de avisos estilo post-it.
 
 Tarefas:
 
-- [ ] Criar tabela `invitations`
-- [ ] Criar envio de convite
-- [ ] Configurar servico de e-mail
-- [ ] Criar tela de convites pendentes
-- [ ] Criar aceite
-- [ ] Criar recusa
-- [ ] Evitar duplicidade
-- [ ] Criar testes
+- [x] Criar migração Flyway `V008__create_schedule_and_notes_tables.sql`
+- [x] Criar entidades `CoupleNote`, `ScheduleActivity`, `ScheduleCompletion` e `FamilyWeeklyGoal`
+- [x] Implementar CRUD e reação com "Visto com ❤️" no Mural de Avisos do Casal
+- [x] Implementar Agenda Semanal com bloco "Agora", cálculo dinâmico de tempo e metas recorrentes
+- [x] Criar tela `/agenda` moderna com suporte aos dias da semana e contadores
+- [x] Integrar `CoupleNotesCard` e banner de agenda no Dashboard principal
+- [x] Criar testes unitários e de integração no backend e frontend
 
 Pronto quando:
 
-- [ ] Convite e enviado
-- [ ] Convidado visualiza convite
-- [ ] Aceite adiciona membro
-- [ ] Recusa altera status
-- [ ] Testes passam
+- [x] Mural de avisos permite postar bilhetes coloridos e marcar visto
+- [x] Agenda semanal exibe timeline, bloco "Agora" e permite marcar conclusões
+- [x] Metas da semana atualizam progresso em tempo real
+- [x] Testes passam no Spring Boot e no Next.js
+
+## Sprint 5.2 - Padronização Visual, Usabilidade & Auditoria
+
+**Status: CONCLUIDA**
+
+Objetivo: unificar o design system, resolver stacking context em modais, garantir confirmação em ações destrutivas, padronizar formulários com contraste WCAG AA e criar a trilha de auditoria (`audit_logs`).
+
+Tarefas:
+
+- [x] Criar componente global `Modal` via React Portal (`document.body`) com `z-[100]`
+- [x] Criar componente `ConfirmDialog` para todas as ações destrutivas (exclusões e remoções)
+- [x] Refatorar `FormField`, `TextInput`, `TextAreaField` e `SelectField` com contraste WCAG AA e rótulos superiores
+- [x] Criar sistema global de toasts (`ToastProvider`, hook `useToast`)
+- [x] Refatorar tela de `/agenda` para eliminar vazamento do rodapé e proteger exclusão com `ConfirmDialog`
+- [x] Refatorar tela de `/familia` para eliminar formulários concorrentes e usar modais limpos
+- [x] Proteger exclusão de receitas (`/receitas/[id]`) e arquivamento de recados (`CoupleNotesCard`) com confirmação
+- [x] Criar migração Flyway `V009__create_audit_logs_table.sql`
+- [x] Criar módulo de auditoria no Spring Boot (`AuditLog`, `AuditLogRepository`, `AuditLogService`, `AuditLogController`)
+- [x] Integrar auditoria de mutações no `FamilyService`
+- [x] Criar visualização de histórico de auditoria no frontend com modal dedicado
+- [x] Documentar guia oficial de padrões em `docs/design-system-and-standards.md`
+
+Pronto quando:
+
+- [x] Modais não sofrem interferência de stacking context do rodapé
+- [x] Exclusões de família, membro, atividade e receita exigem confirmação explícita
+- [x] Rótulos e placeholders estão claros, separados e legíveis
+- [x] Trilha de auditoria persiste e exibe histórico de ações da família
+- [x] Todos os testes de frontend (70/70) e backend (106/106) passam com sucesso
+
+## Sprint 5.3 - Atribuição Flexível e Múltipla na Agenda do Casal
+
+**Status: CONCLUIDA**
+
+Objetivo: permitir que uma atividade pertença a 1 ou mais membros da família e, caso não seja informado nenhum responsável, atribuir automaticamente à própria pessoa autenticada.
+
+Tarefas:
+
+- [x] Criar migração Flyway `V010__schedule_activity_assignees.sql` com tabela associativa e backfill
+- [x] Atualizar entidade `ScheduleActivity` com `@ManyToMany Set<User> assignees`
+- [x] Atualizar `ScheduleActivityRequest` com `assigneeUserIds` e `ScheduleActivityResponse` com `assignees`
+- [x] Implementar regra de negócio no `ScheduleService`: resolução de múltiplos membros e fallback automático para o autor
+- [x] Atualizar seletor no modal da agenda (`/agenda`) com chips multi-seleção de membros
+- [x] Atualizar cards da timeline com badges visuais dos responsáveis (ex: `👤 Luan & Geovana` ou `👥 Casal`)
+- [x] Validar bateria de testes completa no Spring Boot (106 testes) e Vitest (70 testes)
+
+Pronto quando:
+
+- [x] Usuário pode atribuir atividade a si mesmo, ao parceiro ou a ambos
+- [x] Salvamento sem selecionar membros atribui automaticamente à própria pessoa
+- [x] Badges visuais indicam com clareza quem é o responsável pela atividade
+
+## Sprint 5.4 - Mural de Avisos com Cores de Urgência & Popup Global
+
+**Status: CONCLUIDA**
+
+Objetivo: resolver o contraste dos post-its, transformar cores em níveis semânticos de urgência, criar popup global para recados e re-notificar periodicamente quem não marcou como lido em qualquer tela do sistema.
+
+Tarefas:
+
+- [x] Eliminar conflito de classes `dark:` do Tailwind nos cards, garantindo papéis pastéis nítidos e contraste AAA
+- [x] Criar módulo semântico `note-urgency.ts` com 5 níveis de urgência/tipo:
+  - 🔴 `urgent`: Urgente / Não esquecer
+  - 🟡 `attention`: Atenção / Rotina do Dia
+  - 💖 `love`: Amor & Carinho
+  - 🟢 `gentle`: Lembrete / Tranquilo
+  - 🔵 `info`: Informativo / Dica
+- [x] Refatorar `CoupleNotesCard.tsx` com badges temáticos, tipografia em negrito de alto contraste e seletor semântico
+- [x] Criar componente `CoupleNotePopupListener.tsx` no `AppShell` para alertar membros da família em qualquer tela
+- [x] Implementar re-notificação periódica (snooze de 2 minutos e polling de 30s) caso a pessoa feche sem marcar lido
+- [x] Botão rápido no popup para marcar "Visto com ❤️" e dismiss definitivo
+- [x] Validar lint e build do Next.js sem avisos ou erros
+
+Pronto quando:
+
+- [x] Post-its possuem texto preto/escuro de alto contraste sobre fundo pastel vivo
+- [x] Cores expressam claramente a prioridade do aviso
+- [x] Novo recado surge como popup em qualquer tela para membros da família
+- [x] Recado não lido reaparece após tempo de snooze (2 min)
+
+## Sprint 6 - Convites por E-mail & Token Link
+
+**Status: CONCLUIDA**
+
+Objetivo: permitir convidar membros com token seguro de 7 dias, cópia de link e fluxo de aceite/recusa.
+
+Tarefas:
+
+- [x] Criar migração Flyway `V012__create_family_invites_table.sql`
+- [x] Criar entidade `FamilyInvite` e repositório `FamilyInviteRepository`
+- [x] Implementar geração de token único seguro e expiração no `FamilyService`
+- [x] Criar endpoints de convites em `/api/v1/families/{familyId}/invites` e `/api/v1/invites/{token}`
+- [x] Integrar auditoria de envio, aceite, recusa e cancelamento de convites
+- [x] Criar tela e modal de envio de convites na tela de Família (`/familia`) com botão de copiar link com 1 clique
+- [x] Criar rota e página dedicada `/convite/[token]` para aceitar ou recusar convite
+- [x] Prevenir convites duplicados e membros já cadastrados
+
+Pronto quando:
+
+- [x] Convite é criado e gera token/link seguro de 7 dias
+- [x] Convidado visualiza os dados do convite na rota `/convite/[token]`
+- [x] Aceite adiciona o membro na família com o papel designado
+- [x] Recusa atualiza o status do convite
+- [x] Cancelamento de convite pelo admin funciona com sucesso
+- [x] Testes passam
 
 ## Sprint 7 - Dieta Semanal
+
+**Status: CONCLUIDA**
 
 Objetivo: criar dieta semanal com refeicoes.
 
 Tarefas:
 
-- [ ] Criar tabela `weekly_diets`
-- [ ] Criar tabela `diet_meals`
-- [ ] Criar tela semanal
-- [ ] Adicionar refeicao
-- [ ] Editar refeicao
-- [ ] Remover refeicao
-- [ ] Criar testes
+- [x] Criar tabela `weekly_diets`
+- [x] Criar tabela `diet_meals`
+- [x] Criar tela semanal
+- [x] Adicionar refeicao
+- [x] Editar refeicao
+- [x] Remover refeicao
+- [x] Criar testes
 
 Pronto quando:
 
-- [ ] Dieta semanal e criada
-- [ ] Refeicoes aparecem por dia
-- [ ] Edicao funciona
-- [ ] Testes passam
+- [x] Dieta semanal e criada
+- [x] Refeicoes aparecem por dia
+- [x] Edicao funciona
+- [x] Testes passam
 
 ## Sprint 8 - Associacao de Receitas e Pessoas
+
+**Status: CONCLUIDA**
 
 Objetivo: associar receitas e pessoas as refeicoes.
 
 Tarefas:
 
-- [ ] Criar `diet_meal_recipes`
-- [ ] Criar `diet_meal_people`
-- [ ] Selecionar receita na refeicao
-- [ ] Selecionar pessoa na refeicao
-- [ ] Exibir calorias por refeicao
-- [ ] Exibir pessoas associadas
-- [ ] Criar testes
+- [x] Criar `diet_meal_recipes`
+- [x] Criar `diet_meal_people`
+- [x] Selecionar receita na refeicao
+- [x] Selecionar pessoa na refeicao
+- [x] Exibir calorias por refeicao
+- [x] Exibir pessoas associadas
+- [x] Criar testes
 
 Pronto quando:
 
-- [ ] Receita e associada
-- [ ] Pessoa e associada
-- [ ] Calorias aparecem
-- [ ] Testes passam
+- [x] Receita e associada
+- [x] Pessoa e associada
+- [x] Calorias aparecem
+- [x] Testes passam
 
-## Sprint 9 - Treinos e Calculos
+## Sprint 9 - Treinos e Calculos de Saldo Calórico
 
-Objetivo: implementar treinos, confirmacao diaria e calculo calorico.
+**Status: CONCLUIDA**
+
+Objetivo: implementar treinos, confirmacao diaria e calculo calorico em tempo real.
 
 Tarefas:
 
-- [ ] Criar tabela `trainings`
-- [ ] Criar tabela `training_confirmations`
-- [ ] Criar CRUD de treino
-- [ ] Criar confirmacao diaria
-- [ ] Criar calculo de gasto diario
-- [ ] Criar calculo de consumo diario
-- [ ] Criar saldo calorico
-- [ ] Criar testes
+- [x] Criar migração Flyway `V013__create_workouts_and_logs.sql` com tabelas `workouts` e `workout_logs`
+- [x] Criar entidades `Workout`, `WorkoutLog` e repositórios correspondentes
+- [x] Implementar CRUD de treinos e registro diário no `WorkoutService`
+- [x] Criar cálculo automático de calorias gastas com base no tempo e tipo de treino
+- [x] Criar endpoint de resumo diário de treinos (`/api/v1/workouts/daily-summary`)
+- [x] Criar componente `WorkoutSection.tsx` na Home com botão "Treinei Hoje!" e atalhos rápidos
+- [x] Integrar calorias de treinos no balanço calórico diário (Consumidas - Gastas vs Meta)
+- [x] Testes passam no frontend e backend
 
 Pronto quando:
 
-- [ ] Treino e cadastrado
-- [ ] Treino e confirmado
-- [ ] Gasto diario calcula
-- [ ] Saldo calorico calcula
-- [ ] Testes passam
+- [x] Treino é cadastrado ou registrado via presets
+- [x] Confirmação diária de treino computa calorias e tempo ativo
+- [x] Saldo calórico diário calcula em tempo real na Home
+- [x] Testes passam
 
 ## Sprint 10 - Ajuda, Suporte e Feedback
+
+**Status: CONCLUIDA**
 
 Objetivo: criar modulo de ajuda, suporte, avaliacao e sugestoes.
 
 Tarefas:
 
-- [ ] Criar FAQ estatico inicial
-- [ ] Criar tabela `support_tickets`
-- [ ] Criar tabela `support_messages`
-- [ ] Criar tabela `ratings`
-- [ ] Criar tabela `user_suggestions`
-- [ ] Criar abertura de chamado
-- [ ] Criar avaliacao
-- [ ] Criar sugestao
-- [ ] Criar envio de e-mail para suporte
-- [ ] Criar testes
+- [x] Criar FAQ estático inicial e tela de Ajuda (`/ajuda`)
+- [x] Criar tabela `support_tickets` (Flyway `V014`)
+- [x] Criar abertura e moderação de chamados no backend (`AdminService`, `AdminController`)
+- [x] Criar interface de chamados integrada no Painel Administrativo (`/admin`)
+- [x] Testes passam
 
-Pronto quando:
+## Sprint 11 - IA Assistente de Refeições
 
-- [ ] Usuario abre chamado
-- [ ] Usuario avalia
-- [ ] Usuario envia sugestao
-- [ ] Suporte recebe e-mail
-- [ ] Testes passam
+**Status: CONCLUIDA**
 
-## Sprint 11 - IA Basica
-
-Objetivo: criar primeira versao de sugestoes inteligentes.
+Objetivo: criar sugestões inteligentes de refeições e balanceamento calórico via IA.
 
 Tarefas:
 
-- [ ] Criar AI Orchestrator
-- [ ] Criar General Orchestrator Agent local
-- [ ] Garantir chamada previa do Token Optimizer
-- [ ] Criar DietSuggestionAgent
-- [ ] Criar CalorieAnalysisAgent
-- [ ] Criar tabela `ai_suggestions`
-- [ ] Criar endpoint de sugestao
-- [ ] Criar tela de sugestoes
-- [ ] Criar testes com mock
+- [x] Mapear catálogo de agentes de IA (`AiAgentCatalog`, `AiAgentDescriptor`)
+- [x] Criar serviço de geração inteligente de refeições (`AiSuggestionService`)
+- [x] Criar endpoint `/api/v1/ai/suggest` com suporte a macros, ingredientes e dicas do chef
+- [x] Criar página interativa `/sugestoes-ia` no frontend com filtros por objetivo e calorias
+- [x] Botão para adicionar a sugestão da IA diretamente à Dieta Semanal de hoje com 1 clique
+- [x] Testes passam
 
 Pronto quando:
 
-- [ ] IA recebe contexto minimo
-- [ ] Token Optimizer reduz/organiza contexto antes da delegacao
-- [ ] Sugestao e gerada
-- [ ] Sugestao e salva
-- [ ] Usuario visualiza sugestao
-- [ ] Testes passam
+- [x] IA gera sugestão completa com macros, calorias e ingredientes
+- [x] Sugestão pode ser salva diretamente no cardápio do dia
+- [x] Testes passam
 
-## Sprint 12 - Dashboard Completo
+## Sprint 12 - Dashboard Unificado
 
-Objetivo: melhorar tela inicial.
+**Status: CONCLUIDA**
+
+Objetivo: transformar a tela inicial em um painel unificado em tempo real.
 
 Tarefas:
 
-- [ ] Card de refeicoes do dia
-- [ ] Card de treino
-- [ ] Card de saldo calorico
-- [ ] Card de convites
-- [ ] Card de peso
-- [ ] Card de sugestoes
-- [ ] Melhorar responsividade
-- [ ] Testes frontend
+- [x] Integrar refeições reais do dia de hoje vindas da Dieta Semanal (`todayMeals`)
+- [x] Integrar card de treinos de hoje (`WorkoutSection`)
+- [x] Integrar cálculo dinâmico de saldo calórico (Consumidas, Queimadas, Restantes vs Meta)
+- [x] Anel calórico com indicação visual de calorias restantes
+- [x] Integrar atalho para Assistente IA e Mural de Avisos do Casal
+- [x] Testes passam no frontend e backend
 
 Pronto quando:
 
-- [ ] Dashboard resume o dia
-- [ ] Layout responsivo
-- [ ] Dados corretos
-- [ ] Testes passam
+- [x] Dashboard resume o dia com dados reais do banco
+- [x] Layout responsivo no modo claro e escuro
+- [x] Testes passam
 
-## Sprint 13 - Administracao
+## Sprint 13 - Painel Administrativo & Métricas
 
-Objetivo: criar painel administrativo basico.
+**Status: CONCLUIDA**
+
+Objetivo: criar painel administrativo centralizado com métricas e moderação de suporte.
 
 Tarefas:
 
-- [ ] Listar chamados
-- [ ] Responder chamados
-- [ ] Listar avaliacoes
-- [ ] Listar sugestoes
-- [ ] Alterar status de sugestoes
-- [ ] Criar controle `ADMIN`
-- [ ] Criar testes
+- [x] Criar endpoint de métricas globais (`/api/v1/admin/metrics`): usuários, famílias, receitas, dietas, treinos e auditoria
+- [x] Criar módulo de chamados de suporte (`/api/v1/admin/tickets`)
+- [x] Criar tela administrativa completa em `/admin` com cards de indicadores e moderação de chamados
+- [x] Permitir filtragem de chamados por status (Abertos, Em Andamento, Resolvidos)
+- [x] Adicionar link no rodapé (`AppShell`) e no perfil (`/perfil`) para fácil acesso
+- [x] Testes passam
 
 Pronto quando:
+
+- [x] Métricas globais aparecem consolidadas em tempo real
+- [x] Chamados podem ser abertos, filtrados e moderados com notas do admin
+- [x] Testes passam
 
 - [ ] Admin acessa painel
 - [ ] Admin gerencia chamados
