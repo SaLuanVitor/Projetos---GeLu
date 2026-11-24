@@ -6,6 +6,8 @@ import { ActionButton } from "@/components/ui/ActionButton";
 import { useToast } from "@/components/ui/Toast";
 import { getDailyMealChecklist, quickCheckinMeal } from "@/services/meals";
 import { MealLogModal } from "@/components/meals/MealLogModal";
+import { getMealIcon } from "@/components/meals/mealIcons";
+import { UtensilsCrossed, Plus, Check, Pencil, X } from "lucide-react";
 import type { DailyMealChecklistItemResponse } from "@/types/api";
 
 interface DailyMealChecklistCardProps {
@@ -15,15 +17,7 @@ interface DailyMealChecklistCardProps {
   className?: string;
 }
 
-const MEAL_ICONS: Record<string, string> = {
-  BREAKFAST: "☕",
-  MORNING_SNACK: "🍏",
-  LUNCH: "🍲",
-  AFTERNOON_SNACK: "🥪",
-  DINNER: "🥗",
-  SUPPER: "🌙",
-  SNACK: "🥨",
-};
+
 
 export function DailyMealChecklistCard({
   accessToken,
@@ -70,7 +64,7 @@ export function DailyMealChecklistCard({
       });
 
       showToast(
-        `✓ Refeição Confirmada: ${item.mealName} (~${Math.round(item.plannedCalories || 0)} kcal)`,
+        `Refeição anotada: ${item.mealName} (~${Math.round(item.plannedCalories || 0)} kcal)`,
         "success"
       );
 
@@ -136,7 +130,7 @@ export function DailyMealChecklistCard({
             <span className="text-xs text-stone-500 font-semibold">• Hoje</span>
           </div>
           <h2 className="mt-1 font-display text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-            <span>🍽️</span> O que você comeu hoje?
+            <UtensilsCrossed className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[2]" /> <span>O que vocês comeram hoje?</span>
           </h2>
           <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
             {completedCount} de {checklist.length} refeições registradas ({progressPercent}% do plano)
@@ -148,7 +142,7 @@ export function DailyMealChecklistCard({
           onClick={handleAddExtraMeal}
           className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary dark:text-primary-light font-bold text-xs px-3 py-1.5 transition-colors self-start sm:self-auto cursor-pointer"
         >
-          <span>＋</span> Registrar Refeição Extra
+          <Plus className="w-3.5 h-3.5" /> <span>Registrar Refeição Extra</span>
         </button>
       </div>
 
@@ -169,17 +163,19 @@ export function DailyMealChecklistCard({
         </div>
       ) : checklist.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-800 bg-white/40 dark:bg-[#211c18]/40 p-6 text-center">
-          <span className="text-3xl block mb-2">🥗</span>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 mx-auto mb-2.5">
+            <UtensilsCrossed className="w-6 h-6 stroke-[1.75]" />
+          </div>
           <p className="text-xs text-stone-600 dark:text-stone-400 font-medium">
-            Nenhuma refeição planejada na Dieta Semanal para hoje.
+            Nenhuma refeição planejada no cardápio de hoje.
           </p>
           <div className="mt-3 flex justify-center gap-2">
             <button
               type="button"
               onClick={handleAddExtraMeal}
-              className="inline-flex items-center gap-1 text-xs font-bold text-primary underline cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer"
             >
-              ＋ Registrar refeição livre agora
+              <Plus className="w-3.5 h-3.5" /> Registrar refeição livre agora
             </button>
           </div>
         </div>
@@ -187,7 +183,7 @@ export function DailyMealChecklistCard({
         <div className="space-y-3">
           {checklist.map((item) => {
             const isLoading = actionLoadingId === item.dietMealId;
-            const icon = MEAL_ICONS[item.mealName.toUpperCase()] || "🍽️";
+            const MealIcon = getMealIcon(item.mealName);
 
             return (
               <div
@@ -205,8 +201,8 @@ export function DailyMealChecklistCard({
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                   {/* Informações da Refeição */}
                   <div className="flex items-start gap-3 min-w-0">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/60 text-base font-bold text-amber-900 dark:text-amber-200">
-                      {icon}
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100/80 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200">
+                      <MealIcon className="w-4 h-4 stroke-[1.75]" />
                     </span>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -260,7 +256,7 @@ export function DailyMealChecklistCard({
                           onClick={() => handleQuickCheckin(item)}
                           className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-1.5 shadow-2xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                         >
-                          <span>✓</span> Comi o planejado
+                          <Check className="w-3.5 h-3.5 stroke-[2]" /> <span>Comi o planejado</span>
                         </button>
 
                         {/* Comi diferente */}
@@ -270,7 +266,7 @@ export function DailyMealChecklistCard({
                           onClick={() => handleCustomMeal(item)}
                           className="inline-flex items-center gap-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:border-primary font-semibold text-xs px-2.5 py-1.5 transition-colors cursor-pointer"
                         >
-                          <span>✏️</span> Comi diferente
+                          <Pencil className="w-3 h-3" /> <span>Comi diferente</span>
                         </button>
 
                         {/* Pulei */}
@@ -286,7 +282,7 @@ export function DailyMealChecklistCard({
                     ) : item.status === "PLANNED_CONSUMED" ? (
                       <div className="flex items-center gap-2">
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg">
-                          ✓ Consumido ({Math.round(item.consumedCalories || item.plannedCalories || 0)} kcal)
+                          <Check className="w-3.5 h-3.5 stroke-[2]" /> Consumido ({Math.round(item.consumedCalories || item.plannedCalories || 0)} kcal)
                         </span>
                         <button
                           type="button"
@@ -299,7 +295,7 @@ export function DailyMealChecklistCard({
                     ) : item.status === "CUSTOM_CONSUMED" ? (
                       <div className="flex items-center gap-2">
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-950/60 px-2.5 py-1 rounded-lg">
-                          🥗 Substituição (+{Math.round(item.consumedCalories || 0)} kcal)
+                          <UtensilsCrossed className="w-3.5 h-3.5" /> Substituição (+{Math.round(item.consumedCalories || 0)} kcal)
                         </span>
                         <button
                           type="button"
@@ -312,7 +308,7 @@ export function DailyMealChecklistCard({
                     ) : (
                       <div className="flex items-center gap-2">
                         <span className="inline-flex items-center gap-1 text-xs font-bold text-stone-500 bg-stone-200/80 dark:bg-stone-800 px-2.5 py-1 rounded-lg">
-                          ✕ Pulada
+                          <X className="w-3.5 h-3.5" /> Pulada
                         </span>
                         <button
                           type="button"

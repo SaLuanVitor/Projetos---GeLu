@@ -12,39 +12,60 @@ import { CoupleNotePopupListener } from "@/components/couplenotes/CoupleNotePopu
 import { FamilyContextSwitcher } from "@/components/layout/FamilyContextSwitcher";
 import { useFamilyContext } from "@/contexts/FamilyContext";
 import { useFamilySocket } from "@/hooks/useFamilySocket";
+import {
+  Home,
+  CalendarDays,
+  UtensilsCrossed,
+  BookOpen,
+  HeartHandshake,
+  Users,
+  TrendingUp,
+  Sparkles,
+  HelpCircle,
+  User,
+  Menu,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 
 const INTERNAL_HOME_PATH = "/dashboard";
 
-const navItems = [
-  { href: INTERNAL_HOME_PATH, label: "Início", icon: "🏠" },
-  { href: "/agenda", label: "Agenda", icon: "📅" },
-  { href: "/dieta-semanal", label: "Dieta", icon: "🍽️" },
-  { href: "/receitas", label: "Receitas", icon: "📖" },
-  { href: "/espaco", label: "Nosso Espaço", icon: "🏡" },
-  { href: "/familia", label: "Família", icon: "👨‍👩‍👧" },
-  { href: "/perfil/evolucao", label: "Evolução", icon: "📈" },
-  { href: "/sugestoes-ia", label: "Chef IA", icon: "✨" },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+const navItems: NavItem[] = [
+  { href: INTERNAL_HOME_PATH, label: "Início", icon: Home },
+  { href: "/agenda", label: "Agenda", icon: CalendarDays },
+  { href: "/dieta-semanal", label: "Dieta", icon: UtensilsCrossed },
+  { href: "/receitas", label: "Receitas", icon: BookOpen },
+  { href: "/espaco", label: "Nosso Espaço", icon: HeartHandshake },
+  { href: "/familia", label: "Família", icon: Users },
+  { href: "/perfil/evolucao", label: "Evolução", icon: TrendingUp },
+  { href: "/sugestoes-ia", label: "Chef IA", icon: Sparkles },
 ];
 
-const allNavItems = [
-  { href: INTERNAL_HOME_PATH, label: "Início", icon: "🏠" },
-  { href: "/agenda", label: "Agenda do Casal", icon: "📅" },
-  { href: "/dieta-semanal", label: "Cardápio & Dieta", icon: "🍽️" },
-  { href: "/receitas", label: "Livro de Receitas", icon: "📖" },
-  { href: "/espaco", label: "Nosso Espaço", icon: "🏡" },
-  { href: "/familia", label: "Família & Convites", icon: "👨‍👩‍👧" },
-  { href: "/perfil/evolucao", label: "Evolução & Peso", icon: "📈" },
-  { href: "/sugestoes-ia", label: "Chef IA Sugestões", icon: "✨" },
-  { href: "/suporte", label: "Central de Ajuda", icon: "❓" },
-  { href: "/perfil", label: "Meu Perfil", icon: "👤" },
+const allNavItems: NavItem[] = [
+  { href: INTERNAL_HOME_PATH, label: "Início", icon: Home },
+  { href: "/agenda", label: "Agenda do Casal", icon: CalendarDays },
+  { href: "/dieta-semanal", label: "Cardápio & Dieta", icon: UtensilsCrossed },
+  { href: "/receitas", label: "Livro de Receitas", icon: BookOpen },
+  { href: "/espaco", label: "Nosso Espaço", icon: HeartHandshake },
+  { href: "/familia", label: "Família & Convites", icon: Users },
+  { href: "/perfil/evolucao", label: "Evolução & Peso", icon: TrendingUp },
+  { href: "/sugestoes-ia", label: "Chef IA Sugestões", icon: Sparkles },
+  { href: "/suporte", label: "Central de Ajuda", icon: HelpCircle },
+  { href: "/perfil", label: "Meu Perfil", icon: User },
 ];
 
-const mobileBottomTabs = [
-  { href: "/dashboard", label: "Início", icon: "🏠" },
-  { href: "/agenda", label: "Agenda", icon: "📅" },
-  { href: "/dieta-semanal", label: "Dieta", icon: "🍽️" },
-  { href: "/espaco", label: "Espaço", icon: "🏡" },
-  { href: "/perfil", label: "Perfil", icon: "👤" },
+const mobileBottomTabs: NavItem[] = [
+  { href: "/dashboard", label: "Início", icon: Home },
+  { href: "/agenda", label: "Agenda", icon: CalendarDays },
+  { href: "/dieta-semanal", label: "Dieta", icon: UtensilsCrossed },
+  { href: "/espaco", label: "Espaço", icon: HeartHandshake },
+  { href: "/perfil", label: "Perfil", icon: User },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -118,10 +139,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Tooltip text="Central de Ajuda & Dúvidas" position="bottom">
                 <Link
                   aria-label="Ajuda"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-primary bg-surface dark:bg-stone-800 text-sm font-extrabold text-primary transition-transform hover:rotate-6 shadow-sm"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-primary bg-surface dark:bg-stone-800 text-primary transition-transform hover:rotate-6 shadow-sm"
                   href="/suporte"
                 >
-                  ❓
+                  <HelpCircle className="w-4 h-4" />
                 </Link>
               </Tooltip>
 
@@ -135,7 +156,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   }`}
                   href="/perfil"
                 >
-                  👤
+                  <User className="w-4 h-4" />
                 </Link>
               </Tooltip>
 
@@ -144,9 +165,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
                 className="lg:hidden flex h-9 w-9 items-center justify-center rounded-xl border-2 border-outline/50 bg-[#fffdfa] dark:bg-stone-800 text-stone-800 dark:text-stone-100 font-bold hover:border-primary transition-all cursor-pointer shadow-xs"
-                aria-label="Abrir Menu Completo"
+                aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu completo"}
               >
-                {mobileMenuOpen ? "✕" : "☰"}
+                {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -155,6 +176,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <nav className="relative z-10 hidden lg:flex items-center justify-center gap-2 py-2.5 border-t border-stone-200/60 dark:border-stone-800/80 flex-wrap">
             {navItems.map((item) => {
               const active = isActiveRoute(pathname, item.href);
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
@@ -165,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       : "border-stone-300 dark:border-stone-700/80 bg-[#fffdfa] dark:bg-[#25201c] text-stone-800 dark:text-stone-200 shadow-2xs hover:border-tertiary hover:bg-amber-500/15 hover:text-primary"
                   }`}
                 >
-                  <span className="text-sm group-hover:scale-110 transition-transform">{item.icon}</span>
+                  <Icon className="w-3.5 h-3.5 group-hover:scale-110 transition-transform stroke-[2]" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -177,6 +199,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="lg:hidden py-3 border-t-2 border-stone-200 dark:border-stone-800 grid grid-cols-2 gap-2 animate-in slide-in-from-top-2 duration-150">
               {allNavItems.map((item) => {
                 const active = isActiveRoute(pathname, item.href);
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
@@ -188,7 +211,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         : "border-stone-200 dark:border-stone-700 bg-[#fffdfa] dark:bg-[#25201c] text-stone-800 dark:text-stone-200 hover:border-primary"
                     }`}
                   >
-                    <span className="text-base">{item.icon}</span>
+                    <Icon className="w-4 h-4 shrink-0 stroke-[1.75]" />
                     <span className="truncate">{item.label}</span>
                   </Link>
                 );
@@ -205,6 +228,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden border-t-2 border-surface-variant bg-surface/96 backdrop-blur px-2 py-1.5 flex justify-around shadow-2xl">
         {mobileBottomTabs.map((tab) => {
           const active = isActiveRoute(pathname, tab.href);
+          const Icon = tab.icon;
           return (
             <Link
               key={tab.href}
@@ -215,7 +239,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   : "text-stone-500 hover:text-stone-800 dark:hover:text-stone-200"
               }`}
             >
-              <span className="text-lg">{tab.icon}</span>
+              <Icon className="w-5 h-5 mb-0.5 stroke-[1.75]" />
               <span className="text-[10px] tracking-tight">{tab.label}</span>
             </Link>
           );
@@ -228,7 +252,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         <p className="mt-2 text-xs text-stone-500">Caderno familiar de refeições, rotina e bem-estar compartilhado.</p>
         <div className="mt-4 flex justify-center gap-6 text-xs underline decoration-dotted underline-offset-4">
           <Link href="/ajuda">Privacidade & Termos</Link>
-          <Link href="/suporte">💬 Central de Ajuda & Chamados</Link>
+          <Link href="/suporte" className="inline-flex items-center gap-1.5 hover:text-primary transition-colors">
+            <HelpCircle className="w-3.5 h-3.5 stroke-[1.75]" />
+            <span>Central de Ajuda & Dúvidas</span>
+          </Link>
         </div>
       </footer>
 

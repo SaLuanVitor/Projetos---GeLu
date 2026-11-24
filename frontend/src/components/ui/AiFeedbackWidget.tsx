@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { submitAiFeedback } from "@/services/ai";
 import { getValidSession } from "@/services/auth";
 import { useToast } from "@/components/ui/Toast";
+import { ThumbsUp, ThumbsDown, Check, Sparkles, MessageSquareHeart } from "lucide-react";
 
 interface AiFeedbackWidgetProps {
   featureType: "SUGGESTION" | "FOOD_VISION" | "FOOD_PARSER" | "NUTRITION_ESTIMATE" | string;
@@ -48,8 +49,8 @@ export function AiFeedbackWidget({
       if (token) {
         await submitAiFeedback(token, {
           featureType,
-          itemTitle: itemTitle || "Geração de IA",
-          mealTitle: itemTitle || "Geração de IA",
+          itemTitle: itemTitle || "Geração Nutricional",
+          mealTitle: itemTitle || "Geração Nutricional",
           ingredients: ingredients || [],
           accepted: true,
           rating: 5.0,
@@ -57,7 +58,7 @@ export function AiFeedbackWidget({
       }
       setEvaluated("POSITIVE");
       showToast(
-        "Feedback registrado! A IA usará essa confirmação para reforçar suas preferências.",
+        "Que ótimo! Memorizamos que essa sugestão combina com vocês.",
         "success"
       );
       if (onFeedbackSubmitted) {
@@ -83,8 +84,8 @@ export function AiFeedbackWidget({
       if (token) {
         await submitAiFeedback(token, {
           featureType,
-          itemTitle: itemTitle || "Geração de IA",
-          mealTitle: itemTitle || "Geração de IA",
+          itemTitle: itemTitle || "Geração Nutricional",
+          mealTitle: itemTitle || "Geração Nutricional",
           ingredients: ingredients || [],
           accepted: false,
           rating: 1.0,
@@ -94,7 +95,7 @@ export function AiFeedbackWidget({
       setEvaluated("NEGATIVE");
       setShowNegativeForm(false);
       showToast(
-        "Motivo registrado! Seu comentário foi memorizado para treinar e corrigir as próximas gerações.",
+        "Anotamos sua observação no caderno para aperfeiçoar as próximas sugestões.",
         "info"
       );
       if (onFeedbackSubmitted) {
@@ -111,17 +112,21 @@ export function AiFeedbackWidget({
   if (evaluated) {
     return (
       <div
-        className={`flex items-center gap-2 text-xs py-1.5 px-3 rounded-lg border font-medium ${
+        className={`flex items-center gap-2.5 text-xs py-2 px-3.5 rounded-xl border font-medium ${
           evaluated === "POSITIVE"
-            ? "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60"
-            : "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60"
+            ? "bg-emerald-50/80 text-emerald-800 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60"
+            : "bg-amber-50/80 text-amber-800 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60"
         } ${className}`}
       >
-        <span>{evaluated === "POSITIVE" ? "👍" : "👎"}</span>
+        {evaluated === "POSITIVE" ? (
+          <Check className="w-4 h-4 text-emerald-700 shrink-0 stroke-[2]" />
+        ) : (
+          <MessageSquareHeart className="w-4 h-4 text-amber-800 shrink-0 stroke-[2]" />
+        )}
         <span>
           {evaluated === "POSITIVE"
-            ? "Avaliação positiva registrada para calibrar a IA."
-            : "Motivo registrado para treinar e ajustar próximas análises."}
+            ? "Preferência memorizada com sucesso no perfil do casal."
+            : "Observação registrada no caderno. Ajustaremos as próximas recomendações."}
         </span>
       </div>
     );
@@ -129,66 +134,66 @@ export function AiFeedbackWidget({
 
   return (
     <div
-      className={`rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 p-3 transition-all ${className}`}
+      className={`rounded-2xl border border-stone-200/90 dark:border-stone-800 bg-[#fffdfa]/90 dark:bg-[#1f1b17] p-3.5 shadow-2xs transition-all ${className}`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-          <span>✨</span>
-          <span>A geração ou análise da IA foi precisa?</span>
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <span className="text-xs font-medium text-stone-700 dark:text-stone-300 flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+          <span>Essa sugestão combina com o gosto de vocês?</span>
         </span>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handlePositiveClick}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300 transition-colors disabled:opacity-50"
-            title="Aprovado: a IA acertou"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300 transition-colors disabled:opacity-50 shadow-2xs"
+            title="Gostei: combina com nossos hábitos"
           >
-            <span>👍</span>
-            {!compact && <span>Positiva</span>}
+            <ThumbsUp className="w-3.5 h-3.5 stroke-[1.75]" />
+            {!compact && <span>Gostei</span>}
           </button>
 
           <button
             type="button"
             onClick={handleNegativeClick}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 dark:hover:bg-rose-950/40 dark:hover:text-rose-300 transition-colors disabled:opacity-50"
-            title="Negativo: relatar motivo para treinar e corrigir"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300 dark:hover:bg-amber-950/40 dark:hover:text-amber-300 transition-colors disabled:opacity-50 shadow-2xs"
+            title="Ajustar: conte o que podemos melhorar"
           >
-            <span>👎</span>
-            {!compact && <span>Negativa</span>}
+            <ThumbsDown className="w-3.5 h-3.5 stroke-[1.75]" />
+            {!compact && <span>Ajustar</span>}
           </button>
         </div>
       </div>
 
       {showNegativeForm && (
-        <form onSubmit={handleNegativeSubmit} className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Qual foi o problema nesta geração/análise?
+        <form onSubmit={handleNegativeSubmit} className="mt-3 pt-3 border-t border-stone-200/80 dark:border-stone-800">
+          <label className="block text-xs font-medium text-stone-700 dark:text-stone-300 mb-1.5">
+            O que podemos ajustar nesta sugestão ou leitura?
           </label>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={2}
-            placeholder="Ex: identificou o alimento errado, quantidade desproporcional, ingrediente que não como..."
-            className="w-full text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none resize-none"
+            placeholder="Ex: não consumimos este ingrediente, porção pareceu desproporcional, preferimos pratos mais rápidos..."
+            className="w-full text-xs rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none shadow-inner"
             autoFocus
           />
-          <div className="mt-2 flex items-center justify-end gap-2">
+          <div className="mt-2.5 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={() => setShowNegativeForm(false)}
-              className="px-2.5 py-1 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              className="px-3 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-3 py-1 text-xs font-semibold rounded-lg bg-rose-600 text-white hover:bg-rose-700 transition-colors disabled:opacity-50"
+              className="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-amber-800 text-white hover:bg-amber-900 transition-colors disabled:opacity-50 shadow-sm cursor-pointer"
             >
-              {isSubmitting ? "Gravando..." : "Salvar motivo para treinar a IA"}
+              {isSubmitting ? "Anotando..." : "Salvar no Caderno"}
             </button>
           </div>
         </form>

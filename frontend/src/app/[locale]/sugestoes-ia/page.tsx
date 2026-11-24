@@ -20,23 +20,39 @@ import {
   findConflictingMeal,
   getPlanningWeekOptions,
 } from "@/services/diet-conflicts";
+import {
+  Sparkles,
+  ChefHat,
+  Target,
+  Scale,
+  ShieldCheck,
+  AlertCircle,
+  Check,
+  X,
+  RefreshCw,
+  BookOpen,
+  Plus,
+  CalendarCheck,
+  UtensilsCrossed,
+  Info,
+} from "lucide-react";
 import { useFamilyContext } from "@/contexts/FamilyContext";
 import type { MealSuggestionResponse, RecipeResponse, WeeklyDietResponse } from "@/types/api";
 
 const STORAGE_KEY = "gelu_active_ai_suggestion";
 
 const MEAL_TYPES = [
-  { label: "☀️ Café da Manhã", value: "Café da Manhã" },
-  { label: "🍽️ Almoço Completo", value: "Almoço" },
-  { label: "🥪 Lanche da Tarde", value: "Lanche da Tarde" },
-  { label: "🌙 Jantar Leve", value: "Jantar" },
+  { label: "Café da Manhã", value: "Café da Manhã" },
+  { label: "Almoço Completo", value: "Almoço" },
+  { label: "Lanche da Tarde", value: "Lanche da Tarde" },
+  { label: "Jantar Leve", value: "Jantar" },
 ];
 
 const GOALS = [
-  { label: "⚖️ Equilíbrio & Saúde Geral", value: "Equilíbrio & Saúde" },
-  { label: "🔥 Emagrecimento / Déficit Calórico", value: "Emagrecer" },
-  { label: "💪 Hipertrofia / Ganho de Massa", value: "Ganhar massa" },
-  { label: "⚡ Preparo Rápido (até 15 min)", value: "Preparo Rápido" },
+  { label: "Equilíbrio & Saúde Geral", value: "Equilíbrio & Saúde" },
+  { label: "Prato Leve & Equilibrado", value: "Emagrecer" },
+  { label: "Aporte Proteico & Energia", value: "Ganhar massa" },
+  { label: "Preparo Rápido (até 15 min)", value: "Preparo Rápido" },
 ];
 
 const DAY_OPTIONS = [
@@ -50,11 +66,11 @@ const DAY_OPTIONS = [
 ];
 
 const MEAL_TIME_OPTIONS = [
-  { label: "☀️ Café da Manhã (08:00)", value: "Café da Manhã" },
-  { label: "🍽️ Almoço (12:30)", value: "Almoço" },
-  { label: "🥪 Lanche da Tarde (16:30)", value: "Lanche da Tarde" },
-  { label: "🥗 Jantar (20:00)", value: "Jantar" },
-  { label: "🌙 Ceia / Snack (22:00)", value: "Ceia / Snack" },
+  { label: "Café da Manhã (08:00)", value: "Café da Manhã" },
+  { label: "Almoço (12:30)", value: "Almoço" },
+  { label: "Lanche da Tarde (16:30)", value: "Lanche da Tarde" },
+  { label: "Jantar (20:00)", value: "Jantar" },
+  { label: "Ceia / Snack (22:00)", value: "Ceia / Snack" },
 ];
 
 const MEAL_TIMES: Record<string, string> = {
@@ -238,7 +254,7 @@ export default function AiSuggestionsPage() {
         );
       }
 
-      toast.success("Sugestão gastronômica elaborada pela IA! 🥗");
+      toast.success("Sugestão gastronômica elaborada com carinho!");
     } catch {
       toast.error("Não foi possível gerar a sugestão no momento.");
     } finally {
@@ -260,8 +276,8 @@ export default function AiSuggestionsPage() {
         setFeedbackSent(true);
         toast.success(
           accepted
-            ? "Obrigado! Preferência memorizada no seu perfil de IA. 🧠"
-            : "Entendido! Evitaremos combinações similares no futuro. 🛡️"
+            ? "Preferência memorizada com carinho no seu perfil."
+            : "Entendido. Vamos evitar combinações similares nas próximas sugestões."
         );
       } else {
         toast.info("Faça login para calibrar suas preferências na memória da IA.");
@@ -325,7 +341,7 @@ export default function AiSuggestionsPage() {
           ],
         });
         setSavedRecipe(recipe);
-        toast.success(`Receita "${recipe.name}" salva no Livro de Receitas! 🎉`);
+        toast.success(`Receita "${recipe.name}" guardada no Livro de Receitas!`);
       }
 
       // Abrir modal para escolha da semana e tratamento de conflitos
@@ -403,12 +419,12 @@ export default function AiSuggestionsPage() {
       if (targetWeekConflict && conflictResolution === "REPLACE") {
         await updateDietMeal(session.accessToken, targetWeekConflict.id, payload);
         toast.success(
-          `Refeição anterior substituída por "${savedRecipe.name}" no Cardápio! 🔄`
+          `Refeição anterior substituída por "${savedRecipe.name}" no Cardápio!`
         );
       } else {
         await addDietMeal(session.accessToken, diet.id, payload);
         toast.success(
-          `Prato "${savedRecipe.name}" adicionado ao Cardápio Semanal com a receita vinculada! 🍽️`
+          `Prato "${savedRecipe.name}" adicionado ao Cardápio Semanal!`
         );
       }
 
@@ -430,7 +446,7 @@ export default function AiSuggestionsPage() {
     <AppShell>
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <NotebookPageHeader
-          title="✨ Assistente Nutricional IA"
+          title="Sugestões Afetivas do Chef"
           subtitle="Sugestões sob medida para balancear calorias, rotina e o paladar do casal."
         />
 
@@ -439,7 +455,7 @@ export default function AiSuggestionsPage() {
           <div className="lg:col-span-5">
             <PaperCard className="p-6" tape="orange">
               <h3 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2">
-                <span>🎯</span> O que deseja hoje?
+                <Target className="w-5 h-5 text-amber-700 stroke-[2]" /> <span>O que planejam para hoje?</span>
               </h3>
 
               <form onSubmit={handleGenerate} className="space-y-4">
@@ -481,10 +497,10 @@ export default function AiSuggestionsPage() {
                     disabled={loading}
                   >
                     {loading
-                      ? "✨ Criando Receita..."
+                      ? "Criando Receita..."
                       : suggestion
-                        ? "🔄 Gerar Nova Sugestão"
-                        : "✨ Gerar Sugestão Inteligente"}
+                        ? "Sugerir Outro Prato"
+                        : "Criar Sugestão Inteligente"}
                   </ActionButton>
                 </div>
               </form>
@@ -517,17 +533,20 @@ export default function AiSuggestionsPage() {
                     {suggestion.source === "GEMINI_AI" ? (
                       <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 inline-flex items-center gap-1.5 shadow-xs">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        ✨ Gemini 2.5 Flash
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>Gemini 2.5</span>
                       </span>
                     ) : (
-                      <span className="rounded-full bg-orange-100 dark:bg-orange-950/60 px-2.5 py-1 text-xs font-bold text-orange-800 dark:text-orange-300 border border-orange-300 dark:border-orange-700 inline-flex items-center gap-1.5 shadow-xs">
-                        🛡️ Heurística TACO/IBGE
+                      <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-1 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 inline-flex items-center gap-1.5 shadow-xs">
+                        <ShieldCheck className="w-3.5 h-3.5 text-stone-600" />
+                        <span>Tabela TACO/IBGE</span>
                       </span>
                     )}
 
                     {suggestion.confidenceScore && (
-                      <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 px-2.5 py-1 text-xs font-bold text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700 inline-flex items-center gap-1 shadow-xs">
-                        🎯 Confiança {Math.round(suggestion.confidenceScore * 100)}%
+                      <span className="rounded-full bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 text-xs font-semibold text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-800 inline-flex items-center gap-1 shadow-xs">
+                        <Scale className="w-3 h-3 text-amber-700" />
+                        <span>Consistência {Math.round(suggestion.confidenceScore * 100)}%</span>
                       </span>
                     )}
                   </div>
@@ -547,7 +566,7 @@ export default function AiSuggestionsPage() {
                 {/* Confirmação Leve de Incerteza (Sprint 17 / Guardrail) */}
                 {suggestion.requiresConfirmation && (
                   <div className="mb-4 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/80 dark:bg-amber-950/30 p-3 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-2">
-                    <span className="text-base">⚠️</span>
+                    <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
                     <span><strong>Confirmação Leve:</strong> A IA estimou uma margem calórica mais ampla para esta combinação. Se desejar, personalize os ingredientes antes de aceitar.</span>
                   </div>
                 )}
@@ -607,8 +626,9 @@ export default function AiSuggestionsPage() {
 
                 {/* Dica do Chef */}
                 <div className="mt-5 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 bg-amber-50/60 dark:bg-amber-950/20 p-4">
-                  <span className="text-xs font-bold text-amber-950 dark:text-amber-200 block mb-1">
-                    👩‍🍳 Dica de Ouro do Chef:
+                  <span className="text-xs font-bold text-amber-950 dark:text-amber-200 flex items-center gap-1.5 mb-1.5">
+                    <ChefHat className="w-4 h-4 text-amber-800 shrink-0 stroke-[2]" />
+                    <span>Dica Especial de Preparo:</span>
                   </span>
                   <p className="text-xs text-amber-900 dark:text-amber-300 leading-relaxed">
                     {suggestion.chefTip}
@@ -633,7 +653,7 @@ export default function AiSuggestionsPage() {
                       onClick={() => setConfirmRejectOpen(true)}
                       className="inline-flex items-center gap-1.5 rounded-xl border border-red-300 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 px-3.5 py-2.5 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-[0.98]"
                     >
-                      <span>✕</span> Recusar
+                      <X className="w-4 h-4" /> <span>Recusar</span>
                     </button>
 
                     {/* Botão Gerar Outra */}
@@ -643,7 +663,7 @@ export default function AiSuggestionsPage() {
                       disabled={loading}
                       className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#28221d] text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 px-3.5 py-2.5 text-xs font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-50"
                     >
-                      <span>🔄</span> {loading ? "Gerando..." : "Gerar Outra"}
+                      <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> <span>{loading ? "Gerando..." : "Sugerir Outra"}</span>
                     </button>
                   </div>
 
@@ -654,25 +674,27 @@ export default function AiSuggestionsPage() {
                     disabled={savingAction}
                     className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50"
                   >
-                    <span>✓</span> {savingAction ? "Salvando Receita..." : "Aceitar Sugestão"}
+                    <Check className="w-4 h-4 stroke-[2]" /> <span>{savingAction ? "Salvando Receita..." : "Aceitar Sugestão"}</span>
                   </button>
                 </div>
 
                 {/* Disclaimer Legal & Transparência Nutricional */}
                 <div className="mt-4 pt-3 border-t border-stone-200/50 dark:border-stone-800/50 text-center">
                   <p className="text-[11px] text-stone-600 dark:text-stone-300 italic">
-                    ⚖️ {suggestion.disclaimer || "Estimativa nutricional assistiva. Não substitui orientação de nutricionista ou médico."}
+                    <span className="inline-flex items-center gap-1.5"><Scale className="w-3.5 h-3.5 text-stone-500" /> {suggestion.disclaimer || "Estimativa nutricional assistiva. Não substitui orientação profissional."}</span>
                   </p>
                 </div>
               </PaperCard>
             ) : (
               <div className="h-full min-h-[360px] flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-stone-300 dark:border-stone-800 p-8 text-center bg-white/40 dark:bg-[#211c18]/40">
-                <span className="text-5xl block mb-3">🥗</span>
+                <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 mb-3.5 shadow-2xs">
+                  <UtensilsCrossed className="w-8 h-8 stroke-[1.75]" />
+                </div>
                 <h4 className="font-display text-xl font-bold text-stone-800 dark:text-stone-200">
-                  Pronto para criar uma refeição mágica?
+                  Vamos planejar uma refeição deliciosa?
                 </h4>
-                <p className="mt-1.5 text-xs text-stone-500 dark:text-stone-400 max-w-sm">
-                  Escolha o tipo de prato e objetivo ao lado e clique em &quot;Gerar Sugestão Inteligente&quot; para balancear o seu dia.
+                <p className="mt-1.5 text-xs text-stone-500 dark:text-stone-400 max-w-sm leading-relaxed">
+                  Selecione o tipo de refeição e objetivo ao lado para receber uma recomendação que respeita a rotina e as preferências de vocês.
                 </p>
               </div>
             )}
@@ -689,12 +711,12 @@ export default function AiSuggestionsPage() {
             <div className="text-left space-y-5">
               {/* Header com confirmação de receita salva */}
               <div className="flex items-center gap-3 border-b border-stone-200/80 dark:border-stone-800 pb-4">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-xl border border-emerald-300 dark:border-emerald-800">
-                  📖
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shadow-2xs">
+                  <BookOpen className="w-5 h-5 stroke-[2]" />
                 </span>
                 <div>
                   <div className="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
-                    <span>✓</span> Salva no Livro de Receitas
+                    <Check className="w-3.5 h-3.5 stroke-[2]" /> Guardada no Livro de Receitas
                   </div>
                   <h3 className="font-display text-lg sm:text-xl font-bold text-stone-900 dark:text-stone-100 leading-tight">
                     Deseja adicionar ao Cardápio Semanal agora?
@@ -782,7 +804,7 @@ export default function AiSuggestionsPage() {
                 ) : targetWeekConflict ? (
                   <div className="rounded-2xl border-2 border-amber-400/90 dark:border-amber-600/70 bg-amber-50/95 dark:bg-amber-950/40 p-4 shadow-xs">
                     <div className="flex items-start gap-3">
-                      <span className="text-xl shrink-0">⚠️</span>
+                      <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
                       <div className="flex-1 text-xs">
                         <h5 className="font-bold text-amber-950 dark:text-amber-200">
                           Conflito no Cardápio: Já existe um {detectMealCategory(targetWeekConflict.mealName, targetWeekConflict.mealTime)} nesta semana em {DAY_OPTIONS.find((d) => d.value === targetDay)?.label || targetDay}!
@@ -804,7 +826,7 @@ export default function AiSuggestionsPage() {
                                 : "bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700 hover:bg-stone-50"
                             }`}
                           >
-                            🔄 Substituir refeição existente
+                            <span className="inline-flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5" /> Substituir refeição existente</span>
                           </button>
                           <button
                             type="button"
@@ -815,7 +837,7 @@ export default function AiSuggestionsPage() {
                                 : "bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700 hover:bg-stone-50"
                             }`}
                           >
-                            ➕ Manter ambas (prato extra/acompanhamento)
+                            <span className="inline-flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" /> Manter ambas (acompanhamento)</span>
                           </button>
                         </div>
                       </div>
@@ -823,7 +845,7 @@ export default function AiSuggestionsPage() {
                   </div>
                 ) : (
                   <div className="rounded-xl border border-emerald-300/80 dark:border-emerald-800/60 bg-emerald-50/70 dark:bg-emerald-950/30 px-3.5 py-2.5 text-xs flex items-center gap-2 text-emerald-900 dark:text-emerald-200">
-                    <span>✅</span>
+                    <CalendarCheck className="w-4 h-4 text-emerald-700" />
                     <span className="font-semibold">
                       Horário livre! Nenhum outro {targetMeal} planejado para {DAY_OPTIONS.find((d) => d.value === targetDay)?.label || targetDay} nesta semana.
                     </span>
@@ -839,7 +861,7 @@ export default function AiSuggestionsPage() {
                   disabled={savingAction}
                   className="px-4 py-2.5 rounded-xl text-xs font-bold border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all cursor-pointer"
                 >
-                  📖 Apenas Guardar no Livro de Receitas
+                  <span className="inline-flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> Guardar no Livro de Receitas</span>
                 </button>
 
                 <div className="flex items-center gap-2">
@@ -858,7 +880,7 @@ export default function AiSuggestionsPage() {
                     disabled={savingAction}
                     className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition-all cursor-pointer disabled:opacity-50"
                   >
-                    {savingAction ? "Salvando..." : "✓ Confirmar no Cardápio Semanal"}
+                    {savingAction ? "Salvando..." : "Confirmar no Cardápio Semanal"}
                   </button>
                 </div>
               </div>

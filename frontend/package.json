@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@stomp/stompjs": "^7.5.0",
+    "lucide-react": "^1.16.0",
     "next": "14.2.17",
     "next-intl": "^4.11.2",
     "react": "18.3.1",

@@ -2,6 +2,23 @@
 
 import React, { useState, useRef, ChangeEvent } from "react";
 import { Modal } from "@/components/ui/Modal";
+import {
+  Coffee,
+  Apple,
+  Soup,
+  Sandwich,
+  Salad,
+  Moon,
+  Cookie,
+  Camera,
+  Upload,
+  X,
+  Sparkles,
+  Lightbulb,
+  Loader2,
+  Check,
+  type LucideIcon,
+} from "lucide-react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useToast } from "@/components/ui/Toast";
@@ -17,14 +34,20 @@ interface FoodVisionScannerModalProps {
   defaultMealType?: string;
 }
 
-const MEAL_TYPES = [
-  { key: "BREAKFAST", label: "Café da Manhã", icon: "☕" },
-  { key: "MORNING_SNACK", label: "Lanche Manhã", icon: "🍏" },
-  { key: "LUNCH", label: "Almoço", icon: "🍲" },
-  { key: "AFTERNOON_SNACK", label: "Lanche Tarde", icon: "🥪" },
-  { key: "DINNER", label: "Jantar", icon: "🥗" },
-  { key: "SUPPER", label: "Ceia", icon: "🌙" },
-  { key: "SNACK", label: "Lanche Livre", icon: "🥨" },
+interface MealTypeOption {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+const MEAL_TYPES: MealTypeOption[] = [
+  { key: "BREAKFAST", label: "Café da Manhã", icon: Coffee },
+  { key: "MORNING_SNACK", label: "Lanche Manhã", icon: Apple },
+  { key: "LUNCH", label: "Almoço", icon: Soup },
+  { key: "AFTERNOON_SNACK", label: "Lanche Tarde", icon: Sandwich },
+  { key: "DINNER", label: "Jantar", icon: Salad },
+  { key: "SUPPER", label: "Ceia", icon: Moon },
+  { key: "SNACK", label: "Lanche Livre", icon: Cookie },
 ];
 
 export function FoodVisionScannerModal({
@@ -153,7 +176,12 @@ export function FoodVisionScannerModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="📸 Escanear Prato com IA (Food Vision)">
+    <Modal isOpen={isOpen} onClose={handleClose} title={
+        <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold">
+          <Camera className="w-5 h-5 text-amber-800 dark:text-amber-400 stroke-[2]" />
+          <span>Escanear Prato com IA</span>
+        </div>
+      }>
       <div className="space-y-5 max-w-xl">
         {error && (
           <StatusMessage variant="error">
@@ -170,21 +198,25 @@ export function FoodVisionScannerModal({
                 Qual refeição você está fazendo agora?
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {MEAL_TYPES.map((t) => (
-                  <button
-                    key={t.key}
-                    type="button"
-                    onClick={() => setSelectedMealType(t.key)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left ${
-                      selectedMealType === t.key
-                        ? "border-orange-500 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 ring-1 ring-orange-500/20"
-                        : "border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:border-stone-300"
-                    }`}
-                  >
-                    <span>{t.icon}</span>
-                    <span className="truncate">{t.label}</span>
-                  </button>
-                ))}
+                {MEAL_TYPES.map((t) => {
+                  const Icon = t.icon;
+                  const isSelected = selectedMealType === t.key;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setSelectedMealType(t.key)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left ${
+                        isSelected
+                          ? "border-amber-600 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 ring-1 ring-amber-500/20"
+                          : "border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:border-stone-300"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 shrink-0 stroke-[1.75]" />
+                      <span className="truncate">{t.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -207,8 +239,8 @@ export function FoodVisionScannerModal({
 
             {!previewUrl ? (
               <div className="border-2 border-dashed border-stone-300 dark:border-stone-700 rounded-2xl p-6 sm:p-8 text-center bg-stone-50/50 dark:bg-stone-900/50 transition-all hover:bg-stone-50">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-300 text-3xl mb-3 shadow-inner">
-                  📸
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100/80 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 mb-3 shadow-inner">
+                  <Camera className="w-8 h-8 stroke-[1.75]" />
                 </div>
                 <h4 className="font-display font-bold text-base text-stone-900 dark:text-stone-100">
                   Tire uma foto do seu prato
@@ -223,7 +255,7 @@ export function FoodVisionScannerModal({
                     onClick={() => cameraInputRef.current?.click()}
                     className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2.5 text-xs font-bold shadow-xs transition-all cursor-pointer"
                   >
-                    <span>📷</span>
+                    <Camera className="w-4 h-4" />
                     <span>Tirar Foto Agora</span>
                   </button>
 
@@ -232,7 +264,7 @@ export function FoodVisionScannerModal({
                     onClick={() => fileInputRef.current?.click()}
                     className="inline-flex items-center gap-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-50 px-4 py-2.5 text-xs font-bold text-stone-700 dark:text-stone-300 shadow-2xs transition-all cursor-pointer"
                   >
-                    <span>📁</span>
+                    <Upload className="w-4 h-4" />
                     <span>Escolher da Galeria</span>
                   </button>
                 </div>
@@ -252,7 +284,7 @@ export function FoodVisionScannerModal({
                     className="absolute top-3 right-3 rounded-full bg-stone-900/80 hover:bg-stone-900 text-white p-1.5 text-xs font-bold shadow-md transition-all cursor-pointer"
                     title="Trocar imagem"
                   >
-                    ✕ Trocar
+                    <span className="inline-flex items-center gap-1"><X className="w-3.5 h-3.5" /> Trocar</span>
                   </button>
                 </div>
 
@@ -265,12 +297,12 @@ export function FoodVisionScannerModal({
                   >
                     {isAnalyzing ? (
                       <>
-                        <span className="animate-spin text-base">⏳</span>
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Identificando prato com IA...</span>
                       </>
                     ) : (
                       <>
-                        <span>✨</span>
+                        <Sparkles className="w-4 h-4" />
                         <span>Analisar Prato & Calcular Macros</span>
                       </>
                     )}
@@ -319,7 +351,7 @@ export function FoodVisionScannerModal({
 
                 {analysisResult.aiNotes && (
                   <p className="mt-1.5 text-xs text-stone-600 dark:text-stone-300 italic">
-                    💡 &ldquo;{analysisResult.aiNotes}&rdquo;
+                    <span className="inline-flex items-center gap-1.5"><Lightbulb className="w-3.5 h-3.5 text-amber-700 shrink-0" /> &ldquo;{analysisResult.aiNotes}&rdquo;</span>
                   </p>
                 )}
               </div>
@@ -414,7 +446,7 @@ export function FoodVisionScannerModal({
                 onClick={resetState}
                 className="text-xs font-bold text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 cursor-pointer"
               >
-                ← Tirar outra foto
+                <span className="inline-flex items-center gap-1"><Camera className="w-3.5 h-3.5" /> Tirar outra foto</span>
               </button>
 
               <button
@@ -425,12 +457,12 @@ export function FoodVisionScannerModal({
               >
                 {isSaving ? (
                   <>
-                    <span className="animate-spin text-base">⏳</span>
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Salvando no diário...</span>
                   </>
                 ) : (
                   <>
-                    <span>💾</span>
+                    <Check className="w-4 h-4 stroke-[2]" />
                     <span>Salvar no Diário de Alimentação</span>
                   </>
                 )}

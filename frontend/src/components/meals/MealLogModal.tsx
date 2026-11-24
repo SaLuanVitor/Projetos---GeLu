@@ -2,6 +2,25 @@
 
 import React, { useState, useRef, ChangeEvent } from "react";
 import { Modal } from "@/components/ui/Modal";
+import {
+  Coffee,
+  Apple,
+  Soup,
+  Sandwich,
+  Salad,
+  Moon,
+  Cookie,
+  PenLine,
+  Camera,
+  Zap,
+  Sparkles,
+  Upload,
+  X,
+  Check,
+  Lightbulb,
+  UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useToast } from "@/components/ui/Toast";
@@ -23,23 +42,29 @@ interface MealLogModalProps {
   defaultDishName?: string;
 }
 
-const MEAL_TYPES = [
-  { key: "BREAKFAST", label: "Café da Manhã", icon: "☕" },
-  { key: "MORNING_SNACK", label: "Lanche Manhã", icon: "🍏" },
-  { key: "LUNCH", label: "Almoço", icon: "🍲" },
-  { key: "AFTERNOON_SNACK", label: "Lanche Tarde", icon: "🥪" },
-  { key: "DINNER", label: "Jantar", icon: "🥗" },
-  { key: "SUPPER", label: "Ceia", icon: "🌙" },
-  { key: "SNACK", label: "Lanche Livre", icon: "🥨" },
+interface MealTypeOption {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+const MEAL_TYPES: MealTypeOption[] = [
+  { key: "BREAKFAST", label: "Café da Manhã", icon: Coffee },
+  { key: "MORNING_SNACK", label: "Lanche Manhã", icon: Apple },
+  { key: "LUNCH", label: "Almoço", icon: Soup },
+  { key: "AFTERNOON_SNACK", label: "Lanche Tarde", icon: Sandwich },
+  { key: "DINNER", label: "Jantar", icon: Salad },
+  { key: "SUPPER", label: "Ceia", icon: Moon },
+  { key: "SNACK", label: "Lanche Livre", icon: Cookie },
 ];
 
 const STAPLE_SUGGESTIONS = [
-  { label: "🍛 Arroz, feijão e frango grelhado", text: "4 colheres de sopa de arroz branco, 1 concha de feijão carioca e 1 filé de peito de frango grelhado (150g)" },
-  { label: "🍳 2 ovos mexidos com pão", text: "2 ovos mexidos com 1 pão francês e 1 fatia de queijo branco" },
-  { label: "🍌 Vitamina de banana com aveia", text: "1 copo de leite integral (200ml), 1 banana média e 2 colheres de sopa de aveia em flocos" },
-  { label: "🥗 Salada com atum", text: "Prato fundo de alface, tomate, pepino e 1 lata de atum sólido com azeite de oliva" },
-  { label: "☕ Café com leite e torrada", text: "1 xícara de café com leite desnatado e 2 torradas integrais com requeijão" },
-  { label: "🍎 Maçã com castanhas", text: "1 maçã média e 30g de castanhas de caju" },
+  { label: "Arroz, feijão e frango grelhado", text: "4 colheres de sopa de arroz branco, 1 concha de feijão carioca e 1 filé de peito de frango grelhado (150g)" },
+  { label: "2 ovos mexidos com pão e queijo", text: "2 ovos mexidos com 1 pão francês e 1 fatia de queijo branco" },
+  { label: "Vitamina de banana com aveia", text: "1 copo de leite integral (200ml), 1 banana média e 2 colheres de sopa de aveia em flocos" },
+  { label: "Salada com atum", text: "Prato fundo de alface, tomate, pepino e 1 lata de atum sólido com azeite de oliva" },
+  { label: "Café com leite e torrada", text: "1 xícara de café com leite desnatado e 2 torradas integrais com requeijão" },
+  { label: "Maçã com castanhas", text: "1 maçã média e 30g de castanhas de caju" },
 ];
 
 export function MealLogModal({
@@ -239,7 +264,7 @@ export function MealLogModal({
         rawInputText: activeTab === "text" ? rawText : undefined,
       });
 
-      showToast(`✓ ${dishName} adicionado ao diário (+${calories} kcal)`, "success");
+      showToast(`${dishName} anotado no seu diário (+${calories} kcal)`, "success");
 
       handleClose();
       onMealSaved();
@@ -259,9 +284,9 @@ export function MealLogModal({
       onClose={handleClose}
       maxWidth="lg"
       title={
-        <div className="flex items-center gap-2">
-          <span>🍽️</span>
-          <span>Registrar Refeição com IA</span>
+        <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold">
+          <UtensilsCrossed className="w-5 h-5 text-amber-800 dark:text-amber-400 stroke-[2]" />
+          <span>Anotar Refeição no Caderno</span>
         </div>
       }
       subtitle={
@@ -279,21 +304,25 @@ export function MealLogModal({
             Tipo de Refeição
           </label>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-1.5">
-            {MEAL_TYPES.map((type) => (
-              <button
-                key={type.key}
-                type="button"
-                onClick={() => setSelectedMealType(type.key)}
-                className={`flex flex-col items-center justify-center p-2 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
-                  selectedMealType === type.key
-                    ? "border-primary bg-primary/10 text-primary dark:text-primary-light shadow-2xs"
-                    : "border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:border-stone-400"
-                }`}
-              >
-                <span className="text-base mb-0.5">{type.icon}</span>
-                <span className="text-[10px] text-center leading-tight">{type.label}</span>
-              </button>
-            ))}
+            {MEAL_TYPES.map((type) => {
+              const Icon = type.icon;
+              const isSelected = selectedMealType === type.key;
+              return (
+                <button
+                  key={type.key}
+                  type="button"
+                  onClick={() => setSelectedMealType(type.key)}
+                  className={`flex flex-col items-center justify-center p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    isSelected
+                      ? "border-amber-600 bg-amber-500/10 text-amber-900 dark:text-amber-200 shadow-2xs"
+                      : "border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:border-stone-400"
+                  }`}
+                >
+                  <Icon className="w-4 h-4 mb-1 stroke-[1.75]" />
+                  <span className="text-[10px] text-center leading-tight">{type.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -311,7 +340,7 @@ export function MealLogModal({
                 : "border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200"
             }`}
           >
-            <span>✍️</span> Descrever o que comi (Texto/IA)
+            <PenLine className="w-3.5 h-3.5" /> <span>Descrever o que comi</span>
           </button>
           <button
             type="button"
@@ -325,7 +354,7 @@ export function MealLogModal({
                 : "border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200"
             }`}
           >
-            <span>📸</span> Tirar Foto do Prato
+            <Camera className="w-3.5 h-3.5" /> <span>Fotografar Prato</span>
           </button>
         </div>
 
@@ -351,7 +380,7 @@ export function MealLogModal({
             {/* Chips de hábitos frequentes / atalhos */}
             <div>
               <p className="text-[11px] font-bold text-stone-500 mb-1.5">
-                ⚡ Sugestões Rápidas (clique para adicionar):
+                <span className="inline-flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-amber-600" /> Sugestões Rápidas:</span>
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {STAPLE_SUGGESTIONS.map((s, idx) => (
@@ -382,7 +411,7 @@ export function MealLogModal({
                   </span>
                 ) : (
                   <span className="flex items-center gap-1.5">
-                    <span>✨</span> Analisar Alimentos & Calorias
+                    <Sparkles className="w-3.5 h-3.5" /> <span>Analisar Alimentos & Calorias</span>
                   </span>
                 )}
               </ActionButton>
@@ -411,7 +440,9 @@ export function MealLogModal({
 
             {!previewUrl ? (
               <div className="rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 p-8 text-center bg-stone-50/50 dark:bg-stone-900/20">
-                <span className="text-4xl block mb-2">📸</span>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 mx-auto mb-2.5">
+                  <Camera className="w-6 h-6 stroke-[1.75]" />
+                </div>
                 <p className="text-sm font-bold text-stone-800 dark:text-stone-200 mb-1">
                   Fotografe sua refeição
                 </p>
@@ -424,14 +455,14 @@ export function MealLogModal({
                     onClick={() => cameraInputRef.current?.click()}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-white font-bold text-xs px-4 py-2 hover:bg-primary-hover shadow-sm cursor-pointer"
                   >
-                    <span>📷</span> Abrir Câmera
+                    <Camera className="w-3.5 h-3.5" /> <span>Abrir Câmera</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold text-xs px-4 py-2 hover:border-primary cursor-pointer"
                   >
-                    <span>📁</span> Escolher Foto
+                    <Upload className="w-3.5 h-3.5" /> <span>Escolher Foto</span>
                   </button>
                 </div>
               </div>
@@ -448,10 +479,10 @@ export function MealLogModal({
                       setSelectedFile(null);
                       setAnalysisResult(null);
                     }}
-                    className="absolute top-2 right-2 rounded-full bg-black/60 text-white p-1 text-xs hover:bg-black cursor-pointer"
+                    className="absolute top-2 right-2 rounded-full bg-black/60 text-white p-1 hover:bg-black cursor-pointer"
                     title="Remover foto"
                   >
-                    ✕
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
@@ -476,7 +507,7 @@ export function MealLogModal({
                       </span>
                     ) : (
                       <span className="flex items-center gap-1.5">
-                        <span>✨</span> Escanear Prato com Visão IA
+                        <Sparkles className="w-3.5 h-3.5" /> <span>Escanear Prato com Visão IA</span>
                       </span>
                     )}
                   </ActionButton>
@@ -491,7 +522,7 @@ export function MealLogModal({
           <div className="mt-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/60 p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-stone-200 dark:border-stone-800 pb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                <span>✓</span> Análise Nutricional Concluída
+                <Check className="w-3.5 h-3.5 stroke-[2]" /> <span>Análise Nutricional Concluída</span>
               </span>
               <span className="text-[11px] font-semibold text-stone-500">
                 Ajuste os valores se desejar
@@ -593,7 +624,7 @@ export function MealLogModal({
             {/* Dica / Notas da IA */}
             {aiNotes && (
               <p className="text-xs text-stone-600 dark:text-stone-400 italic bg-primary/5 p-2 rounded-lg border border-primary/10">
-                💡 <span className="font-medium">Nutri IA:</span> {aiNotes}
+                <span className="inline-flex items-center gap-1.5"><Lightbulb className="w-3.5 h-3.5 text-amber-700 shrink-0" /> <span className="font-medium">Nota Nutricional:</span></span> {aiNotes}
               </p>
             )}
 
@@ -622,7 +653,7 @@ export function MealLogModal({
                 disabled={isSubmitting}
                 className="text-xs py-2 px-5 shadow-sm"
               >
-                {isSubmitting ? "Gravando no Diário..." : "✓ Confirmar & Salvar no Diário"}
+                {isSubmitting ? "Gravando no Diário..." : "Salvar no Diário"}
               </ActionButton>
             </div>
           </div>

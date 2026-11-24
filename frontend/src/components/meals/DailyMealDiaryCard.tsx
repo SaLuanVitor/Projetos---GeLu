@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { useToast } from "@/components/ui/Toast";
 import { MealLogModal } from "@/components/meals/MealLogModal";
+import { getMealIcon } from "@/components/meals/mealIcons";
+import { Camera, Trash2, Loader2, UtensilsCrossed } from "lucide-react";
 import { getDailyMealSummary, deleteMealLog } from "@/services/meals";
 import type { DailyMealSummaryResponse, MealLogResponse } from "@/types/api";
 
@@ -13,15 +15,7 @@ interface DailyMealDiaryCardProps {
   className?: string;
 }
 
-const MEAL_ICONS: Record<string, string> = {
-  BREAKFAST: "☕",
-  MORNING_SNACK: "🍏",
-  LUNCH: "🍲",
-  AFTERNOON_SNACK: "🥪",
-  DINNER: "🥗",
-  SUPPER: "🌙",
-  SNACK: "🥨",
-};
+
 
 const MEAL_NAMES: Record<string, string> = {
   BREAKFAST: "Café da Manhã",
@@ -102,7 +96,7 @@ export function DailyMealDiaryCard({
               <span className="text-xs text-stone-500 font-semibold">• Diário em Tempo Real</span>
             </div>
             <h2 className="mt-1 font-display text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-              <span>📸</span> Diário de Pratos & Refeições
+              <Camera className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[2]" /> <span>Diário de Pratos & Refeições</span>
             </h2>
             <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
               {meals.length} {meals.length === 1 ? "refeição registrada" : "refeições registradas"} hoje ({Math.round(totalCalories)} kcal consumidas)
@@ -114,8 +108,8 @@ export function DailyMealDiaryCard({
             onClick={() => setIsScannerOpen(true)}
             className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-xs font-black shadow-xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
           >
-            <span>📷</span>
-            <span>Tirar Foto do Prato</span>
+            <Camera className="w-4 h-4" />
+            <span>Fotografar Prato</span>
           </button>
         </div>
 
@@ -157,7 +151,9 @@ export function DailyMealDiaryCard({
             </div>
           ) : meals.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/30 p-8 text-center">
-              <span className="text-3xl block mb-2">📸</span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 mx-auto mb-2.5">
+                <Camera className="w-6 h-6 stroke-[1.75]" />
+              </div>
               <h4 className="font-display font-bold text-sm text-stone-800 dark:text-stone-200">
                 Nenhum prato fotografado hoje
               </h4>
@@ -170,7 +166,7 @@ export function DailyMealDiaryCard({
                   onClick={() => setIsScannerOpen(true)}
                   className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-xs font-bold shadow-xs transition-all cursor-pointer"
                 >
-                  <span>📷</span>
+                  <Camera className="w-4 h-4" />
                   <span>Escanear Primeiro Prato</span>
                 </button>
               </div>
@@ -178,7 +174,7 @@ export function DailyMealDiaryCard({
           ) : (
             <div className="space-y-3">
               {meals.map((meal: MealLogResponse) => {
-                const icon = MEAL_ICONS[meal.mealType] || "🍽️";
+                const MealIcon = getMealIcon(meal.mealType);
                 const typeName = MEAL_NAMES[meal.mealType] || meal.mealType;
                 const timeStr = meal.consumedAt
                   ? new Date(meal.consumedAt).toLocaleTimeString("pt-BR", {
@@ -210,8 +206,8 @@ export function DailyMealDiaryCard({
                           />
                         </div>
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-950/60 text-orange-700 text-2xl shrink-0">
-                          {icon}
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-amber-100/80 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 shrink-0">
+                          <MealIcon className="w-6 h-6 stroke-[1.75]" />
                         </div>
                       )}
 
@@ -250,7 +246,7 @@ export function DailyMealDiaryCard({
                       className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-all cursor-pointer text-xs shrink-0"
                       title="Excluir refeição"
                     >
-                      {deletingId === meal.id ? "⏳" : "🗑️"}
+                      {deletingId === meal.id ? <Loader2 className="w-4 h-4 animate-spin text-stone-400" /> : <Trash2 className="w-4 h-4" />}
                     </button>
                   </div>
                 );
