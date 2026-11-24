@@ -9,7 +9,8 @@ import { TextInput, SelectField } from "@/components/ui/FormField";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
-import { generateMealSuggestion } from "@/services/ai";
+import { AiFeedbackWidget } from "@/components/ui/AiFeedbackWidget";
+import { generateMealSuggestion, submitAiFeedback } from "@/services/ai";
 import { getValidSession } from "@/services/auth";
 import { listFamilies } from "@/services/families";
 import { addDietMeal, getOrCreateWeeklyDiet, updateDietMeal } from "@/services/diet";
@@ -81,6 +82,7 @@ export default function AiSuggestionsPage() {
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState<MealSuggestionResponse | null>(null);
   const [createdAt, setCreatedAt] = useState<Date | null>(null);
+  const [feedbackSent, setFeedbackSent] = useState(false);
 
   // Receita salva no aceite
   const [savedRecipe, setSavedRecipe] = useState<RecipeResponse | null>(null);
@@ -200,12 +202,20 @@ export default function AiSuggestionsPage() {
     if (e) e.preventDefault();
     try {
       setLoading(true);
-      const res = await generateMealSuggestion({
-        mealType,
-        goal,
-        targetCalories: parseInt(targetCalories, 10) || 450,
-        preferences: preferences.trim() || undefined,
-      });
+      setFeedbackSent(false);
+      const session = await getValidSession().catch(() => null);
+      const idempotencyKey = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : undefined;
+
+      const res = await generateMealSuggestion(
+        {
+          mealType,
+          goal,
+          targetCalories: parseInt(targetCalories, 10) || 450,
+          preferences: preferences.trim() || undefined,
+        },
+        session?.accessToken,
+        idempotencyKey
+      );
 
       const now = new Date();
       setSuggestion(res);
@@ -233,6 +243,31 @@ export default function AiSuggestionsPage() {
       toast.error("Não foi possível gerar a sugestão no momento.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFeedback = async (accepted: boolean) => {
+    if (!suggestion || feedbackSent) return;
+    try {
+      const session = await getValidSession().catch(() => null);
+      if (session) {
+        await submitAiFeedback(session.accessToken, {
+          mealTitle: suggestion.title,
+          ingredients: suggestion.ingredients,
+          accepted,
+          rating: accepted ? 5.0 : 2.0,
+        });
+        setFeedbackSent(true);
+        toast.success(
+          accepted
+            ? "Obrigado! Preferência memorizada no seu perfil de IA. 🧠"
+            : "Entendido! Evitaremos combinações similares no futuro. 🛡️"
+        );
+      } else {
+        toast.info("Faça login para calibrar suas preferências na memória da IA.");
+      }
+    } catch {
+      // Ignorar falha silenciosa de telemetria
     }
   };
 
@@ -474,14 +509,48 @@ export default function AiSuggestionsPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200/80 dark:border-stone-800 pb-4 mb-4">
-                  <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-bold text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800">
-                    {suggestion.category} • ~{suggestion.prepTimeMinutes} min
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-bold text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800">
+                      {suggestion.category} • ~{suggestion.prepTimeMinutes} min
+                    </span>
 
-                  <span className="font-black text-xl text-amber-700 dark:text-amber-400">
-                    {suggestion.estimatedCalories} kcal
-                  </span>
+                    {suggestion.source === "GEMINI_AI" ? (
+                      <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 inline-flex items-center gap-1.5 shadow-xs">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        ✨ Gemini 2.5 Flash
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-orange-100 dark:bg-orange-950/60 px-2.5 py-1 text-xs font-bold text-orange-800 dark:text-orange-300 border border-orange-300 dark:border-orange-700 inline-flex items-center gap-1.5 shadow-xs">
+                        🛡️ Heurística TACO/IBGE
+                      </span>
+                    )}
+
+                    {suggestion.confidenceScore && (
+                      <span className="rounded-full bg-blue-100 dark:bg-blue-950/60 px-2.5 py-1 text-xs font-bold text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700 inline-flex items-center gap-1 shadow-xs">
+                        🎯 Confiança {Math.round(suggestion.confidenceScore * 100)}%
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-right">
+                    <span className="font-black text-xl text-amber-700 dark:text-amber-400 block">
+                      {suggestion.estimatedCalories} kcal
+                    </span>
+                    {suggestion.minCalories && suggestion.maxCalories && (
+                      <span className="text-[10px] text-stone-500 dark:text-stone-400 font-medium block">
+                        Faixa: {suggestion.minCalories} – {suggestion.maxCalories} kcal
+                      </span>
+                    )}
+                  </div>
                 </div>
+
+                {/* Confirmação Leve de Incerteza (Sprint 17 / Guardrail) */}
+                {suggestion.requiresConfirmation && (
+                  <div className="mb-4 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/80 dark:bg-amber-950/30 p-3 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-2">
+                    <span className="text-base">⚠️</span>
+                    <span><strong>Confirmação Leve:</strong> A IA estimou uma margem calórica mais ampla para esta combinação. Se desejar, personalize os ingredientes antes de aceitar.</span>
+                  </div>
+                )}
 
                 <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100 leading-tight">
                   {suggestion.title}
@@ -546,6 +615,15 @@ export default function AiSuggestionsPage() {
                   </p>
                 </div>
 
+                {/* Feedback da Geração de IA com Justificativa para Treinamento */}
+                <div className="mt-4">
+                  <AiFeedbackWidget
+                    featureType="SUGGESTION"
+                    itemTitle={suggestion.title}
+                    ingredients={suggestion.ingredients}
+                  />
+                </div>
+
                 {/* Barra de Ações: Aceitar, Recusar ou Gerar Outra */}
                 <div className="mt-8 pt-5 border-t border-stone-200/80 dark:border-stone-800 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
@@ -578,6 +656,13 @@ export default function AiSuggestionsPage() {
                   >
                     <span>✓</span> {savingAction ? "Salvando Receita..." : "Aceitar Sugestão"}
                   </button>
+                </div>
+
+                {/* Disclaimer Legal & Transparência Nutricional */}
+                <div className="mt-4 pt-3 border-t border-stone-200/50 dark:border-stone-800/50 text-center">
+                  <p className="text-[11px] text-stone-600 dark:text-stone-300 italic">
+                    ⚖️ {suggestion.disclaimer || "Estimativa nutricional assistiva. Não substitui orientação de nutricionista ou médico."}
+                  </p>
                 </div>
               </PaperCard>
             ) : (

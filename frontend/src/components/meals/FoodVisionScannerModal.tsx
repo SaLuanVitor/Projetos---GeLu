@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useToast } from "@/components/ui/Toast";
+import { AiFeedbackWidget } from "@/components/ui/AiFeedbackWidget";
 import { analyzeMealPhoto, createMealLog } from "@/services/meals";
 import type { AnalyzeMealPhotoResponse, FoodItemIdentified } from "@/types/api";
 
@@ -395,6 +396,16 @@ export function FoodVisionScannerModal({
                 </div>
               </div>
             )}
+
+            {/* Feedback da Análise Visual para Treinamento da IA */}
+            <div className="pt-2">
+              <AiFeedbackWidget
+                featureType="FOOD_VISION"
+                itemTitle={editableDishName || analysisResult.dishName}
+                ingredients={analysisResult.items?.map((i) => i.name)}
+                accessToken={accessToken}
+              />
+            </div>
 
             {/* Ações Finais */}
             <div className="flex justify-between items-center pt-3 border-t border-stone-200 dark:border-stone-800">

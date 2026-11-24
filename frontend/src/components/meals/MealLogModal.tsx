@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useToast } from "@/components/ui/Toast";
+import { AiFeedbackWidget } from "@/components/ui/AiFeedbackWidget";
 import { analyzeMealPhoto, parseMealText, createMealLog } from "@/services/meals";
 import type {
   AnalyzeMealPhotoResponse,
@@ -595,6 +596,16 @@ export function MealLogModal({
                 💡 <span className="font-medium">Nutri IA:</span> {aiNotes}
               </p>
             )}
+
+            {/* Feedback da Análise da IA para Treinamento Contínuo */}
+            <div className="pt-1">
+              <AiFeedbackWidget
+                featureType={activeTab === "text" ? "FOOD_PARSER" : "FOOD_VISION"}
+                itemTitle={dishName}
+                ingredients={items?.map((i) => i.name)}
+                accessToken={accessToken}
+              />
+            </div>
 
             {/* Ação Salvar */}
             <div className="pt-2 flex justify-end gap-2">

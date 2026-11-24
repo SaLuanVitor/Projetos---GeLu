@@ -634,6 +634,23 @@ export type MealSuggestionResponse = {
   carbsGrams: string;
   fatGrams: string;
   chefTip: string;
+  source?: string;
+  disclaimer?: string;
+  confidenceScore?: number;
+  minCalories?: number;
+  maxCalories?: number;
+  requiresConfirmation?: boolean;
+};
+
+export type UserAiFeedbackRequest = {
+  featureType?: string; // "SUGGESTION" | "FOOD_VISION" | "FOOD_PARSER" | "NUTRITION_ESTIMATE"
+  mealTitle?: string;
+  itemTitle?: string;
+  ingredients?: string[];
+  accepted: boolean;
+  rating?: number;
+  correctionNotes?: string;
+  metadata?: string;
 };
 
 // Painel Administrativo & Suporte (Sprint 13)

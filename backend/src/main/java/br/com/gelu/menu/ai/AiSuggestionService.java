@@ -15,6 +15,9 @@ import br.com.gelu.menu.ai.dto.WeeklyEvolutionSummaryResponse;
 import br.com.gelu.menu.ai.dto.WeeklySummaryRequest;
 import br.com.gelu.menu.ai.dto.WorkoutCalorieEstimateRequest;
 import br.com.gelu.menu.ai.dto.WorkoutCalorieEstimateResponse;
+import br.com.gelu.menu.ai.guardrails.NutritionSanityBoundsValidator;
+import br.com.gelu.menu.ai.guardrails.PiiScrubberService;
+import br.com.gelu.menu.ai.guardrails.SanityBoundsException;
 import br.com.gelu.menu.common.exception.BadRequestException;
 import br.com.gelu.menu.family.Family;
 import br.com.gelu.menu.family.FamilyRepository;
@@ -42,6 +45,10 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import br.com.gelu.menu.ai.grounding.TacoDataService;
+import br.com.gelu.menu.ai.learning.UserHabitLearningService;
+import br.com.gelu.menu.ai.resilience.AiRetryExecutor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +63,11 @@ public class AiSuggestionService {
   private final WorkoutLogRepository workoutLogRepository;
   private final ScheduleActivityRepository scheduleActivityRepository;
   private final ObjectMapper objectMapper;
+  private final PiiScrubberService piiScrubberService;
+  private final NutritionSanityBoundsValidator sanityBoundsValidator;
+  private final TacoDataService tacoDataService;
+  private final AiRetryExecutor retryExecutor;
+  private final UserHabitLearningService userHabitLearningService;
   private final String superAdminEmail;
   private final java.util.Map<String, CachedAiItem> aiCache =
       new java.util.concurrent.ConcurrentHashMap<>();
@@ -74,6 +86,7 @@ public class AiSuggestionService {
     }
   }
 
+  @Autowired
   public AiSuggestionService(
       SystemSettingRepository systemSettingRepository,
       AiUsageLogRepository aiUsageLogRepository,
@@ -83,6 +96,11 @@ public class AiSuggestionService {
       WorkoutLogRepository workoutLogRepository,
       ScheduleActivityRepository scheduleActivityRepository,
       ObjectMapper objectMapper,
+      PiiScrubberService piiScrubberService,
+      NutritionSanityBoundsValidator sanityBoundsValidator,
+      TacoDataService tacoDataService,
+      AiRetryExecutor retryExecutor,
+      UserHabitLearningService userHabitLearningService,
       @Value("${gelu.super-admin-email:luanvitors_852@hotmail.com}") String superAdminEmail) {
     this.systemSettingRepository = systemSettingRepository;
     this.aiUsageLogRepository = aiUsageLogRepository;
@@ -92,7 +110,41 @@ public class AiSuggestionService {
     this.workoutLogRepository = workoutLogRepository;
     this.scheduleActivityRepository = scheduleActivityRepository;
     this.objectMapper = objectMapper;
+    this.piiScrubberService = piiScrubberService;
+    this.sanityBoundsValidator = sanityBoundsValidator;
+    this.tacoDataService = tacoDataService;
+    this.retryExecutor = retryExecutor;
+    this.userHabitLearningService = userHabitLearningService;
     this.superAdminEmail = superAdminEmail;
+  }
+
+  public AiSuggestionService(
+      SystemSettingRepository systemSettingRepository,
+      AiUsageLogRepository aiUsageLogRepository,
+      UserRepository userRepository,
+      FamilyRepository familyRepository,
+      WeightHistoryRepository weightHistoryRepository,
+      WorkoutLogRepository workoutLogRepository,
+      ScheduleActivityRepository scheduleActivityRepository,
+      ObjectMapper objectMapper,
+      PiiScrubberService piiScrubberService,
+      NutritionSanityBoundsValidator sanityBoundsValidator,
+      String superAdminEmail) {
+    this(
+        systemSettingRepository,
+        aiUsageLogRepository,
+        userRepository,
+        familyRepository,
+        weightHistoryRepository,
+        workoutLogRepository,
+        scheduleActivityRepository,
+        objectMapper,
+        piiScrubberService,
+        sanityBoundsValidator,
+        null,
+        new AiRetryExecutor(),
+        null,
+        superAdminEmail);
   }
 
   public MealSuggestionResponse generateSuggestion(UUID userId, GenerateSuggestionRequest request) {
@@ -172,13 +224,20 @@ public class AiSuggestionService {
 
     if (apiKey != null && !apiKey.isBlank() && !apiKey.contains("...")) {
       try {
-        GeminiResult geminiRes = callGeminiApi(apiKey.trim(), model, request);
+        GeminiResult geminiRes =
+            retryExecutor != null
+                ? retryExecutor.executeWithRetry(
+                    "MEAL_SUGGESTION",
+                    () -> callGeminiApi(apiKey.trim(), model, request, userId),
+                    () -> new GeminiResult(generateLocalSuggestion(request), 120, 330, 450))
+                : callGeminiApi(apiKey.trim(), model, request, userId);
+
         if (geminiRes != null && geminiRes.suggestion != null) {
           response = geminiRes.suggestion;
           promptTokens = geminiRes.promptTokens;
           completionTokens = geminiRes.completionTokens;
           totalTokens = geminiRes.totalTokens;
-          status = "SUCCESS_GEMINI";
+          status = response.source() != null && response.source().contains("GEMINI") ? "SUCCESS_GEMINI" : "FALLBACK_LOCAL";
         }
       } catch (Exception e) {
         // Fallback para gerador determinístico local caso a API oscile
@@ -231,7 +290,7 @@ public class AiSuggestionService {
     }
   }
 
-  private GeminiResult callGeminiApi(String apiKey, String model, GenerateSuggestionRequest request)
+  private GeminiResult callGeminiApi(String apiKey, String model, GenerateSuggestionRequest request, UUID userId)
       throws Exception {
     String endpoint =
         "https://generativelanguage.googleapis.com/v1beta/models/"
@@ -239,64 +298,46 @@ public class AiSuggestionService {
             + ":generateContent?key="
             + apiKey;
 
-    String mealType = request.mealType() != null ? request.mealType() : "Almoço";
-    String goal = request.goal() != null ? request.goal() : "Equilíbrio & Saúde";
+    String mealType = piiScrubberService.sanitizePromptInput(request.mealType() != null ? request.mealType() : "Almoço");
+    String goal = piiScrubberService.sanitizePromptInput(request.goal() != null ? request.goal() : "Equilíbrio & Saúde");
     int targetCals =
         request.targetCalories() != null && request.targetCalories() > 0
             ? request.targetCalories()
             : 450;
     String preferences =
-        request.preferences() != null ? request.preferences() : "Nenhuma restrição específica";
+        piiScrubberService.sanitizePromptInput(request.preferences() != null ? request.preferences() : "Nenhuma restrição específica");
+
+    String habitsPrompt = (userHabitLearningService != null && userId != null)
+        ? userHabitLearningService.getFewShotPromptContext(userId)
+        : "";
 
     String systemPrompt =
         "Você é o Chef e Nutricionista inteligente do sistema GeLu Menu. "
             + "Crie uma receita saudável e criativa típica brasileira ou balanceada. "
-            + "Você DEVE responder ESTRITAMENTE em formato JSON com o seguinte schema:\n"
+            + habitsPrompt
+            + "\nVocê DEVE responder ESTRITAMENTE em formato JSON com o seguinte schema:\n"
             + "{\n"
-            + '"'
-            + "title"
-            + '"'
-            + ": \"Nome do prato\",\n"
-            + '"'
-            + "mealType"
-            + '"'
-            + ": \""
+            + "\"title\": \"Nome do prato\",\n"
+            + "\"mealType\": \""
             + mealType
             + "\",\n"
-            + '"'
-            + "calories"
-            + '"'
-            + ": "
+            + "\"calories\": "
             + targetCals
             + ",\n"
-            + '"'
-            + "prepTimeMinutes"
-            + '"'
-            + ": 25,\n"
-            + '"'
-            + "description"
-            + '"'
-            + ": \"Breve descrição do valor nutricional\",\n"
-            + '"'
-            + "ingredients"
-            + '"'
-            + ": [\"150g frango\", \"4 colheres arroz integral\"],\n"
-            + '"'
-            + "protein"
-            + '"'
-            + ": \"35g\",\n"
-            + '"'
-            + "carbs"
-            + '"'
-            + ": \"40g\",\n"
-            + '"'
-            + "fat"
-            + '"'
-            + ": \"10g\",\n"
-            + '"'
-            + "chefTip"
-            + '"'
-            + ": \"Dica do chef para realçar o sabor\"\n"
+            + "\"minCalories\": "
+            + Math.max(0, targetCals - 40)
+            + ",\n"
+            + "\"maxCalories\": "
+            + (targetCals + 40)
+            + ",\n"
+            + "\"confidenceScore\": 0.95,\n"
+            + "\"prepTimeMinutes\": 25,\n"
+            + "\"description\": \"Breve descrição do valor nutricional\",\n"
+            + "\"ingredients\": [\"150g frango\", \"4 colheres arroz integral\"],\n"
+            + "\"protein\": \"35g\",\n"
+            + "\"carbs\": \"40g\",\n"
+            + "\"fat\": \"10g\",\n"
+            + "\"chefTip\": \"Dica do chef para realçar o sabor\"\n"
             + "}\n"
             + "Não inclua markdown (sem ```json), responda somente o JSON puro.";
 
@@ -358,6 +399,11 @@ public class AiSuggestionService {
     JsonNode parsed = objectMapper.readTree(rawText);
     String title = parsed.path("title").asText("Prato Saudável do Chef");
     int calories = parsed.path("calories").asInt(targetCals);
+    int minCal = parsed.has("minCalories") ? parsed.path("minCalories").asInt(Math.max(0, calories - 40)) : Math.max(0, calories - 40);
+    int maxCal = parsed.has("maxCalories") ? parsed.path("maxCalories").asInt(calories + 40) : (calories + 40);
+    double confidence = parsed.has("confidenceScore") ? parsed.path("confidenceScore").asDouble(0.95) : 0.95;
+    boolean requiresConfirmation = confidence < 0.85;
+
     int prepTime = parsed.path("prepTimeMinutes").asInt(25);
     String description = parsed.path("description").asText("");
     String protein = parsed.path("protein").asText("30g");
@@ -376,6 +422,9 @@ public class AiSuggestionService {
       ingredients.add("Mix de ingredientes balanceados da estação");
     }
 
+    // Output Guardrail: Validação física e biológica estrita contra alucinações
+    sanityBoundsValidator.validateMealSuggestion(calories, protein, carbs, fat);
+
     MealSuggestionResponse suggestion =
         new MealSuggestionResponse(
             title,
@@ -387,7 +436,13 @@ public class AiSuggestionService {
             protein,
             carbs,
             fat,
-            chefTip);
+            chefTip,
+            "GEMINI_AI",
+            "Estimativa nutricional gerada por inteligência artificial. Não substitui orientação de nutricionista ou médico.",
+            confidence,
+            minCal,
+            maxCal,
+            requiresConfirmation);
 
     JsonNode usage = root.path("usageMetadata");
     int promptTokens = usage.path("promptTokenCount").asInt(150);
@@ -539,7 +594,13 @@ public class AiSuggestionService {
 
     if (apiKey != null && !apiKey.isBlank() && !apiKey.contains("...")) {
       try {
-        response = callGeminiNutritionApi(apiKey.trim(), model, request, servings);
+        response =
+            retryExecutor != null
+                ? retryExecutor.executeWithRetry(
+                    "NUTRITION_ESTIMATE",
+                    () -> callGeminiNutritionApi(apiKey.trim(), model, request, servings),
+                    () -> calculateLocalNutrition(request, servings))
+                : callGeminiNutritionApi(apiKey.trim(), model, request, servings);
       } catch (Exception e) {
         // Fallback para gerador heurístico local
       }
@@ -574,18 +635,21 @@ public class AiSuggestionService {
             .append(" ")
             .append(ing.unit() != null ? ing.unit() : "")
             .append(" ")
-            .append(ing.name() != null ? ing.name() : "")
+            .append(piiScrubberService.sanitizePromptInput(ing.name()))
             .append("\n");
       }
     }
 
+    String recipeName = piiScrubberService.sanitizePromptInput(request.name());
+    String recipeCategory = piiScrubberService.sanitizePromptInput(request.category() != null ? request.category() : "Geral");
+
     String prompt =
         "Você é um nutricionista especialista. Estime os valores nutricionais TOTAIS da receita inteira:\n"
             + "Nome: "
-            + request.name()
+            + recipeName
             + "\n"
             + "Categoria: "
-            + (request.category() != null ? request.category() : "Geral")
+            + recipeCategory
             + "\n"
             + "Porções: "
             + servings
@@ -646,6 +710,9 @@ public class AiSuggestionService {
               BigDecimal.valueOf(json.path("sodium").asDouble(250.0))
                   .setScale(1, RoundingMode.HALF_UP);
 
+          // Output Guardrail: Validação física estrita
+          sanityBoundsValidator.validateNutritionEstimate(totalCals, carbs, protein, fats, servings);
+
           BigDecimal s = BigDecimal.valueOf(servings);
           return new NutritionEstimateResponse(
               totalCals,
@@ -670,6 +737,9 @@ public class AiSuggestionService {
 
   private NutritionEstimateResponse calculateLocalNutrition(
       NutritionEstimateRequest request, int servings) {
+    if (tacoDataService != null && request.ingredients() != null && !request.ingredients().isEmpty()) {
+      return tacoDataService.estimateFromIngredients(request.ingredients(), servings);
+    }
     double totalCals = 0;
     double carbs = 0;
     double protein = 0;
@@ -803,7 +873,7 @@ public class AiSuggestionService {
             : 45;
     String activity =
         (request.activity() != null && !request.activity().isBlank())
-            ? request.activity().trim()
+            ? piiScrubberService.sanitizePromptInput(request.activity())
             : "Treino / Atividade Física";
     String intensity =
         (request.intensity() != null && !request.intensity().isBlank())

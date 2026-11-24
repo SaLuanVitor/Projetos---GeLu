@@ -6,6 +6,7 @@ import type {
   MealSuggestionResponse,
   NutritionEstimateRequest,
   NutritionEstimateResponse,
+  UserAiFeedbackRequest,
   WorkoutCalorieEstimateRequest,
   WorkoutCalorieEstimateResponse,
 } from "@/types/api";
@@ -40,14 +41,20 @@ export async function estimateWorkoutCalories(
 
 export async function estimateRecipeNutrition(
   accessToken: string,
-  body: NutritionEstimateRequest
+  body: NutritionEstimateRequest,
+  idempotencyKey?: string
 ): Promise<NutritionEstimateResponse> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
+  };
+  if (idempotencyKey) {
+    headers["X-Idempotency-Key"] = idempotencyKey;
+  }
+
   const response = await fetch(`${API_URL}/ai/nutrition-estimate`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers,
     body: JSON.stringify(body),
   });
 
@@ -65,13 +72,23 @@ export async function estimateRecipeNutrition(
 }
 
 export async function generateMealSuggestion(
-  body: GenerateSuggestionRequest
+  body: GenerateSuggestionRequest,
+  accessToken?: string,
+  idempotencyKey?: string
 ): Promise<MealSuggestionResponse> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+  if (idempotencyKey) {
+    headers["X-Idempotency-Key"] = idempotencyKey;
+  }
+
   const response = await fetch(`${API_URL}/ai/suggest`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(body),
   });
 
@@ -85,6 +102,57 @@ export async function generateMealSuggestion(
     );
   }
 
+  return payload.data;
+}
+
+export async function submitAiFeedback(
+  accessToken: string,
+  feedback: UserAiFeedbackRequest
+): Promise<void> {
+  const response = await fetch(`${API_URL}/ai/feedback`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(feedback),
+  });
+
+  const payload = await readPayload<void>(response);
+  if (!response.ok || !payload.success) {
+    const error = "error" in payload ? payload.error : undefined;
+    throw new ApiClientError(
+      error?.message ?? "Não foi possível registrar o feedback.",
+      error?.code ?? "FEEDBACK_ERROR",
+      error?.details ?? []
+    );
+  }
+}
+
+export async function exportLgpdData(accessToken: string): Promise<any> {
+  const response = await fetch(`${API_URL}/ai/lgpd/export`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const payload = await readPayload<any>(response);
+  if (!response.ok || !payload.success) {
+    throw new ApiClientError("Falha ao exportar dados LGPD.", "LGPD_EXPORT_ERROR", []);
+  }
+  return payload.data;
+}
+
+export async function purgeLgpdData(accessToken: string): Promise<any> {
+  const response = await fetch(`${API_URL}/ai/lgpd/data`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const payload = await readPayload<any>(response);
+  if (!response.ok || !payload.success) {
+    throw new ApiClientError("Falha ao eliminar dados LGPD.", "LGPD_PURGE_ERROR", []);
+  }
   return payload.data;
 }
 

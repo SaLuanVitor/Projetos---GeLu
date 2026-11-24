@@ -25,4 +25,10 @@ public interface AiUsageLogRepository extends JpaRepository<AiUsageLog, UUID> {
 
   @Query("SELECT COUNT(l) FROM AiUsageLog l WHERE l.userId = :userId AND l.createdAt >= :since")
   long countSinceByUserId(@Param("userId") UUID userId, @Param("since") LocalDateTime since);
+
+  List<AiUsageLog> findAllByUserId(UUID userId);
+
+  @org.springframework.data.jpa.repository.Modifying
+  @Query("UPDATE AiUsageLog l SET l.userId = null WHERE l.userId = :userId")
+  void anonymizeByUserId(@Param("userId") UUID userId);
 }
