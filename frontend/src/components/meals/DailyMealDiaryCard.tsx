@@ -106,7 +106,7 @@ export function DailyMealDiaryCard({
           <button
             type="button"
             onClick={() => setIsScannerOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-xs font-black shadow-xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
+            className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-xs font-black shadow-md transition-all duration-150 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 cursor-pointer self-start sm:self-auto shrink-0"
           >
             <Camera className="w-4 h-4" />
             <span>Fotografar Prato</span>

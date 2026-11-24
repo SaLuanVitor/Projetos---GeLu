@@ -454,14 +454,14 @@ export function MealLogModal({
                   <button
                     type="button"
                     onClick={() => cameraInputRef.current?.click()}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-white font-bold text-xs px-4 py-2 hover:bg-primary-hover shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-95 active:translate-y-0 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-white font-bold text-xs px-4 py-2 hover:bg-primary-hover shadow-sm transition-all duration-150 hover:rotate-1 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] active:rotate-0 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5" /> <span>Abrir Câmera</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold text-xs px-4 py-2 hover:border-primary shadow-xs transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-95 active:translate-y-0 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold text-xs px-4 py-2 hover:border-primary shadow-xs transition-all duration-150 hover:rotate-1 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] active:rotate-0 cursor-pointer"
                   >
                     <Upload className="w-3.5 h-3.5" /> <span>Escolher Foto</span>
                   </button>

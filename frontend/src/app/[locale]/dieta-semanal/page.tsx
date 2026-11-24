@@ -530,7 +530,7 @@ export default function WeeklyDietPage() {
               <button
                 type="button"
                 onClick={() => setFoodVisionOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-xs font-bold shadow-xs transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-xs font-bold shadow-md transition-all duration-150 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 cursor-pointer"
               >
                 <Camera className="w-3.5 h-3.5" />
                 <span>Escanear com IA</span>

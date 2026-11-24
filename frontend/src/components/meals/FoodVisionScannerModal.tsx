@@ -298,7 +298,7 @@ export function FoodVisionScannerModal({
                     type="button"
                     onClick={handleAnalyzePhoto}
                     disabled={isAnalyzing}
-                    className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-black shadow-xs transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 disabled:opacity-60 text-white px-5 py-2.5 text-xs font-black shadow-md transition-all duration-150 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 cursor-pointer"
                   >
                     {isAnalyzing ? (
                       <>

@@ -382,7 +382,7 @@ export default function RecipesPage() {
                     <Link
                       aria-label={t("editRecipe") || "Editar receita"}
                       title="Editar esta receita"
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border-2 border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-200 shadow-2xs hover:border-amber-600 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all duration-150 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl border-2 border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-200 shadow-2xs hover:border-amber-600 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all duration-150 hover:rotate-2 hover:scale-105 active:scale-95 active:rotate-0 cursor-pointer"
                       href={`/receitas/${recipe.slug || recipe.id}/editar`}
                     >
                       <Pencil className="w-5 h-5 stroke-[2]" />
@@ -531,7 +531,7 @@ export default function RecipesPage() {
                       <Link
                         aria-label={t("editRecipe") || "Editar receita"}
                         title="Editar esta receita"
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-200 shadow-2xs hover:border-amber-600 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all duration-150 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-200 shadow-2xs hover:border-amber-600 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all duration-150 hover:rotate-2 hover:scale-105 active:scale-95 active:rotate-0 cursor-pointer"
                         href={`/receitas/${recipe.slug || recipe.id}/editar`}
                       >
                         <Pencil className="w-4 h-4 stroke-[2]" />
