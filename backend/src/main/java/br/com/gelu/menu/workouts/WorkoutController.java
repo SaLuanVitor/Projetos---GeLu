@@ -70,9 +70,11 @@ public class WorkoutController {
   public ApiResponse<WorkoutLogResponse> completeRoutineWorkout(
       @AuthenticationPrincipal AuthenticatedUser user,
       @PathVariable UUID id,
-      @RequestParam(required = false) String notes) {
+      @RequestParam(required = false) String notes,
+      @RequestParam(required = false) Integer durationMinutes,
+      @RequestParam(required = false) Integer caloriesBurned) {
     return ApiResponse.ok(
-        workoutService.completeRoutineWorkout(user.id(), id, notes),
+        workoutService.completeRoutineWorkout(user.id(), id, notes, durationMinutes, caloriesBurned),
         "Routine workout completed successfully");
   }
 

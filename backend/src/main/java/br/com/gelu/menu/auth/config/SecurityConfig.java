@@ -48,6 +48,7 @@ public class SecurityConfig {
                         "/api/v1/support/settings",
                         "/api/v1/ai/**",
                         "/api/v1/meals/photo/**",
+                        "/api/v1/imports/template/**",
                         "/ws/**",
                         "/ws-raw/**",
                         "/v3/api-docs/**",

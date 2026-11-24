@@ -52,9 +52,15 @@ export async function getTodayWorkoutRoutine(
 export async function completeRoutineWorkout(
   accessToken: string,
   id: string,
-  notes?: string
+  notes?: string,
+  durationMinutes?: number,
+  caloriesBurned?: number
 ): Promise<WorkoutLogResponse> {
-  const query = notes ? `?notes=${encodeURIComponent(notes)}` : "";
+  const params = new URLSearchParams();
+  if (notes) params.append("notes", notes);
+  if (durationMinutes) params.append("durationMinutes", String(durationMinutes));
+  if (caloriesBurned) params.append("caloriesBurned", String(caloriesBurned));
+  const query = params.toString() ? `?${params.toString()}` : "";
   return request<WorkoutLogResponse>(`/workouts/${id}/complete${query}`, accessToken, {
     method: "POST",
   });

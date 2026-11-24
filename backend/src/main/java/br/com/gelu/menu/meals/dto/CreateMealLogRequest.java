@@ -23,4 +23,34 @@ public record CreateMealLogRequest(
     String inputMethod,
     String rawInputText,
     String skipReason,
-    LocalDateTime consumedAt) {}
+    LocalDateTime consumedAt) {
+
+  public CreateMealLogRequest(
+      String mealType,
+      String dishName,
+      BigDecimal totalCalories,
+      BigDecimal proteins,
+      BigDecimal carbohydrates,
+      BigDecimal fats,
+      LocalDateTime consumedAt,
+      String notes) {
+    this(
+        mealType,
+        dishName,
+        null,
+        totalCalories,
+        proteins,
+        carbohydrates,
+        fats,
+        BigDecimal.ZERO,
+        BigDecimal.ZERO,
+        List.of(),
+        notes,
+        null,
+        "COMPLETED",
+        "EXCEL_IMPORT",
+        null,
+        null,
+        consumedAt);
+  }
+}

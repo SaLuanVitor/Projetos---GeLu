@@ -754,4 +754,27 @@ export type AdminDashboardTelemetryResponse = {
   generatedAt: string;
 };
 
+export type OrphanItemResponse = {
+  objectKey: string;
+  sizeBytes: number;
+  sizeFormatted: string;
+  lastModified: string;
+};
+
+export type StorageStatsResponse = {
+  totalSizeBytes: number;
+  totalSizeFormatted: string;
+  totalFiles: number;
+  mealPhotosCount: number;
+  mealPhotosBytes: number;
+  recipeMediaCount: number;
+  recipeMediaBytes: number;
+  otherFilesCount: number;
+  otherFilesBytes: number;
+  orphanFilesCount: number;
+  orphanFilesBytes: number;
+  orphanFilesFormatted: string;
+  orphanFiles: OrphanItemResponse[];
+};
+
 

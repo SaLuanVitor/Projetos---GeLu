@@ -39,6 +39,8 @@ import {
   updateAdminTeamMemberStatus,
   deleteAdminTeamMember,
   logPiiRevealWithReason,
+  getStorageStats,
+  purgeOrphanFiles,
 } from "@/services/admin";
 import type {
   AdminDashboardTelemetryResponse,
@@ -53,6 +55,7 @@ import type {
   SystemSettingResponse,
   UserAiUsageResponse,
   UserDataExportResponse,
+  StorageStatsResponse,
 } from "@/types/api";
 
 import {
@@ -96,6 +99,9 @@ import {
   Check,
   Layers,
   HeartHandshake,
+  Trash2,
+  FileSpreadsheet,
+  Image as ImageIcon,
 } from "lucide-react";
 
 type TabType =
@@ -107,7 +113,8 @@ type TabType =
   | "TEAM"
   | "TICKETS"
   | "SETTINGS"
-  | "AUDIT";
+  | "AUDIT"
+  | "STORAGE_GOVERNANCE";
 
 export default function BackofficeDashboardPage() {
   const { showToast } = useToast();
@@ -162,6 +169,10 @@ export default function BackofficeDashboardPage() {
   const [aiUsage, setAiUsage] = useState<AiUsageSummaryResponse | null>(null);
   const [userAiUsage, setUserAiUsage] = useState<UserAiUsageResponse[]>([]);
   const [auditLogs, setAuditLogs] = useState<SystemAuditLogResponse[]>([]);
+  const [storageStats, setStorageStats] = useState<StorageStatsResponse | null>(null);
+  const [loadingStorage, setLoadingStorage] = useState<boolean>(false);
+  const [purgingOrphans, setPurgingOrphans] = useState<boolean>(false);
+  const [selectedOrphanKeys, setSelectedOrphanKeys] = useState<string[]>([]);
 
   // Filtros
   const [userSearch, setUserSearch] = useState("");
@@ -385,6 +396,42 @@ export default function BackofficeDashboardPage() {
     }
   };
 
+  const handleRefreshStorage = async () => {
+    if (!sessionToken) return;
+    setLoadingStorage(true);
+    try {
+      const data = await getStorageStats(sessionToken);
+      setStorageStats(data);
+      setSelectedOrphanKeys([]);
+      showToast("Estatísticas de storage atualizadas!", "info");
+    } catch {
+      showToast("Falha ao carregar métricas de storage.", "error");
+    } finally {
+      setLoadingStorage(false);
+    }
+  };
+
+  const handlePurgeOrphans = async (keysToPurge?: string[]) => {
+    if (!sessionToken) return;
+    const keys = keysToPurge || selectedOrphanKeys;
+    if (!keys || keys.length === 0) {
+      showToast("Nenhum arquivo órfão selecionado.", "error");
+      return;
+    }
+    setPurgingOrphans(true);
+    try {
+      const res = await purgeOrphanFiles(sessionToken, keys);
+      showToast(`${res.deleted} arquivo(s) órfão(s) purgado(s) com sucesso!`, "success");
+      setSelectedOrphanKeys([]);
+      const updated = await getStorageStats(sessionToken);
+      setStorageStats(updated);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Falha ao purgar arquivos órfãos.", "error");
+    } finally {
+      setPurgingOrphans(false);
+    }
+  };
+
   const checkAuthAndLoad = useCallback(async () => {
     setLoading(true);
     try {
@@ -419,6 +466,7 @@ export default function BackofficeDashboardPage() {
         userAiData,
         auditLogsData,
         teamData,
+        storageStatsData,
       ] = await Promise.all([
         getAdminMetrics(session.accessToken).catch(() => null),
         getDashboardTelemetry(session.accessToken).catch(() => null),
@@ -430,6 +478,7 @@ export default function BackofficeDashboardPage() {
         getUserAiUsage(session.accessToken).catch(() => []),
         getAdminAuditLogs(session.accessToken).catch(() => []),
         getAdminTeam(session.accessToken).catch(() => []),
+        getStorageStats(session.accessToken).catch(() => null),
       ]);
 
       setMetrics(metricsData);
@@ -442,6 +491,7 @@ export default function BackofficeDashboardPage() {
       setUserAiUsage(userAiData);
       setAuditLogs(auditLogsData);
       setTeam(teamData);
+      setStorageStats(storageStatsData);
 
       // Preencher formulário de configurações
       if (settingsData && settingsData.length > 0) {
@@ -2335,6 +2385,279 @@ export default function BackofficeDashboardPage() {
             </div>
           </PaperCard>
         )}
+
+        {/* Gestão de Arquivos & Governança de Storage */}
+        {activeTab === "STORAGE_GOVERNANCE" && (
+          <div className="space-y-6">
+            <PaperCard tape="orange">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-variant">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/40">
+                    <HardDrive className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="font-display text-lg font-black text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                      Gestão de Arquivos & Storage (MinIO S3)
+                    </h2>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
+                      Monitoramento de cotas, limites por tipo de arquivo, integridade de storage e varredura de arquivos órfãos.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRefreshStorage}
+                    disabled={loadingStorage}
+                    className="inline-flex items-center gap-2 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 px-3.5 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 shadow-2xs hover:bg-stone-50 dark:hover:bg-stone-800/80 transition-all hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingStorage ? "animate-spin" : ""}`} />
+                    Atualizar Métricas
+                  </button>
+                </div>
+              </div>
+
+              {/* KPI Cards de Storage */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                <div className="rounded-2xl border border-stone-200/70 dark:border-stone-800 bg-white/70 dark:bg-stone-900/60 p-4">
+                  <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
+                    <span>Espaço Total no Bucket</span>
+                    <HardDrive className="w-4 h-4 text-orange-500" />
+                  </div>
+                  <div className="mt-2 text-2xl font-black font-display text-stone-900 dark:text-stone-100">
+                    {storageStats?.totalSizeFormatted ?? "0 B"}
+                  </div>
+                  <div className="mt-1 text-[11px] text-stone-500 font-medium">
+                    {storageStats?.totalFiles ?? 0} arquivos indexados
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-stone-200/70 dark:border-stone-800 bg-white/70 dark:bg-stone-900/60 p-4">
+                  <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
+                    <span>Fotos de Refeições</span>
+                    <UtensilsCrossed className="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <div className="mt-2 text-2xl font-black font-display text-stone-900 dark:text-stone-100">
+                    {storageStats ? ((storageStats.mealPhotosBytes ?? 0) / 1024 / 1024).toFixed(1) + " MB" : "0 MB"}
+                  </div>
+                  <div className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    {storageStats?.mealPhotosCount ?? 0} fotos ativas em logs
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-stone-200/70 dark:border-stone-800 bg-white/70 dark:bg-stone-900/60 p-4">
+                  <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
+                    <span>Mídias de Receitas</span>
+                    <ImageIcon className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <div className="mt-2 text-2xl font-black font-display text-stone-900 dark:text-stone-100">
+                    {storageStats ? ((storageStats.recipeMediaBytes ?? 0) / 1024 / 1024).toFixed(1) + " MB" : "0 MB"}
+                  </div>
+                  <div className="mt-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                    {storageStats?.recipeMediaCount ?? 0} fotos de preparo/pratos
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 p-4">
+                  <div className="flex items-center justify-between text-xs text-amber-700 dark:text-amber-400">
+                    <span>Arquivos Órfãos Detectados</span>
+                    <Trash2 className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div className="mt-2 text-2xl font-black font-display text-amber-900 dark:text-amber-100">
+                    {storageStats?.orphanFilesFormatted ?? "0 B"}
+                  </div>
+                  <div className="mt-1 text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+                    {storageStats?.orphanFilesCount ?? 0} sem vínculo com entidades
+                  </div>
+                </div>
+              </div>
+            </PaperCard>
+
+            {/* Políticas de Governança & Upload */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-stone-200/70 dark:border-stone-800 bg-[#FCF8F2] dark:bg-[#1C1815] p-4 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-stone-900 dark:text-stone-100">
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+                  Planilhas & Dados em Lote
+                </div>
+                <p className="text-[12px] text-stone-600 dark:text-stone-400 leading-relaxed">
+                  Formatos aceitos: <strong>.xlsx, .csv</strong>. Limite estrito de <strong>5 MB</strong> por arquivo. Apenas esquemas validados com cabeçalho canônico são autorizados para persistência.
+                </p>
+                <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                  Validador Bloqueante Ativo
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-stone-200/70 dark:border-stone-800 bg-[#FCF8F2] dark:bg-[#1C1815] p-4 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-stone-900 dark:text-stone-100">
+                  <ImageIcon className="w-4 h-4 text-orange-600" />
+                  Imagens & Fotos (MinIO)
+                </div>
+                <p className="text-[12px] text-stone-600 dark:text-stone-400 leading-relaxed">
+                  Refeições: máx <strong>10 MB</strong>. Receitas: máx <strong>15 MB</strong>. Avatares: máx <strong>3 MB</strong>. Mimes: <code>image/jpeg, image/png, image/webp</code>.
+                </p>
+                <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300">
+                  Compressão & Hash SHA-256
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-stone-200/70 dark:border-stone-800 bg-[#FCF8F2] dark:bg-[#1C1815] p-4 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-stone-900 dark:text-stone-100">
+                  <ShieldCheck className="w-4 h-4 text-blue-600" />
+                  Auditoria de Purga de Órfãos
+                </div>
+                <p className="text-[12px] text-stone-600 dark:text-stone-400 leading-relaxed">
+                  Arquivos temporários ou descartados após exclusão de logs geram registros órfãos. A purga é irreversível e gera log em <code>system_audit_log</code>.
+                </p>
+                <div className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300">
+                  Trilha de Auditoria LGPD
+                </div>
+              </div>
+            </div>
+
+            {/* Tabela de Arquivos Órfãos */}
+            <PaperCard tape="orange">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface-variant">
+                <div>
+                  <h3 className="font-display text-base font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                    <Trash2 className="w-4 h-4 text-amber-600" />
+                    Varredura de Arquivos Órfãos ({storageStats?.orphanFilesCount ?? 0})
+                  </h3>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                    Arquivos existentes no bucket que não possuem referência em nenhum log de refeição ou mídia de receita.
+                  </p>
+                </div>
+
+                {storageStats?.orphanFiles && storageStats.orphanFiles.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedOrphanKeys.length === storageStats.orphanFiles.length) {
+                          setSelectedOrphanKeys([]);
+                        } else {
+                          setSelectedOrphanKeys(storageStats.orphanFiles.map((o) => o.objectKey));
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 text-xs font-semibold hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 cursor-pointer"
+                    >
+                      {selectedOrphanKeys.length === storageStats.orphanFiles.length
+                        ? "Desmarcar Todos"
+                        : "Selecionar Todos"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handlePurgeOrphans()}
+                      disabled={selectedOrphanKeys.length === 0 || purgingOrphans}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold disabled:opacity-50 transition-all hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      {purgingOrphans
+                        ? "Purgando..."
+                        : `Purgar Selecionados (${selectedOrphanKeys.length})`}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full text-left text-xs text-stone-700 dark:text-stone-300">
+                  <thead className="bg-stone-100 dark:bg-stone-800 text-stone-500 uppercase font-semibold">
+                    <tr>
+                      <th className="p-3 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={
+                            (storageStats?.orphanFiles?.length ?? 0) > 0 &&
+                            selectedOrphanKeys.length === storageStats?.orphanFiles?.length
+                          }
+                          onChange={(e) => {
+                            if (e.target.checked && storageStats?.orphanFiles) {
+                              setSelectedOrphanKeys(storageStats.orphanFiles.map((o) => o.objectKey));
+                            } else {
+                              setSelectedOrphanKeys([]);
+                            }
+                          }}
+                          className="rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                        />
+                      </th>
+                      <th className="p-3">Chave do Objeto (Storage Key)</th>
+                      <th className="p-3">Tamanho</th>
+                      <th className="p-3">Última Modificação</th>
+                      <th className="p-3 text-right">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-200 dark:divide-stone-800">
+                    {!storageStats?.orphanFiles || storageStats.orphanFiles.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-stone-400">
+                          <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-80" />
+                          <p className="font-semibold text-stone-700 dark:text-stone-300">
+                            Nenhum arquivo órfão encontrado no storage
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5">
+                            Todos os arquivos armazenados no MinIO possuem vínculo íntegro com receitas ou refeições cadastradas.
+                          </p>
+                        </td>
+                      </tr>
+                    ) : (
+                      storageStats.orphanFiles.map((orphan) => {
+                        const isChecked = selectedOrphanKeys.includes(orphan.objectKey);
+                        return (
+                          <tr
+                            key={orphan.objectKey}
+                            className={`hover:bg-stone-50 dark:hover:bg-stone-900/40 transition-colors ${
+                              isChecked ? "bg-orange-50/60 dark:bg-orange-950/20" : ""
+                            }`}
+                          >
+                            <td className="p-3 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedOrphanKeys((prev) => [...prev, orphan.objectKey]);
+                                  } else {
+                                    setSelectedOrphanKeys((prev) =>
+                                      prev.filter((k) => k !== orphan.objectKey)
+                                    );
+                                  }
+                                }}
+                                className="rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                              />
+                            </td>
+                            <td className="p-3 font-mono text-stone-800 dark:text-stone-200 break-all">
+                              {orphan.objectKey}
+                            </td>
+                            <td className="p-3 font-semibold text-stone-600 dark:text-stone-300 whitespace-nowrap">
+                              {orphan.sizeFormatted}
+                            </td>
+                            <td className="p-3 text-stone-500 dark:text-stone-400 whitespace-nowrap">
+                              {orphan.lastModified}
+                            </td>
+                            <td className="p-3 text-right whitespace-nowrap">
+                              <button
+                                type="button"
+                                onClick={() => handlePurgeOrphans([orphan.objectKey])}
+                                disabled={purgingOrphans}
+                                className="px-2.5 py-1 rounded bg-stone-100 hover:bg-red-50 hover:text-red-600 dark:bg-stone-800 dark:hover:bg-red-950/60 dark:hover:text-red-400 text-stone-600 dark:text-stone-300 font-semibold transition-all hover:scale-105 cursor-pointer"
+                              >
+                                Purgar
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </PaperCard>
+          </div>
+        )}
+
 
         {/* Modal de Membros da Família */}
         <Modal

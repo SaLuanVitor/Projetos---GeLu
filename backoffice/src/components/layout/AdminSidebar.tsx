@@ -13,6 +13,7 @@ import {
   LifeBuoy,
   Settings,
   ScrollText,
+  HardDrive,
   ChevronDown,
   X,
 } from "lucide-react";
@@ -26,7 +27,8 @@ export type AdminTabType =
   | "TEAM"
   | "TICKETS"
   | "SETTINGS"
-  | "AUDIT";
+  | "AUDIT"
+  | "STORAGE_GOVERNANCE";
 
 interface AdminSidebarProps {
   activeTab: AdminTabType;
@@ -76,6 +78,11 @@ export function AdminSidebar({
       id: "LGPD_GOVERNANCE",
       label: "Governança & LGPD",
       icon: <ShieldAlert className="w-5 h-5" />,
+    },
+    {
+      id: "STORAGE_GOVERNANCE",
+      label: "Gestão de Arquivos & Storage",
+      icon: <HardDrive className="w-5 h-5" />,
     },
     {
       id: "TEAM",

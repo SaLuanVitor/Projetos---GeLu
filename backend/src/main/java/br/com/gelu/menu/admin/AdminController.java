@@ -9,6 +9,7 @@ import br.com.gelu.menu.admin.dto.AdminUserResponse;
 import br.com.gelu.menu.admin.dto.AiUsageSummaryResponse;
 import br.com.gelu.menu.admin.dto.CreateAdminTeamRequest;
 import br.com.gelu.menu.admin.dto.PiiRevealRequest;
+import br.com.gelu.menu.admin.dto.StorageStatsResponse;
 import br.com.gelu.menu.admin.dto.SupportTicketResponse;
 import br.com.gelu.menu.admin.dto.SystemAuditLogResponse;
 import br.com.gelu.menu.admin.dto.SystemSettingResponse;
@@ -206,5 +207,19 @@ public class AdminController {
       @AuthenticationPrincipal AuthenticatedUser user, @PathVariable UUID id) {
     adminService.deleteTeamMember(user.id(), id);
     return ApiResponse.ok(null, "Team member deleted successfully");
+  }
+
+  @GetMapping("/storage/stats")
+  public ApiResponse<StorageStatsResponse> getStorageStats(
+      @AuthenticationPrincipal AuthenticatedUser user) {
+    return ApiResponse.ok(adminService.getStorageStats(user.id()), "Storage stats loaded successfully");
+  }
+
+  @PostMapping("/storage/purge")
+  public ApiResponse<Map<String, Object>> purgeOrphans(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @RequestBody List<String> objectKeys) {
+    int deleted = adminService.purgeOrphanFiles(user.id(), objectKeys);
+    return ApiResponse.ok(Map.of("deletedCount", deleted), deleted + " arquivos órfãos purgados com sucesso");
   }
 }

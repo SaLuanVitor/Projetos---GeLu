@@ -279,6 +279,12 @@ public class WorkoutService {
 
   @Transactional
   public WorkoutLogResponse completeRoutineWorkout(UUID userId, UUID workoutId, String notes) {
+    return completeRoutineWorkout(userId, workoutId, notes, null, null);
+  }
+
+  @Transactional
+  public WorkoutLogResponse completeRoutineWorkout(
+      UUID userId, UUID workoutId, String notes, Integer customDuration, Integer customCalories) {
     User user =
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -288,8 +294,12 @@ public class WorkoutService {
             .orElseThrow(() -> new NotFoundException("Workout not found"));
 
     Family family = workout.getFamily();
-    int duration = workout.getDefaultDurationMinutes();
-    int caloriesBurned = (workout.getCaloriesPerHour() * duration) / 60;
+    int duration = (customDuration != null && customDuration > 0)
+        ? customDuration
+        : workout.getDefaultDurationMinutes();
+    int caloriesBurned = (customCalories != null && customCalories > 0)
+        ? customCalories
+        : (workout.getCaloriesPerHour() * duration) / 60;
     if (caloriesBurned <= 0) {
       caloriesBurned = (400 * duration) / 60;
     }

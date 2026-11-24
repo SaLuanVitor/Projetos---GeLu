@@ -6,6 +6,7 @@ import { SelectField, TextInput } from "@/components/ui/FormField";
 import { NotebookPageHeader, RecipePhotoPlaceholder } from "@/components/ui/Notebook";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
+import { ExcelImportModal } from "@/components/ui/ExcelImportModal";
 import { Link, useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import { getLocalizedApiError } from "@/services/localized-error";
@@ -25,6 +26,7 @@ import {
   BookOpen,
   ListOrdered,
   UtensilsCrossed,
+  FileSpreadsheet,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
@@ -56,6 +58,8 @@ export default function RecipesPage() {
   const [favoriteBusy, setFavoriteBusy] = useState<Record<string, boolean>>({});
   const [error, setError] = useState("");
   const [viewMode, setViewMode] = useState<"CARDS" | "LIST">("CARDS");
+  const [token, setToken] = useState("");
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -107,6 +111,7 @@ export default function RecipesPage() {
         setLoading(false);
         return;
       }
+      setToken(session.accessToken);
 
       try {
         setRecipes(sortRecipes(await listRecipes(session.accessToken, nextFilters)));
@@ -213,7 +218,20 @@ export default function RecipesPage() {
     <AppShell>
       <main className="mx-auto max-w-6xl px-5 py-8">
         <NotebookPageHeader
-          action={<ActionLink href="/receitas/nova">{t("newRecipe")}</ActionLink>}
+          action={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setImportModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-stone-700 dark:text-stone-300 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-2xs hover:border-orange-300 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 transition-transform cursor-pointer"
+                title="Importar receitas em lote via planilha Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-orange-600" />
+                <span>Importar Planilha</span>
+              </button>
+              <ActionLink href="/receitas/nova">{t("newRecipe")}</ActionLink>
+            </div>
+          }
           eyebrow={t("eyebrow")}
           subtitle={t("description")}
           title={t("title")}
@@ -593,6 +611,15 @@ export default function RecipesPage() {
             ))}
           </section>
         )}
+
+        <ExcelImportModal
+          isOpen={importModalOpen}
+          onClose={() => setImportModalOpen(false)}
+          module="recipes"
+          moduleTitle="Receitas"
+          token={token}
+          onSuccess={() => void loadRecipes()}
+        />
       </main>
     </AppShell>
   );

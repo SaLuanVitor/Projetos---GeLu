@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { useToast } from "@/components/ui/Toast";
 import { MealLogModal } from "@/components/meals/MealLogModal";
+import { ExcelImportModal } from "@/components/ui/ExcelImportModal";
 import { Link, useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import {
@@ -33,6 +34,7 @@ import {
   Copy,
   CalendarDays,
   Camera,
+  FileSpreadsheet,
   Plus,
   Search,
   X,
@@ -105,6 +107,7 @@ export default function WeeklyDietPage() {
   const [diet, setDiet] = useState<WeeklyDietResponse | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [foodVisionOpen, setFoodVisionOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [currentWeekStart, setCurrentWeekStart] = useState<string>(() =>
     getMondayOfDate(new Date())
   );
@@ -527,6 +530,16 @@ export default function WeeklyDietPage() {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setImportModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-stone-700 dark:text-stone-300 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-2xs hover:border-orange-300 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 transition-transform cursor-pointer"
+                title="Importar cardápio da semana via planilha Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-orange-600" />
+                <span>Importar Planilha</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setFoodVisionOpen(true)}
@@ -1049,6 +1062,19 @@ export default function WeeklyDietPage() {
             onClose={() => setFoodVisionOpen(false)}
             accessToken={sessionToken}
             onMealSaved={loadData}
+          />
+        )}
+
+        {/* Modal de Importação de Planilha */}
+        {sessionToken && (
+          <ExcelImportModal
+            isOpen={importModalOpen}
+            onClose={() => setImportModalOpen(false)}
+            module="weekly_menu"
+            moduleTitle="Cardápio Semanal"
+            token={sessionToken}
+            familyId={activeFamily?.id}
+            onSuccess={loadData}
           />
         )}
       </main>

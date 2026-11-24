@@ -9,7 +9,9 @@ import br.com.gelu.menu.admin.dto.AdminUserResponse;
 import br.com.gelu.menu.admin.dto.AiUsageLogResponse;
 import br.com.gelu.menu.admin.dto.AiUsageSummaryResponse;
 import br.com.gelu.menu.admin.dto.CreateAdminTeamRequest;
+import br.com.gelu.menu.admin.dto.OrphanItemResponse;
 import br.com.gelu.menu.admin.dto.PiiRevealRequest;
+import br.com.gelu.menu.admin.dto.StorageStatsResponse;
 import br.com.gelu.menu.admin.dto.SupportTicketResponse;
 import br.com.gelu.menu.admin.dto.SystemAuditLogResponse;
 import br.com.gelu.menu.admin.dto.SystemSettingResponse;
@@ -32,6 +34,8 @@ import br.com.gelu.menu.family.Family;
 import br.com.gelu.menu.family.FamilyMember;
 import br.com.gelu.menu.family.FamilyRepository;
 import br.com.gelu.menu.meals.MealLogRepository;
+import br.com.gelu.menu.media.ObjectStorageService;
+import br.com.gelu.menu.recipes.RecipeMediaRepository;
 import br.com.gelu.menu.recipes.RecipeRepository;
 import br.com.gelu.menu.users.User;
 import br.com.gelu.menu.users.UserRepository;
@@ -71,6 +75,8 @@ public class AdminService {
   private final AiUsageLogRepository aiUsageLogRepository;
   private final SystemAuditLogRepository systemAuditLogRepository;
   private final MealLogRepository mealLogRepository;
+  private final RecipeMediaRepository recipeMediaRepository;
+  private final ObjectStorageService objectStorageService;
   private final RefreshTokenRepository refreshTokenRepository;
   private final AiFeedbackRepository aiFeedbackRepository;
   private final DataSource dataSource;
@@ -89,6 +95,8 @@ public class AdminService {
       AiUsageLogRepository aiUsageLogRepository,
       SystemAuditLogRepository systemAuditLogRepository,
       MealLogRepository mealLogRepository,
+      RecipeMediaRepository recipeMediaRepository,
+      ObjectStorageService objectStorageService,
       RefreshTokenRepository refreshTokenRepository,
       AiFeedbackRepository aiFeedbackRepository,
       DataSource dataSource,
@@ -104,6 +112,8 @@ public class AdminService {
     this.aiUsageLogRepository = aiUsageLogRepository;
     this.systemAuditLogRepository = systemAuditLogRepository;
     this.mealLogRepository = mealLogRepository;
+    this.recipeMediaRepository = recipeMediaRepository;
+    this.objectStorageService = objectStorageService;
     this.refreshTokenRepository = refreshTokenRepository;
     this.aiFeedbackRepository = aiFeedbackRepository;
     this.dataSource = dataSource;
@@ -947,5 +957,25 @@ public class AdminService {
             "TEAM_MEMBER_DELETED",
             "Excluiu operador do backoffice: " + email,
             "internal"));
+  }
+
+  public StorageStatsResponse getStorageStats(UUID adminId) {
+    assertAdminAccess(adminId);
+    List<String> knownUrls = new ArrayList<>(mealLogRepository.findAllPhotoUrls());
+    knownUrls.addAll(recipeMediaRepository.findAllMediaUrls());
+    return objectStorageService.getStorageStats(knownUrls);
+  }
+
+  @Transactional
+  public int purgeOrphanFiles(UUID adminId, List<String> objectKeys) {
+    assertAdminAccess(adminId);
+    int deleted = objectStorageService.deleteObjects(objectKeys);
+    systemAuditLogRepository.save(
+        new SystemAuditLog(
+            currentAdminEmail(adminId),
+            "PURGE_STORAGE_ORPHANS",
+            "Purgou " + deleted + " arquivos órfãos do MinIO",
+            "internal"));
+    return deleted;
   }
 }

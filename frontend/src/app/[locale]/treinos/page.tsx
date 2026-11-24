@@ -10,6 +10,7 @@ import { TextInput, SelectField } from "@/components/ui/FormField";
 import { useToast } from "@/components/ui/Toast";
 import { InfoHint } from "@/components/ui/Tooltip";
 import { StatusMessage } from "@/components/ui/StatusMessage";
+import { ExcelImportModal } from "@/components/ui/ExcelImportModal";
 import { useRouter } from "@/i18n/navigation";
 import { getValidSession } from "@/services/auth";
 import {
@@ -40,6 +41,7 @@ import {
   Flame,
   Check,
   Plus,
+  FileSpreadsheet,
   Search,
   Heart,
   CalendarDays,
@@ -109,6 +111,7 @@ export default function WorkoutsPage() {
 
   // Modal de Criação / Edição
   const [modalOpen, setModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<WorkoutResponse | null>(null);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("MUSCULACAO");
@@ -121,6 +124,14 @@ export default function WorkoutsPage() {
   const [saving, setSaving] = useState(false);
   const [completingId, setCompletingId] = useState<string | null>(null);
   const [expandedExercises, setExpandedExercises] = useState<Record<string, boolean>>({});
+
+  // Modal de Conclusão Dinâmica de Treino (Cálculo Calórico)
+  const [workoutToComplete, setWorkoutToComplete] = useState<WorkoutResponse | null>(null);
+  const [completionDuration, setCompletionDuration] = useState<number>(45);
+  const [completionIntensity, setCompletionIntensity] = useState<number>(1.0);
+  const [checkedExerciseIndices, setCheckedExerciseIndices] = useState<number[]>([]);
+  const [completionNotes, setCompletionNotes] = useState<string>("");
+  const [isSubmittingCompletion, setIsSubmittingCompletion] = useState<boolean>(false);
 
   // Carregar dados
   const loadData = useCallback(async () => {
@@ -292,8 +303,82 @@ export default function WorkoutsPage() {
     }
   };
 
-  // Concluir Treino em 1 Clique (Hoje ou na grade)
+  // Concluir Treino com Cálculo Dinâmico
+  const openCompleteModal = (workout: WorkoutResponse) => {
+    let parsed: WorkoutExercise[] = [];
+    if (workout.exercisesJson) {
+      try {
+        parsed = JSON.parse(workout.exercisesJson);
+      } catch {}
+    }
+    setWorkoutToComplete(workout);
+    setCompletionDuration(workout.defaultDurationMinutes || 45);
+    setCompletionIntensity(1.0);
+    setCheckedExerciseIndices(parsed.map((_, idx) => idx));
+    setCompletionNotes("");
+  };
+
+  const parsedExercisesToComplete = useMemo(() => {
+    if (!workoutToComplete?.exercisesJson) return [];
+    try {
+      return JSON.parse(workoutToComplete.exercisesJson) as WorkoutExercise[];
+    } catch {
+      return [];
+    }
+  }, [workoutToComplete]);
+
+  const dynamicallyCalculatedCalories = useMemo(() => {
+    if (!workoutToComplete) return 0;
+    const calPerHour = workoutToComplete.caloriesPerHour || 400;
+    const durationHours = Math.max(5, completionDuration) / 60;
+    const baseKcal = calPerHour * durationHours;
+
+    let exerciseRatio = 1.0;
+    if (parsedExercisesToComplete.length > 0) {
+      exerciseRatio = checkedExerciseIndices.length / parsedExercisesToComplete.length;
+      if (exerciseRatio === 0) exerciseRatio = 0.2;
+    }
+
+    return Math.round(baseKcal * completionIntensity * exerciseRatio);
+  }, [workoutToComplete, completionDuration, completionIntensity, checkedExerciseIndices, parsedExercisesToComplete]);
+
+  const handleConfirmCompletion = async () => {
+    if (!token || !workoutToComplete) return;
+    setIsSubmittingCompletion(true);
+    try {
+      const notes = completionNotes.trim()
+        ? `${completionNotes.trim()} (${checkedExerciseIndices.length}/${parsedExercisesToComplete.length} exercícios)`
+        : undefined;
+
+      await completeRoutineWorkout(
+        token,
+        workoutToComplete.id,
+        notes,
+        completionDuration,
+        dynamicallyCalculatedCalories
+      );
+
+      toast.showToast(`Sensacional! Treino concluído: -${dynamicallyCalculatedCalories} kcal queimadas! 🔥`, "success");
+      setWorkoutToComplete(null);
+      loadData();
+    } catch {
+      toast.showToast("Não foi possível registrar a conclusão do treino.", "error");
+    } finally {
+      setIsSubmittingCompletion(false);
+    }
+  };
+
   const handleCompleteWorkout = async (workoutId: string, workoutName: string) => {
+    const found = workouts.find((w) => w.id === workoutId);
+    if (found) {
+      openCompleteModal(found);
+      return;
+    }
+    if (routine?.currentWorkout?.id === workoutId) {
+      openCompleteModal(routine.currentWorkout);
+      return;
+    }
+    // Fallback direto
     if (!token) return;
     setCompletingId(workoutId);
     try {
@@ -360,15 +445,27 @@ export default function WorkoutsPage() {
           title="Treinos & Rotinas"
           subtitle="Cadastre suas fichas, organize sua semana e acompanhe o ritmo de movimento da casa."
           action={
-            <ActionButton
-              type="button"
-              variant="primary"
-              onClick={handleOpenCreate}
-              className="gap-2 shadow-sm transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0"
-            >
-              <Plus className="w-4 h-4" />
-              Nova Ficha de Treino
-            </ActionButton>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setImportModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-stone-700 dark:text-stone-300 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-2xs hover:border-orange-300 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 transition-transform cursor-pointer"
+                title="Importar treinos e rotinas via planilha Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-orange-600" />
+                <span>Importar Planilha</span>
+              </button>
+
+              <ActionButton
+                type="button"
+                variant="primary"
+                onClick={handleOpenCreate}
+                className="gap-2 shadow-sm transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0"
+              >
+                <Plus className="w-4 h-4" />
+                Nova Ficha de Treino
+              </ActionButton>
+            </div>
           }
         />
 
@@ -1024,6 +1121,226 @@ export default function WorkoutsPage() {
               </ActionButton>
             </div>
           </form>
+        </Modal>
+
+        {/* Modal de Importação de Planilha */}
+        <ExcelImportModal
+          isOpen={importModalOpen}
+          onClose={() => setImportModalOpen(false)}
+          module="workouts"
+          moduleTitle="Treinos e Exercícios"
+          token={token}
+          onSuccess={loadData}
+        />
+
+        {/* Modal de Conclusão de Treino com Cálculo Dinâmico de Calorias */}
+        <Modal
+          isOpen={!!workoutToComplete}
+          onClose={() => setWorkoutToComplete(null)}
+          title={`Concluir Treino: ${workoutToComplete?.title ?? ""}`}
+          subtitle="Ajuste o tempo real e os exercícios executados para cálculo exato das calorias queimadas."
+          maxWidth="lg"
+        >
+          {workoutToComplete && (
+            <div className="space-y-4 py-1">
+              {/* Card de Calorias em Tempo Real */}
+              <div className="rounded-2xl border border-orange-200/80 dark:border-orange-900/50 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 dark:from-orange-950/30 dark:via-amber-950/20 dark:to-orange-950/30 p-4 text-center shadow-xs">
+                <span className="text-[11px] font-bold text-orange-700 dark:text-orange-300 uppercase tracking-wider">
+                  Gasto Calórico Recalculado
+                </span>
+                <div className="text-3xl font-black font-display text-orange-600 dark:text-orange-400 mt-1 flex items-center justify-center gap-1.5">
+                  <Flame className="w-7 h-7 text-orange-500 animate-pulse" />
+                  -{dynamicallyCalculatedCalories} kcal
+                </div>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-1">
+                  Taxa base: {workoutToComplete.caloriesPerHour || 400} kcal/h • {completionDuration} min • {completionIntensity}x intensidade
+                  {parsedExercisesToComplete.length > 0 && ` • ${checkedExerciseIndices.length}/${parsedExercisesToComplete.length} exercícios`}
+                </p>
+              </div>
+
+              {/* Duração Real do Treino */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-stone-700 dark:text-stone-300">
+                    Duração Real (minutos)
+                  </label>
+                  <span className="text-xs font-mono font-bold text-orange-600 dark:text-orange-400">
+                    {completionDuration} min
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={10}
+                    max={180}
+                    step={5}
+                    value={completionDuration}
+                    onChange={(e) => setCompletionDuration(parseInt(e.target.value, 10))}
+                    className="flex-1 accent-orange-600 cursor-pointer"
+                  />
+                </div>
+                {/* Atalhos Rápidos de Duração */}
+                <div className="flex flex-wrap gap-1.5">
+                  {[20, 30, 45, 60, 75, 90].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => setCompletionDuration(mins)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                        completionDuration === mins
+                          ? "bg-orange-500 text-white border-orange-500 shadow-2xs"
+                          : "border-stone-200 dark:border-stone-800 bg-white/70 dark:bg-stone-900/60 text-stone-600 dark:text-stone-300 hover:border-orange-300"
+                      }`}
+                    >
+                      {mins} min
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setCompletionDuration((prev) => prev + 10)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold border border-dashed border-stone-300 dark:border-stone-700 text-stone-500 hover:text-stone-900 dark:hover:text-stone-200 cursor-pointer"
+                  >
+                    +10 min
+                  </button>
+                </div>
+              </div>
+
+              {/* Nível de Intensidade / PSE */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-700 dark:text-stone-300">
+                  Percepção de Esforço (Intensidade)
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { label: "Leve", mult: 0.85, hint: "Tranquilo" },
+                    { label: "Moderado", mult: 1.0, hint: "Padrão" },
+                    { label: "Intenso", mult: 1.2, hint: "Pesado" },
+                    { label: "Extremo", mult: 1.4, hint: "Exaustivo" },
+                  ].map((lvl) => {
+                    const isSelected = completionIntensity === lvl.mult;
+                    return (
+                      <button
+                        key={lvl.label}
+                        type="button"
+                        onClick={() => setCompletionIntensity(lvl.mult)}
+                        className={`p-2 rounded-xl text-center border transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-orange-500/15 border-orange-500 text-orange-800 dark:text-orange-200 font-bold shadow-2xs"
+                            : "border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-300 hover:bg-stone-50"
+                        }`}
+                      >
+                        <div className="text-xs font-bold">{lvl.label}</div>
+                        <div className="text-[10px] text-stone-400 mt-0.5">{lvl.hint} ({lvl.mult}x)</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Exercícios da Ficha (Checklist Interativo) */}
+              {parsedExercisesToComplete.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-stone-200/60 dark:border-stone-800">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-stone-700 dark:text-stone-300">
+                      Exercícios Realizados ({checkedExerciseIndices.length}/{parsedExercisesToComplete.length})
+                    </span>
+                    <div className="flex gap-2 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setCheckedExerciseIndices(parsedExercisesToComplete.map((_, i) => i))}
+                        className="text-orange-600 dark:text-orange-400 hover:underline font-semibold cursor-pointer"
+                      >
+                        Marcar Todos
+                      </button>
+                      <span className="text-stone-300">•</span>
+                      <button
+                        type="button"
+                        onClick={() => setCheckedExerciseIndices([])}
+                        className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 font-semibold cursor-pointer"
+                      >
+                        Desmarcar
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                    {parsedExercisesToComplete.map((ex, idx) => {
+                      const isChecked = checkedExerciseIndices.includes(idx);
+                      return (
+                        <label
+                          key={idx}
+                          className={`flex items-center justify-between p-2 rounded-xl border text-xs cursor-pointer transition-colors ${
+                            isChecked
+                              ? "bg-amber-50/60 dark:bg-amber-950/20 border-amber-200/80 dark:border-amber-900/40 text-stone-800 dark:text-stone-200"
+                              : "bg-stone-50/50 dark:bg-stone-900/40 border-stone-200/50 dark:border-stone-800 text-stone-400 opacity-60"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setCheckedExerciseIndices((prev) => [...prev, idx]);
+                                } else {
+                                  setCheckedExerciseIndices((prev) => prev.filter((i) => i !== idx));
+                                }
+                              }}
+                              className="rounded border-stone-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                            />
+                            <span className={`font-semibold ${isChecked ? "text-stone-900 dark:text-stone-100" : "line-through text-stone-400"}`}>
+                              {ex.name}
+                            </span>
+                          </div>
+                          {(ex.sets || ex.weight) && (
+                            <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
+                              {[ex.sets, ex.weight].filter(Boolean).join(" • ")}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Observações da Sessão */}
+              <div>
+                <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                  Notas da Sessão (Opcional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ex: Treino muito produtivo, bati recorde no supino..."
+                  value={completionNotes}
+                  onChange={(e) => setCompletionNotes(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 focus:outline-hidden"
+                />
+              </div>
+
+              {/* Botões de Ação */}
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-200/60 dark:border-stone-800">
+                <ActionButton
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setWorkoutToComplete(null)}
+                  disabled={isSubmittingCompletion}
+                >
+                  Cancelar
+                </ActionButton>
+                <ActionButton
+                  type="button"
+                  variant="primary"
+                  disabled={isSubmittingCompletion}
+                  onClick={handleConfirmCompletion}
+                  className="gap-2 bg-gradient-to-r from-orange-600 to-amber-600 shadow-md transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0"
+                >
+                  <Check className="w-4 h-4" />
+                  {isSubmittingCompletion ? "Registrando..." : `Confirmar Treino (-${dynamicallyCalculatedCalories} kcal)`}
+                </ActionButton>
+              </div>
+            </div>
+          )}
         </Modal>
       </div>
     </AppShell>

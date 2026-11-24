@@ -23,6 +23,7 @@ import type {
   UpdateSystemSettingsRequest,
   UserAiUsageResponse,
   UserDataExportResponse,
+  StorageStatsResponse,
 } from "@/types/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
@@ -167,6 +168,20 @@ export async function deleteAdminTeamMember(
 ): Promise<void> {
   return request<void>(`/admin/team/${id}`, accessToken, {
     method: "DELETE",
+  });
+}
+
+export async function getStorageStats(accessToken: string): Promise<StorageStatsResponse> {
+  return request<StorageStatsResponse>("/admin/storage/stats", accessToken);
+}
+
+export async function purgeOrphanFiles(
+  accessToken: string,
+  objectKeys: string[]
+): Promise<{ deleted: number }> {
+  return request<{ deleted: number }>("/admin/storage/purge", accessToken, {
+    method: "POST",
+    body: objectKeys,
   });
 }
 

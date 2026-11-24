@@ -13,4 +13,28 @@ public record WorkoutRequest(
     String daysOfWeek,
     String exercisesJson,
     Boolean favorite,
-    String intensity) {}
+    String intensity) {
+
+  public WorkoutRequest(
+      String title,
+      String category,
+      String intensity,
+      Integer defaultDurationMinutes,
+      Integer caloriesPerHour,
+      String notes,
+      String daysOfWeek,
+      String exercisesJson,
+      Boolean favorite) {
+    this(
+        null,
+        title,
+        category,
+        caloriesPerHour,
+        defaultDurationMinutes,
+        notes,
+        daysOfWeek,
+        exercisesJson,
+        favorite,
+        intensity);
+  }
+}

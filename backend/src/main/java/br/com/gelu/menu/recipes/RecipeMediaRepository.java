@@ -26,4 +26,7 @@ public interface RecipeMediaRepository extends JpaRepository<RecipeMedia, UUID> 
         and media.main = true
       """)
   int clearMainImages(@Param("recipeId") UUID recipeId, @Param("userId") UUID userId);
+
+  @Query("SELECT media.objectKey FROM RecipeMedia media WHERE media.objectKey IS NOT NULL")
+  List<String> findAllMediaUrls();
 }
