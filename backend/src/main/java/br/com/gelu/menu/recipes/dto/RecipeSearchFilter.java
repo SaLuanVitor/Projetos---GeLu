@@ -7,4 +7,15 @@ public record RecipeSearchFilter(
     String ingredient,
     String category,
     Integer maxPrepTimeMinutes,
-    BigDecimal maxCalories) {}
+    BigDecimal maxCalories,
+    Boolean favorite) {
+
+  public RecipeSearchFilter(
+      String query,
+      String ingredient,
+      String category,
+      Integer maxPrepTimeMinutes,
+      BigDecimal maxCalories) {
+    this(query, ingredient, category, maxPrepTimeMinutes, maxCalories, null);
+  }
+}

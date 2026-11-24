@@ -39,11 +39,13 @@ public class RecipeController {
       @RequestParam(required = false) String ingredient,
       @RequestParam(required = false) String category,
       @RequestParam(required = false) Integer maxPrepTimeMinutes,
-      @RequestParam(required = false) BigDecimal maxCalories) {
+      @RequestParam(required = false) BigDecimal maxCalories,
+      @RequestParam(required = false) Boolean favorite) {
     return ApiResponse.ok(
         recipeService.listRecipes(
             user.id(),
-            new RecipeSearchFilter(query, ingredient, category, maxPrepTimeMinutes, maxCalories)),
+            new RecipeSearchFilter(
+                query, ingredient, category, maxPrepTimeMinutes, maxCalories, favorite)),
         "Recipes loaded successfully");
   }
 

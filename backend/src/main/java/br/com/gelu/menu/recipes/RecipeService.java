@@ -3,6 +3,8 @@ package br.com.gelu.menu.recipes;
 import br.com.gelu.menu.common.exception.BadRequestException;
 import br.com.gelu.menu.common.exception.NotFoundException;
 import br.com.gelu.menu.common.util.SlugUtils;
+import br.com.gelu.menu.family.Family;
+import br.com.gelu.menu.family.FamilyRepository;
 import br.com.gelu.menu.recipes.dto.RecipeIngredientRequest;
 import br.com.gelu.menu.recipes.dto.RecipeIngredientResponse;
 import br.com.gelu.menu.recipes.dto.RecipeRequest;
@@ -12,9 +14,11 @@ import br.com.gelu.menu.recipes.dto.RecipeStepRequest;
 import br.com.gelu.menu.recipes.dto.RecipeStepResponse;
 import br.com.gelu.menu.users.UserRepository;
 import jakarta.persistence.criteria.JoinType;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,27 +30,70 @@ public class RecipeService {
   private final RecipeMediaRepository recipeMediaRepository;
   private final RecipeMediaService recipeMediaService;
   private final UserRepository userRepository;
+  private final UserFavoriteRecipeRepository userFavoriteRecipeRepository;
+  private final FamilyRepository familyRepository;
 
   public RecipeService(
       RecipeRepository recipeRepository,
       RecipeMediaRepository recipeMediaRepository,
       RecipeMediaService recipeMediaService,
       UserRepository userRepository) {
+    this(
+        recipeRepository,
+        recipeMediaRepository,
+        recipeMediaService,
+        userRepository,
+        null,
+        null);
+  }
+
+  @Autowired
+  public RecipeService(
+      RecipeRepository recipeRepository,
+      RecipeMediaRepository recipeMediaRepository,
+      RecipeMediaService recipeMediaService,
+      UserRepository userRepository,
+      UserFavoriteRecipeRepository userFavoriteRecipeRepository,
+      FamilyRepository familyRepository) {
     this.recipeRepository = recipeRepository;
     this.recipeMediaRepository = recipeMediaRepository;
     this.recipeMediaService = recipeMediaService;
     this.userRepository = userRepository;
+    this.userFavoriteRecipeRepository = userFavoriteRecipeRepository;
+    this.familyRepository = familyRepository;
   }
 
   @Transactional(readOnly = true)
   public List<RecipeResponse> listRecipes(UUID userId, RecipeSearchFilter filter) {
     ensureUserExists(userId);
+    List<UUID> familyIds =
+        familyRepository != null
+            ? familyRepository.findAllByMemberUserId(userId).stream().map(Family::getId).toList()
+            : List.of();
+    Set<UUID> favoriteRecipeIds =
+        userFavoriteRecipeRepository != null
+            ? userFavoriteRecipeRepository.findFavoriteRecipeIdsByUserId(userId)
+            : Set.of();
+
     return recipeRepository
-        .findAll(
-            toSpecification(userId, filter),
-            Sort.by(Sort.Order.desc("favorite"), Sort.Order.desc("createdAt")))
+        .findAll(toSpecification(userId, familyIds, favoriteRecipeIds, filter))
         .stream()
-        .map(this::toResponse)
+        .sorted(
+            Comparator.comparing(
+                    (Recipe r) ->
+                        userFavoriteRecipeRepository != null
+                            ? favoriteRecipeIds.contains(r.getId())
+                            : r.isFavorite())
+                .reversed()
+                .thenComparing(
+                    Recipe::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+        .map(
+            recipe ->
+                toResponse(
+                    recipe,
+                    userFavoriteRecipeRepository != null
+                        ? favoriteRecipeIds.contains(recipe.getId())
+                        : recipe.isFavorite()))
         .toList();
   }
 
@@ -85,26 +132,44 @@ public class RecipeService {
 
   @Transactional(readOnly = true)
   public RecipeResponse getRecipe(UUID userId, UUID recipeId) {
-    return toResponse(findOwnedRecipe(userId, recipeId));
+    Recipe recipe = findAccessibleRecipe(userId, recipeId);
+    boolean isFavorite =
+        userFavoriteRecipeRepository != null
+            ? userFavoriteRecipeRepository.existsByIdUserIdAndIdRecipeId(userId, recipe.getId())
+            : recipe.isFavorite();
+    return toResponse(recipe, isFavorite);
   }
 
   @Transactional(readOnly = true)
   public RecipeResponse getRecipe(UUID userId, String idOrSlug) {
-    return toResponse(findOwnedRecipe(userId, idOrSlug));
+    Recipe recipe = findAccessibleRecipe(userId, idOrSlug);
+    boolean isFavorite =
+        userFavoriteRecipeRepository != null
+            ? userFavoriteRecipeRepository.existsByIdUserIdAndIdRecipeId(userId, recipe.getId())
+            : recipe.isFavorite();
+    return toResponse(recipe, isFavorite);
   }
 
   @Transactional
   public RecipeResponse updateRecipe(UUID userId, UUID recipeId, RecipeRequest request) {
     Recipe recipe = findOwnedRecipe(userId, recipeId);
     applyRecipeUpdate(recipe, request);
-    return toResponse(recipe);
+    boolean isFavorite =
+        userFavoriteRecipeRepository != null
+            ? userFavoriteRecipeRepository.existsByIdUserIdAndIdRecipeId(userId, recipe.getId())
+            : recipe.isFavorite();
+    return toResponse(recipe, isFavorite);
   }
 
   @Transactional
   public RecipeResponse updateRecipe(UUID userId, String idOrSlug, RecipeRequest request) {
     Recipe recipe = findOwnedRecipe(userId, idOrSlug);
     applyRecipeUpdate(recipe, request);
-    return toResponse(recipe);
+    boolean isFavorite =
+        userFavoriteRecipeRepository != null
+            ? userFavoriteRecipeRepository.existsByIdUserIdAndIdRecipeId(userId, recipe.getId())
+            : recipe.isFavorite();
+    return toResponse(recipe, isFavorite);
   }
 
   private void applyRecipeUpdate(Recipe recipe, RecipeRequest request) {
@@ -131,16 +196,36 @@ public class RecipeService {
 
   @Transactional
   public RecipeResponse updateFavorite(UUID userId, UUID recipeId, boolean favorite) {
-    Recipe recipe = findOwnedRecipe(userId, recipeId);
-    recipe.setFavorite(favorite);
-    return toResponse(recipe);
+    Recipe recipe = findAccessibleRecipe(userId, recipeId);
+    if (userFavoriteRecipeRepository != null) {
+      if (favorite) {
+        if (!userFavoriteRecipeRepository.existsByIdUserIdAndIdRecipeId(userId, recipe.getId())) {
+          userFavoriteRecipeRepository.save(new UserFavoriteRecipe(userId, recipe.getId()));
+        }
+      } else {
+        userFavoriteRecipeRepository.deleteByUserIdAndRecipeId(userId, recipe.getId());
+      }
+    } else {
+      recipe.setFavorite(favorite);
+    }
+    return toResponse(recipe, favorite);
   }
 
   @Transactional
   public RecipeResponse updateFavorite(UUID userId, String idOrSlug, boolean favorite) {
-    Recipe recipe = findOwnedRecipe(userId, idOrSlug);
-    recipe.setFavorite(favorite);
-    return toResponse(recipe);
+    Recipe recipe = findAccessibleRecipe(userId, idOrSlug);
+    if (userFavoriteRecipeRepository != null) {
+      if (favorite) {
+        if (!userFavoriteRecipeRepository.existsByIdUserIdAndIdRecipeId(userId, recipe.getId())) {
+          userFavoriteRecipeRepository.save(new UserFavoriteRecipe(userId, recipe.getId()));
+        }
+      } else {
+        userFavoriteRecipeRepository.deleteByUserIdAndRecipeId(userId, recipe.getId());
+      }
+    } else {
+      recipe.setFavorite(favorite);
+    }
+    return toResponse(recipe, favorite);
   }
 
   @Transactional
@@ -151,7 +236,11 @@ public class RecipeService {
       throw new BadRequestException("Recipe video URL is required to use video as main media");
     }
     recipe.setMainMediaType(mainMediaType);
-    return toResponse(recipe);
+    boolean isFavorite =
+        userFavoriteRecipeRepository != null
+            ? userFavoriteRecipeRepository.existsByIdUserIdAndIdRecipeId(userId, recipe.getId())
+            : recipe.isFavorite();
+    return toResponse(recipe, isFavorite);
   }
 
   @Transactional
@@ -162,7 +251,11 @@ public class RecipeService {
       throw new BadRequestException("Recipe video URL is required to use video as main media");
     }
     recipe.setMainMediaType(mainMediaType);
-    return toResponse(recipe);
+    boolean isFavorite =
+        userFavoriteRecipeRepository != null
+            ? userFavoriteRecipeRepository.existsByIdUserIdAndIdRecipeId(userId, recipe.getId())
+            : recipe.isFavorite();
+    return toResponse(recipe, isFavorite);
   }
 
   @Transactional
@@ -203,6 +296,49 @@ public class RecipeService {
         .orElseThrow(() -> new NotFoundException("Recipe not found"));
   }
 
+  private Recipe findAccessibleRecipe(UUID userId, UUID recipeId) {
+    ensureUserExists(userId);
+    Recipe recipe =
+        recipeRepository
+            .findById(recipeId)
+            .orElseThrow(() -> new NotFoundException("Recipe not found"));
+    ensureRecipeAccess(userId, recipe);
+    return recipe;
+  }
+
+  private Recipe findAccessibleRecipe(UUID userId, String idOrSlug) {
+    ensureUserExists(userId);
+    Recipe recipe = null;
+    try {
+      UUID id = UUID.fromString(idOrSlug);
+      recipe = recipeRepository.findById(id).orElse(null);
+    } catch (IllegalArgumentException ignored) {
+      // not a UUID
+    }
+    if (recipe == null) {
+      recipe = recipeRepository.findBySlug(idOrSlug).orElse(null);
+    }
+    if (recipe == null) {
+      throw new NotFoundException("Recipe not found");
+    }
+    ensureRecipeAccess(userId, recipe);
+    return recipe;
+  }
+
+  private void ensureRecipeAccess(UUID userId, Recipe recipe) {
+    if (recipe.getUserId().equals(userId)) {
+      return;
+    }
+    if (recipe.getFamilyId() != null && !recipe.isPersonal() && familyRepository != null) {
+      List<UUID> familyIds =
+          familyRepository.findAllByMemberUserId(userId).stream().map(Family::getId).toList();
+      if (familyIds.contains(recipe.getFamilyId())) {
+        return;
+      }
+    }
+    throw new NotFoundException("Recipe not found");
+  }
+
   private void ensureUserExists(UUID userId) {
     if (!userRepository.existsById(userId)) {
       throw new NotFoundException("User not found");
@@ -230,6 +366,10 @@ public class RecipeService {
   }
 
   private RecipeResponse toResponse(Recipe recipe) {
+    return toResponse(recipe, recipe.isFavorite());
+  }
+
+  private RecipeResponse toResponse(Recipe recipe, boolean isFavorite) {
     var media =
         recipeMediaService.responses(
             recipeMediaRepository.findByRecipeIdAndUserIdOrderByCreatedAtAsc(
@@ -260,7 +400,7 @@ public class RecipeService {
         recipe.getEstimatedCalories(),
         recipe.getServings(),
         recipe.getVideoUrl(),
-        recipe.isFavorite(),
+        isFavorite,
         recipe.getMainMediaType().name(),
         mainImageUrl,
         media,
@@ -301,10 +441,29 @@ public class RecipeService {
     return value.trim();
   }
 
-  private Specification<Recipe> toSpecification(UUID userId, RecipeSearchFilter filter) {
+  private Specification<Recipe> toSpecification(
+      UUID userId, List<UUID> familyIds, Set<UUID> favoriteIds, RecipeSearchFilter filter) {
     return (root, query, criteriaBuilder) -> {
       List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
-      predicates.add(criteriaBuilder.equal(root.get("userId"), userId));
+
+      if (familyIds != null && !familyIds.isEmpty()) {
+        predicates.add(
+            criteriaBuilder.or(
+                criteriaBuilder.equal(root.get("userId"), userId),
+                criteriaBuilder.and(
+                    root.get("familyId").in(familyIds),
+                    criteriaBuilder.isFalse(root.get("isPersonal")))));
+      } else {
+        predicates.add(criteriaBuilder.equal(root.get("userId"), userId));
+      }
+
+      if (filter.favorite() != null && filter.favorite()) {
+        if (favoriteIds == null || favoriteIds.isEmpty()) {
+          predicates.add(criteriaBuilder.disjunction());
+        } else {
+          predicates.add(root.get("id").in(favoriteIds));
+        }
+      }
 
       String textQuery = normalize(filter.query());
       if (textQuery != null) {

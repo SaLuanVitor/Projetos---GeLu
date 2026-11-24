@@ -54,6 +54,12 @@ public class Recipe {
   @Column(name = "video_url", length = 500)
   private String videoUrl;
 
+  @Column(name = "family_id")
+  private UUID familyId;
+
+  @Column(name = "is_personal", nullable = false)
+  private boolean isPersonal = false;
+
   @Column(nullable = false)
   private boolean favorite;
 
@@ -263,6 +269,22 @@ public class Recipe {
 
   public String getVideoUrl() {
     return videoUrl;
+  }
+
+  public UUID getFamilyId() {
+    return familyId;
+  }
+
+  public void setFamilyId(UUID familyId) {
+    this.familyId = familyId;
+  }
+
+  public boolean isPersonal() {
+    return isPersonal;
+  }
+
+  public void setPersonal(boolean personal) {
+    isPersonal = personal;
   }
 
   public boolean isFavorite() {

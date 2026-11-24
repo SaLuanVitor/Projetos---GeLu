@@ -51,6 +51,7 @@ export default function RecipesPage() {
   const [category, setCategory] = useState("");
   const [maxPrepTimeMinutes, setMaxPrepTimeMinutes] = useState("");
   const [maxCalories, setMaxCalories] = useState("");
+  const [favorite, setFavorite] = useState("");
   const [loading, setLoading] = useState(true);
   const [favoriteBusy, setFavoriteBusy] = useState<Record<string, boolean>>({});
   const [error, setError] = useState("");
@@ -91,6 +92,10 @@ export default function RecipesPage() {
       label: t("filters.kcalUpTo", { count: Number(value) }),
       value
     }))
+  ];
+  const favoriteOptions = [
+    { label: t("filters.allFavorites") || "Todas", value: "" },
+    { label: t("filters.onlyFavorites") || "Apenas favoritas", value: "true" }
   ];
 
   const loadRecipes = useCallback(
@@ -169,7 +174,8 @@ export default function RecipesPage() {
       ingredient,
       category,
       maxPrepTimeMinutes,
-      maxCalories
+      maxCalories,
+      favorite: favorite || undefined
     };
     setFilters(nextFilters);
     void loadRecipes(nextFilters);
@@ -215,7 +221,7 @@ export default function RecipesPage() {
 
         <section className="scribble-border paper-grid-block dark:bg-[#201b17] dark:border-stone-700/80 mt-8 p-5 rounded-2xl">
           <form
-            className="grid gap-4 md:grid-cols-[1fr_1fr_1fr_150px_150px_auto]"
+            className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[1fr_1fr_1fr_130px_130px_140px_auto]"
             onSubmit={handleFilterSubmit}
           >
             <TextInput label={t("filters.query")} value={query} onValueChange={setQuery} />
@@ -241,6 +247,12 @@ export default function RecipesPage() {
               options={calorieOptions}
               value={maxCalories}
               onValueChange={setMaxCalories}
+            />
+            <SelectField
+              label={t("filters.favorite") || "Favoritos"}
+              options={favoriteOptions}
+              value={favorite}
+              onValueChange={setFavorite}
             />
             <div className="self-end">
               <ActionButton className="w-full whitespace-nowrap" type="submit">
@@ -268,7 +280,7 @@ export default function RecipesPage() {
         {/* Barra de Contagem e Alternância de Visualização (Fichas x Listagem) */}
         {!loading && recipes.length > 0 && (
           <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b-2 border-stone-200/70 dark:border-stone-800 pb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="font-display text-base sm:text-lg font-bold text-on-surface">
                 {recipes.length} {recipes.length === 1 ? "receita encontrada" : "receitas encontradas"}
               </span>
@@ -277,6 +289,41 @@ export default function RecipesPage() {
                   Filtrado
                 </span>
               )}
+              <button
+                type="button"
+                onClick={() => {
+                  const nextVal = favorite === "true" ? "" : "true";
+                  setFavorite(nextVal);
+                  const nextFilters = {
+                    ...filters,
+                    query,
+                    ingredient,
+                    category,
+                    maxPrepTimeMinutes,
+                    maxCalories,
+                    favorite: nextVal || undefined
+                  };
+                  setFilters(nextFilters);
+                  void loadRecipes(nextFilters);
+                }}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all duration-150 hover:scale-105 active:scale-95 cursor-pointer ${
+                  favorite === "true"
+                    ? "bg-rose-50 border-rose-400 text-rose-700 dark:bg-rose-950/40 dark:border-rose-700 dark:text-rose-300 shadow-2xs"
+                    : "bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:border-rose-400 hover:text-rose-600"
+                }`}
+                title={
+                  favorite === "true"
+                    ? "Remover filtro de favoritas e ver todas as receitas"
+                    : "Filtrar e exibir apenas as suas receitas favoritas"
+                }
+              >
+                <Heart
+                  className={`w-3.5 h-3.5 ${
+                    favorite === "true" ? "fill-rose-500 text-rose-500" : "text-stone-400"
+                  }`}
+                />
+                <span>{favorite === "true" ? "Mostrando Favoritas" : "Apenas Favoritas"}</span>
+              </button>
             </div>
 
             <div className="flex items-center gap-1 rounded-xl border border-stone-200/90 dark:border-stone-700 bg-white/90 dark:bg-stone-900/90 p-1 shrink-0 self-end sm:self-auto shadow-2xs">
@@ -343,6 +390,7 @@ export default function RecipesPage() {
                     </h2>
                     <button
                       aria-label={recipe.favorite ? t("removeFavorite") : t("addFavorite")}
+                      title={recipe.favorite ? (t("removeFavorite") || "Remover dos favoritos") : (t("addFavorite") || "Salvar como favorita")}
                       className="text-3xl leading-none text-primary transition-transform hover:scale-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60 cursor-pointer p-1"
                       disabled={favoriteBusy[recipe.id]}
                       onClick={() => void handleFavoriteToggle(recipe)}
@@ -415,7 +463,8 @@ export default function RecipesPage() {
                   {/* Botão de Favorito no Mobile sobreposto na foto */}
                   <button
                     aria-label={recipe.favorite ? t("removeFavorite") : t("addFavorite")}
-                    className="md:hidden absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-stone-900/90 text-primary shadow-xs"
+                    title={recipe.favorite ? (t("removeFavorite") || "Remover dos favoritos") : (t("addFavorite") || "Salvar como favorita")}
+                    className="md:hidden absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 dark:bg-stone-900/90 text-primary shadow-xs cursor-pointer"
                     disabled={favoriteBusy[recipe.id]}
                     onClick={() => void handleFavoriteToggle(recipe)}
                     type="button"
@@ -448,6 +497,7 @@ export default function RecipesPage() {
 
                       <button
                         aria-label={recipe.favorite ? t("removeFavorite") : t("addFavorite")}
+                        title={recipe.favorite ? (t("removeFavorite") || "Remover dos favoritos") : (t("addFavorite") || "Salvar como favorita")}
                         className="hidden md:block text-2xl leading-none text-primary transition-transform hover:scale-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60 cursor-pointer p-0.5 shrink-0"
                         disabled={favoriteBusy[recipe.id]}
                         onClick={() => void handleFavoriteToggle(recipe)}

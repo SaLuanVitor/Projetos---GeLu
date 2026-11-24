@@ -311,6 +311,7 @@ export type RecipeSearchFilters = {
   category?: string;
   maxPrepTimeMinutes?: string;
   maxCalories?: string;
+  favorite?: string;
 };
 
 

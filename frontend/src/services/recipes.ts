@@ -16,8 +16,8 @@ export async function listRecipes(
 ): Promise<RecipeResponse[]> {
   const query = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {
-    if (value) {
-      query.set(key, value);
+    if (value !== undefined && value !== null && value !== "") {
+      query.set(key, String(value));
     }
   });
 
