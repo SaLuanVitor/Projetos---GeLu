@@ -226,15 +226,15 @@ export function DailyMealDiaryCard({
                           {meal.dishName}
                         </h4>
                         <div className="flex items-center gap-2 mt-1 text-[11px] text-stone-500 font-medium">
-                          <span className="font-bold text-orange-600 dark:text-orange-400">
+                          <span title="Calorias totais estimadas consumidas nesta refeição" className="font-bold text-orange-600 dark:text-orange-400 cursor-help">
                             {Math.round(meal.totalCalories)} kcal
                           </span>
                           <span>•</span>
-                          <span>P: {Math.round(meal.proteins)}g</span>
+                          <span title="Proteínas (P): macronutriente para saciedade e síntese muscular" className="cursor-help">P: {Math.round(meal.proteins)}g</span>
                           <span>•</span>
-                          <span>C: {Math.round(meal.carbohydrates)}g</span>
+                          <span title="Carboidratos (C): fonte principal de energia imediata do corpo" className="cursor-help">C: {Math.round(meal.carbohydrates)}g</span>
                           <span>•</span>
-                          <span>G: {Math.round(meal.fats)}g</span>
+                          <span title="Gorduras saudáveis / Lipídios (G): essenciais para absorção vitamínica e hormônios" className="cursor-help">G: {Math.round(meal.fats)}g</span>
                         </div>
                       </div>
                     </div>

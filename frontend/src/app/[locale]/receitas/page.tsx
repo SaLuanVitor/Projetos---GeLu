@@ -379,14 +379,14 @@ export default function RecipesPage() {
                     <ActionLink className="flex-1" href={`/receitas/${recipe.slug || recipe.id}`}>
                       {t("viewRecipe")}
                     </ActionLink>
-                    <ActionLink
-                      aria-label={t("editRecipe")}
-                      className="h-11 w-11 px-0 text-xl font-bold"
+                    <Link
+                      aria-label={t("editRecipe") || "Editar receita"}
+                      title="Editar esta receita"
+                      className="flex h-11 w-11 items-center justify-center rounded-xl border-2 border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-200 shadow-2xs hover:border-amber-600 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all duration-150 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
                       href={`/receitas/${recipe.slug || recipe.id}/editar`}
-                      variant="outline"
                     >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </ActionLink>
+                      <Pencil className="w-5 h-5 stroke-[2]" />
+                    </Link>
                   </div>
                 </article>
               );
@@ -430,17 +430,17 @@ export default function RecipesPage() {
                     {/* Cabeçalho da Linha: Badges + Favorito no Desktop */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="rounded-full bg-secondary-fixed dark:bg-emerald-950/60 px-2.5 py-0.5 text-xs font-bold text-secondary dark:text-emerald-300 border border-transparent dark:border-emerald-800">
+                        <span title="Categoria da receita" className="rounded-full bg-secondary-fixed dark:bg-emerald-950/60 px-2.5 py-0.5 text-xs font-bold text-secondary dark:text-emerald-300 border border-transparent dark:border-emerald-800 cursor-help">
                           <span className="inline-flex items-center gap-1"><Tag className="w-3 h-3 text-stone-400" /> {recipe.category ?? t("noCategory")}</span>
                         </span>
-                        <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+                        <span title="Tempo estimado de preparo" className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 cursor-help">
                           <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3 text-stone-400" /> {recipe.prepTimeMinutes ? t("minutes", { count: recipe.prepTimeMinutes }) : t("noTime")}</span>
                         </span>
-                        <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
+                        <span title="Rendimento em porções" className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 cursor-help">
                           <span className="inline-flex items-center gap-1"><Users className="w-3 h-3 text-stone-400" /> {recipe.servings ? t("servings", { count: recipe.servings }) : t("noServings")}</span>
                         </span>
                         {recipe.steps && recipe.steps.length > 0 && (
-                          <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hidden sm:inline-flex">
+                          <span title="Etapas do modo de preparo" className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hidden sm:inline-flex cursor-help">
                             <span className="inline-flex items-center gap-1"><ListOrdered className="w-3 h-3 text-stone-400" /> {recipe.steps.length} {recipe.steps.length === 1 ? "passo" : "passos"}</span>
                           </span>
                         )}
@@ -498,26 +498,26 @@ export default function RecipesPage() {
                   <div className="pt-2 border-t border-stone-200/60 dark:border-stone-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     {/* Nutrição */}
                     <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                      <span title="Calorias estimadas por porção individual" className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-help">
                         <span className="inline-flex items-center gap-1"><Flame className="w-3 h-3 text-amber-600" /> {recipe.caloriesPerServing ? `${recipe.caloriesPerServing} kcal/porção` : (recipe.estimatedCalories ? `${recipe.estimatedCalories} kcal` : t("noCalories"))}</span>
                       </span>
                       {(recipe.proteinPerServing != null || recipe.proteins != null) && (
-                        <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        <span title="Proteínas (P): reparação tecidual, músculos e saciedade duradoura" className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 cursor-help">
                           P: {recipe.proteinPerServing ?? recipe.proteins}g
                         </span>
                       )}
                       {(recipe.carbsPerServing != null || recipe.carbohydrates != null) && (
-                        <span className="inline-flex items-center gap-1 rounded-lg bg-amber-100/60 dark:bg-amber-900/30 px-2.5 py-1 text-amber-800 dark:text-amber-200 border border-amber-200/60 dark:border-amber-800">
+                        <span title="Carboidratos (C): principal fonte de energia do organismo" className="inline-flex items-center gap-1 rounded-lg bg-amber-100/60 dark:bg-amber-900/30 px-2.5 py-1 text-amber-800 dark:text-amber-200 border border-amber-200/60 dark:border-amber-800 cursor-help">
                           C: {recipe.carbsPerServing ?? recipe.carbohydrates}g
                         </span>
                       )}
                       {(recipe.fatPerServing != null || recipe.fats != null) && (
-                        <span className="inline-flex items-center gap-1 rounded-lg bg-yellow-50 dark:bg-yellow-950/40 px-2.5 py-1 text-yellow-900 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800">
+                        <span title="Gorduras saudáveis / Lipídios (G): síntese hormonal e absorção de vitaminas" className="inline-flex items-center gap-1 rounded-lg bg-yellow-50 dark:bg-yellow-950/40 px-2.5 py-1 text-yellow-900 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 cursor-help">
                           G: {recipe.fatPerServing ?? recipe.fats}g
                         </span>
                       )}
                       {(recipe.fiberPerServing != null || recipe.fibers != null) && (
-                        <span className="inline-flex items-center gap-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 px-2.5 py-1 text-teal-900 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hidden md:inline-flex">
+                        <span title="Fibras alimentares: digestão saudável e equilíbrio glicêmico" className="inline-flex items-center gap-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 px-2.5 py-1 text-teal-900 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hidden md:inline-flex cursor-help">
                           Fibras: {recipe.fiberPerServing ?? recipe.fibers}g
                         </span>
                       )}
@@ -528,14 +528,14 @@ export default function RecipesPage() {
                       <ActionLink href={`/receitas/${recipe.slug || recipe.id}`} className="py-1.5 px-3.5 text-xs">
                         {t("viewRecipe")}
                       </ActionLink>
-                      <ActionLink
-                        aria-label={t("editRecipe")}
-                        className="h-8 w-8 px-0 text-sm font-bold flex items-center justify-center"
+                      <Link
+                        aria-label={t("editRecipe") || "Editar receita"}
+                        title="Editar esta receita"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-200 shadow-2xs hover:border-amber-600 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all duration-150 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
                         href={`/receitas/${recipe.slug || recipe.id}/editar`}
-                        variant="outline"
                       >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </ActionLink>
+                        <Pencil className="w-4 h-4 stroke-[2]" />
+                      </Link>
                     </div>
                   </div>
                 </div>

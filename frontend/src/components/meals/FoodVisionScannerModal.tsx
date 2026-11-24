@@ -176,13 +176,18 @@ export function FoodVisionScannerModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      maxWidth="2xl"
+      title={
         <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold">
           <Camera className="w-5 h-5 text-amber-800 dark:text-amber-400 stroke-[2]" />
           <span>Escanear Prato com IA</span>
         </div>
-      }>
-      <div className="space-y-5 max-w-xl">
+      }
+    >
+      <div className="space-y-5 w-full">
         {error && (
           <StatusMessage variant="error">
             {error}
@@ -253,7 +258,7 @@ export function FoodVisionScannerModal({
                   <button
                     type="button"
                     onClick={() => cameraInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2.5 text-xs font-bold shadow-xs transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2.5 text-xs font-bold shadow-xs transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-95 active:translate-y-0 cursor-pointer"
                   >
                     <Camera className="w-4 h-4" />
                     <span>Tirar Foto Agora</span>
@@ -262,7 +267,7 @@ export function FoodVisionScannerModal({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-50 px-4 py-2.5 text-xs font-bold text-stone-700 dark:text-stone-300 shadow-2xs transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-stone-50 px-4 py-2.5 text-xs font-bold text-stone-700 dark:text-stone-300 shadow-2xs transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-95 active:translate-y-0 cursor-pointer"
                   >
                     <Upload className="w-4 h-4" />
                     <span>Escolher da Galeria</span>

@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -9,7 +10,7 @@ export interface ModalProps {
   title?: ReactNode;
   subtitle?: ReactNode;
   children: ReactNode;
-  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
   showCloseButton?: boolean;
 }
 
@@ -19,7 +20,7 @@ export function Modal({
   title,
   subtitle,
   children,
-  maxWidth = "md",
+  maxWidth = "xl",
   showCloseButton = true,
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
@@ -50,17 +51,20 @@ export function Modal({
 
   if (!mounted || !isOpen) return null;
 
-  const maxWidthClasses = {
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
-    "2xl": "max-w-2xl",
-  }[maxWidth];
+  const maxWidthClasses: Record<string, string> = {
+    sm: "max-w-md",
+    md: "max-w-xl",
+    lg: "max-w-2xl",
+    xl: "max-w-3xl",
+    "2xl": "max-w-4xl",
+    "3xl": "max-w-5xl",
+  };
+
+  const selectedWidthClass = maxWidthClasses[maxWidth] || maxWidthClasses.xl;
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-stone-900/60 p-4 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-stone-900/65 backdrop-blur-sm transition-opacity overflow-hidden"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
@@ -70,19 +74,21 @@ export function Modal({
       }}
     >
       <div
-        className={`relative my-8 w-full ${maxWidthClasses} rounded-3xl border-2 border-stone-200/90 dark:border-stone-700/90 bg-[#FFFDF8] dark:bg-[#1f1a16] p-6 text-stone-800 dark:text-stone-100 shadow-2xl ring-1 ring-black/5 dark:ring-white/5 transition-all animate-in fade-in-0 zoom-in-95`}
+        className={`relative w-full ${selectedWidthClass} max-h-[90vh] flex flex-col rounded-3xl border-2 border-stone-200/90 dark:border-stone-700/90 bg-[#FFFDF8] dark:bg-[#1f1a16] text-stone-800 dark:text-stone-100 shadow-2xl ring-1 ring-black/5 dark:ring-white/5 transition-all animate-in fade-in-0 zoom-in-95 overflow-hidden`}
       >
-        {/* Header */}
+        {/* Header fixo do card */}
         {(title || showCloseButton) && (
-          <div className="mb-4 flex items-start justify-between gap-4 border-b border-stone-200/60 dark:border-stone-800 pb-3">
-            <div>
+          <div className="shrink-0 px-6 pt-5 pb-4 border-b border-stone-200/70 dark:border-stone-800 bg-[#FFFDF8] dark:bg-[#1f1a16] flex items-start justify-between gap-4 z-10">
+            <div className="min-w-0 flex-1">
               {title && (
-                <h3 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100">
+                <div className="font-display text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 leading-snug">
                   {title}
-                </h3>
+                </div>
               )}
               {subtitle && (
-                <p className="mt-0.5 text-xs text-stone-500 dark:text-stone-400">{subtitle}</p>
+                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
+                  {subtitle}
+                </p>
               )}
             </div>
 
@@ -90,29 +96,20 @@ export function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-700 dark:hover:text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-colors cursor-pointer"
-                aria-label="Fechar"
+                className="shrink-0 rounded-full p-2 text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 hover:text-stone-700 dark:hover:text-stone-200 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all active:scale-90 cursor-pointer"
+                aria-label="Fechar popup"
+                title="Fechar (Esc)"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X className="w-5 h-5 stroke-[2]" />
               </button>
             )}
           </div>
         )}
 
-        {/* Content */}
-        <div>{children}</div>
+        {/* Corpo com rolagem interna no card */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 text-left">
+          {children}
+        </div>
       </div>
     </div>,
     document.body

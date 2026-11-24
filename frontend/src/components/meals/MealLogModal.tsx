@@ -282,7 +282,7 @@ export function MealLogModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      maxWidth="lg"
+      maxWidth="2xl"
       title={
         <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold">
           <UtensilsCrossed className="w-5 h-5 text-amber-800 dark:text-amber-400 stroke-[2]" />
@@ -311,11 +311,12 @@ export function MealLogModal({
                 <button
                   key={type.key}
                   type="button"
+                  title={`Refeição: ${type.label}`}
                   onClick={() => setSelectedMealType(type.key)}
-                  className={`flex flex-col items-center justify-center p-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border text-xs font-bold transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xs active:scale-95 active:translate-y-0 cursor-pointer ${
                     isSelected
-                      ? "border-amber-600 bg-amber-500/10 text-amber-900 dark:text-amber-200 shadow-2xs"
-                      : "border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:border-stone-400"
+                      ? "border-amber-600 bg-amber-500/15 text-amber-950 dark:text-amber-200 ring-1 ring-amber-500/30 shadow-xs"
+                      : "border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:border-amber-300 dark:hover:border-stone-600"
                   }`}
                 >
                   <Icon className="w-4 h-4 mb-1 stroke-[1.75]" />
@@ -453,14 +454,14 @@ export function MealLogModal({
                   <button
                     type="button"
                     onClick={() => cameraInputRef.current?.click()}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-white font-bold text-xs px-4 py-2 hover:bg-primary-hover shadow-sm cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-white font-bold text-xs px-4 py-2 hover:bg-primary-hover shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-95 active:translate-y-0 cursor-pointer"
                   >
                     <Camera className="w-3.5 h-3.5" /> <span>Abrir Câmera</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold text-xs px-4 py-2 hover:border-primary cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-200 font-bold text-xs px-4 py-2 hover:border-primary shadow-xs transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-95 active:translate-y-0 cursor-pointer"
                   >
                     <Upload className="w-3.5 h-3.5" /> <span>Escolher Foto</span>
                   </button>
@@ -542,58 +543,70 @@ export function MealLogModal({
               />
             </div>
 
-            {/* Grid de Macros */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div className="rounded-lg border border-orange-200 bg-orange-50/70 dark:border-orange-950/60 dark:bg-orange-950/30 p-2.5 text-center">
-                <span className="text-[10px] font-bold uppercase text-orange-800 dark:text-orange-300 block">
-                  Calorias
+            {/* Grid de Macros com Hints Explicativos */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div
+                title="Calorias (kcal): energia total fornecida por este prato"
+                className="rounded-xl border border-orange-200/90 bg-orange-50/80 dark:border-orange-950/60 dark:bg-orange-950/30 p-2.5 text-center shadow-2xs hover:border-orange-300 transition-colors"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-800 dark:text-orange-300 block">
+                  Calorias (kcal)
                 </span>
                 <input
                   type="number"
                   value={calories}
                   onChange={(e) => setCalories(Number(e.target.value))}
-                  className="w-full text-center font-display text-lg font-bold text-orange-900 dark:text-orange-100 bg-transparent focus:outline-none"
+                  className="w-full text-center font-display text-xl font-black text-orange-950 dark:text-orange-100 bg-transparent focus:outline-none"
                 />
-                <span className="text-[10px] text-orange-600 dark:text-orange-400">kcal</span>
+                <span className="text-[10px] text-orange-600 dark:text-orange-400 font-medium">energia total</span>
               </div>
 
-              <div className="rounded-lg border border-rose-200 bg-rose-50/70 dark:border-rose-950/60 dark:bg-rose-950/30 p-2.5 text-center">
-                <span className="text-[10px] font-bold uppercase text-rose-800 dark:text-rose-300 block">
-                  Proteínas
+              <div
+                title="Proteínas (P): macronutriente essencial para massa muscular, recuperação e saciedade duradoura"
+                className="rounded-xl border border-rose-200/90 bg-rose-50/80 dark:border-rose-950/60 dark:bg-rose-950/30 p-2.5 text-center shadow-2xs hover:border-rose-300 transition-colors"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-800 dark:text-rose-300 block">
+                  Proteínas (P)
                 </span>
                 <input
                   type="number"
                   value={proteins}
                   onChange={(e) => setProteins(Number(e.target.value))}
-                  className="w-full text-center font-display text-lg font-bold text-rose-900 dark:text-rose-100 bg-transparent focus:outline-none"
+                  className="w-full text-center font-display text-xl font-black text-rose-950 dark:text-rose-100 bg-transparent focus:outline-none"
                 />
-                <span className="text-[10px] text-rose-600 dark:text-rose-400">g</span>
+                <span className="text-[10px] text-rose-600 dark:text-rose-400 font-medium">gramas (g)</span>
               </div>
 
-              <div className="rounded-lg border border-amber-200 bg-amber-50/70 dark:border-amber-950/60 dark:bg-amber-950/30 p-2.5 text-center">
-                <span className="text-[10px] font-bold uppercase text-amber-800 dark:text-amber-300 block">
-                  Carboidratos
+              <div
+                title="Carboidratos (C): principal fonte de energia imediata e glicose para mente e corpo"
+                className="rounded-xl border border-amber-200/90 bg-amber-50/80 dark:border-amber-950/60 dark:bg-amber-950/30 p-2.5 text-center shadow-2xs hover:border-amber-300 transition-colors"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
+                  Carboidratos (C)
                 </span>
                 <input
                   type="number"
                   value={carbs}
                   onChange={(e) => setCarbs(Number(e.target.value))}
-                  className="w-full text-center font-display text-lg font-bold text-amber-900 dark:text-amber-100 bg-transparent focus:outline-none"
+                  className="w-full text-center font-display text-xl font-black text-amber-950 dark:text-amber-100 bg-transparent focus:outline-none"
                 />
-                <span className="text-[10px] text-amber-600 dark:text-amber-400">g</span>
+                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">gramas (g)</span>
               </div>
 
-              <div className="rounded-lg border border-yellow-200 bg-yellow-50/70 dark:border-yellow-950/60 dark:bg-yellow-950/30 p-2.5 text-center">
-                <span className="text-[10px] font-bold uppercase text-yellow-800 dark:text-yellow-300 block">
-                  Gorduras
+              <div
+                title="Gorduras Saudáveis (G): lipídios fundamentais para regulação hormonal e absorção de vitaminas"
+                className="rounded-xl border border-yellow-200/90 bg-yellow-50/80 dark:border-yellow-950/60 dark:bg-yellow-950/30 p-2.5 text-center shadow-2xs hover:border-yellow-300 transition-colors"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-yellow-800 dark:text-yellow-300 block">
+                  Gorduras (G)
                 </span>
                 <input
                   type="number"
                   value={fats}
                   onChange={(e) => setFats(Number(e.target.value))}
-                  className="w-full text-center font-display text-lg font-bold text-yellow-900 dark:text-yellow-100 bg-transparent focus:outline-none"
+                  className="w-full text-center font-display text-xl font-black text-yellow-950 dark:text-yellow-100 bg-transparent focus:outline-none"
                 />
-                <span className="text-[10px] text-yellow-600 dark:text-yellow-400">g</span>
+                <span className="text-[10px] text-yellow-600 dark:text-yellow-400 font-medium">gramas (g)</span>
               </div>
             </div>
 

@@ -579,29 +579,38 @@ export default function AiSuggestionsPage() {
                   {suggestion.explanation}
                 </p>
 
-                {/* Macro Nutrientes */}
-                <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-stone-50 dark:bg-[#25201c] p-2.5">
-                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
-                      Proteínas
+                {/* Macro Nutrientes com Hints */}
+                <div className="mt-5 grid grid-cols-3 gap-2.5 text-center">
+                  <div
+                    title="Proteínas (P): macronutriente fundamental para construção muscular e saciedade prolongada"
+                    className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-stone-50 dark:bg-[#25201c] p-2.5 shadow-2xs hover:border-amber-300 transition-colors cursor-help"
+                  >
+                    <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+                      Proteínas (P)
                     </span>
                     <span className="text-sm font-extrabold text-stone-800 dark:text-stone-200 mt-0.5 block">
                       {suggestion.proteinGrams}
                     </span>
                   </div>
 
-                  <div className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-stone-50 dark:bg-[#25201c] p-2.5">
-                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
-                      Carboidratos
+                  <div
+                    title="Carboidratos (C): fornecem energia vital e glicose para mente e músculos"
+                    className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-stone-50 dark:bg-[#25201c] p-2.5 shadow-2xs hover:border-amber-300 transition-colors cursor-help"
+                  >
+                    <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+                      Carboidratos (C)
                     </span>
                     <span className="text-sm font-extrabold text-stone-800 dark:text-stone-200 mt-0.5 block">
                       {suggestion.carbsGrams}
                     </span>
                   </div>
 
-                  <div className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-stone-50 dark:bg-[#25201c] p-2.5">
-                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
-                      Gorduras
+                  <div
+                    title="Gorduras saudáveis (G): lipídios necessários para suporte hormonal e absorção de vitaminas"
+                    className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-stone-50 dark:bg-[#25201c] p-2.5 shadow-2xs hover:border-amber-300 transition-colors cursor-help"
+                  >
+                    <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">
+                      Gorduras (G)
                     </span>
                     <span className="text-sm font-extrabold text-stone-800 dark:text-stone-200 mt-0.5 block">
                       {suggestion.fatGrams}
@@ -706,7 +715,7 @@ export default function AiSuggestionsPage() {
           <Modal
             isOpen={acceptModalOpen}
             onClose={() => setAcceptModalOpen(false)}
-            maxWidth="md"
+            maxWidth="xl"
           >
             <div className="text-left space-y-5">
               {/* Header com confirmação de receita salva */}

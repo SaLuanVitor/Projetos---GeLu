@@ -12,7 +12,7 @@ const variants: Record<Variant, string> = {
 };
 
 const baseClass =
-  "inline-flex items-center justify-center rounded-lg border-2 px-4 py-2 text-sm font-bold transition-transform hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center rounded-xl border-2 px-4 py-2 text-sm font-bold transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-95 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer";
 
 type ActionButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
