@@ -4,8 +4,13 @@ import type {
   ApiErrorResponse,
   ApiResponse,
   CreateMealLogRequest,
+  DailyMealChecklistItemResponse,
   DailyMealSummaryResponse,
+  HabitInsightsResponse,
   MealLogResponse,
+  ParseMealTextRequest,
+  ParseMealTextResponse,
+  QuickCheckinMealRequest,
 } from "@/types/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
@@ -168,4 +173,123 @@ export async function deleteMealLog(
       error?.details ?? []
     );
   }
+}
+
+/**
+ * Analisa texto livre em português ou transcrição de áudio com Gemini 2.5 Flash
+ */
+export async function parseMealText(
+  accessToken: string,
+  body: ParseMealTextRequest
+): Promise<ParseMealTextResponse> {
+  const response = await fetch(`${API_URL}/meals/parse-text`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const payload = await readPayload<ParseMealTextResponse>(response);
+  if (!response.ok || !payload.success) {
+    const error = "error" in payload ? payload.error : undefined;
+    throw new ApiClientError(
+      error?.message ?? "Não foi possível analisar o texto da refeição.",
+      error?.code ?? "PARSE_TEXT_ERROR",
+      error?.details ?? []
+    );
+  }
+
+  return payload.data;
+}
+
+/**
+ * Check-in instantâneo em 1 clique para refeições planejadas (Comi ou Pulei)
+ */
+export async function quickCheckinMeal(
+  accessToken: string,
+  body: QuickCheckinMealRequest
+): Promise<MealLogResponse> {
+  const response = await fetch(`${API_URL}/meals/quick-checkin`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const payload = await readPayload<MealLogResponse>(response);
+  if (!response.ok || !payload.success) {
+    const error = "error" in payload ? payload.error : undefined;
+    throw new ApiClientError(
+      error?.message ?? "Não foi possível realizar o check-in da refeição.",
+      error?.code ?? "QUICK_CHECKIN_ERROR",
+      error?.details ?? []
+    );
+  }
+
+  return payload.data;
+}
+
+/**
+ * Retorna o checklist diário de refeições planejadas vs consumidas/puladas
+ */
+export async function getDailyMealChecklist(
+  accessToken: string,
+  date?: string,
+  familyId?: string
+): Promise<DailyMealChecklistItemResponse[]> {
+  const params = new URLSearchParams();
+  if (date) params.append("date", date);
+  if (familyId) params.append("familyId", familyId);
+  const query = params.toString() ? `?${params.toString()}` : "";
+
+  const response = await fetch(`${API_URL}/meals/daily-checklist${query}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const payload = await readPayload<DailyMealChecklistItemResponse[]>(response);
+  if (!response.ok || !payload.success) {
+    const error = "error" in payload ? payload.error : undefined;
+    throw new ApiClientError(
+      error?.message ?? "Não foi possível carregar o checklist de refeições.",
+      error?.code ?? "CHECKLIST_ERROR",
+      error?.details ?? []
+    );
+  }
+
+  return payload.data;
+}
+
+/**
+ * Retorna a taxa de adesão, hábitos alimentares frequentes e dicas do coach IA
+ */
+export async function getHabitsInsights(
+  accessToken: string,
+  familyId?: string
+): Promise<HabitInsightsResponse> {
+  const query = familyId ? `?familyId=${encodeURIComponent(familyId)}` : "";
+  const response = await fetch(`${API_URL}/meals/habits-insights${query}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const payload = await readPayload<HabitInsightsResponse>(response);
+  if (!response.ok || !payload.success) {
+    const error = "error" in payload ? payload.error : undefined;
+    throw new ApiClientError(
+      error?.message ?? "Não foi possível obter insights de hábitos alimentares.",
+      error?.code ?? "HABITS_INSIGHTS_ERROR",
+      error?.details ?? []
+    );
+  }
+
+  return payload.data;
 }

@@ -15,6 +15,12 @@ public interface MealLogRepository extends JpaRepository<MealLog, UUID> {
   List<MealLog> findAllByFamilyIdAndConsumedAtBetweenOrderByConsumedAtDesc(
       UUID familyId, LocalDateTime start, LocalDateTime end);
 
+  List<MealLog> findAllByUserIdAndDietMealIdInAndConsumedAtBetween(
+      UUID userId, List<UUID> dietMealIds, LocalDateTime start, LocalDateTime end);
+
+  List<MealLog> findAllByUserIdAndConsumedAtAfterOrderByConsumedAtDesc(
+      UUID userId, LocalDateTime since);
+
   @Query("SELECT COUNT(m) FROM MealLog m WHERE m.userId = :userId AND m.consumedAt >= :since")
   long countByUserIdSince(@Param("userId") UUID userId, @Param("since") LocalDateTime since);
 }

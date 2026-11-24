@@ -70,6 +70,21 @@ public class MealLog implements Persistable<UUID> {
   @Column(name = "ai_notes", columnDefinition = "TEXT")
   private String aiNotes;
 
+  @Column(name = "diet_meal_id")
+  private UUID dietMealId;
+
+  @Column(name = "status", nullable = false, length = 30)
+  private String status = "CUSTOM_CONSUMED";
+
+  @Column(name = "input_method", nullable = false, length = 30)
+  private String inputMethod = "MANUAL";
+
+  @Column(name = "raw_input_text", columnDefinition = "TEXT")
+  private String rawInputText;
+
+  @Column(name = "skip_reason", length = 100)
+  private String skipReason;
+
   @Column(name = "consumed_at", nullable = false)
   private LocalDateTime consumedAt;
 
@@ -109,6 +124,48 @@ public class MealLog implements Persistable<UUID> {
     this.aiNotes = aiNotes;
     this.consumedAt = consumedAt != null ? consumedAt : LocalDateTime.now();
     this.createdAt = LocalDateTime.now();
+  }
+
+  public MealLog(
+      UUID userId,
+      UUID familyId,
+      UUID dietMealId,
+      String mealType,
+      String dishName,
+      String photoUrl,
+      BigDecimal totalCalories,
+      BigDecimal proteins,
+      BigDecimal carbohydrates,
+      BigDecimal fats,
+      BigDecimal fibers,
+      BigDecimal sodium,
+      String itemsJson,
+      String aiNotes,
+      String status,
+      String inputMethod,
+      String rawInputText,
+      String skipReason,
+      LocalDateTime consumedAt) {
+    this(
+        userId,
+        familyId,
+        mealType,
+        dishName,
+        photoUrl,
+        totalCalories,
+        proteins,
+        carbohydrates,
+        fats,
+        fibers,
+        sodium,
+        itemsJson,
+        aiNotes,
+        consumedAt);
+    this.dietMealId = dietMealId;
+    this.status = status != null ? status : "CUSTOM_CONSUMED";
+    this.inputMethod = inputMethod != null ? inputMethod : "MANUAL";
+    this.rawInputText = rawInputText;
+    this.skipReason = skipReason;
   }
 
   public UUID getId() {
@@ -173,5 +230,25 @@ public class MealLog implements Persistable<UUID> {
 
   public LocalDateTime getCreatedAt() {
     return createdAt;
+  }
+
+  public UUID getDietMealId() {
+    return dietMealId;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public String getInputMethod() {
+    return inputMethod;
+  }
+
+  public String getRawInputText() {
+    return rawInputText;
+  }
+
+  public String getSkipReason() {
+    return skipReason;
   }
 }

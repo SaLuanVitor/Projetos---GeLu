@@ -4,6 +4,7 @@ import br.com.gelu.menu.meals.FoodItemIdentified;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public record CreateMealLogRequest(
     String mealType,
@@ -17,4 +18,9 @@ public record CreateMealLogRequest(
     BigDecimal sodium,
     List<FoodItemIdentified> items,
     String aiNotes,
+    UUID dietMealId,
+    String status,
+    String inputMethod,
+    String rawInputText,
+    String skipReason,
     LocalDateTime consumedAt) {}

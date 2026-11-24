@@ -806,6 +806,11 @@ export type CreateMealLogRequest = {
   sodium?: number;
   items?: FoodItemIdentified[];
   aiNotes?: string;
+  dietMealId?: string | null;
+  status?: "PLANNED_CONSUMED" | "UNPLANNED_CONSUMED" | "CUSTOM_CONSUMED" | "SKIPPED" | string;
+  inputMethod?: "ONE_CLICK" | "TEXT_AI" | "VOICE_AI" | "VISION_AI" | "MANUAL" | string;
+  rawInputText?: string | null;
+  skipReason?: string | null;
   consumedAt?: string;
 };
 
@@ -813,6 +818,7 @@ export type MealLogResponse = {
   id: string;
   userId: string;
   familyId?: string | null;
+  dietMealId?: string | null;
   mealType: string;
   dishName: string;
   photoUrl?: string | null;
@@ -824,8 +830,74 @@ export type MealLogResponse = {
   sodium?: number | null;
   items: FoodItemIdentified[];
   aiNotes?: string | null;
+  status?: string | null;
+  inputMethod?: string | null;
+  rawInputText?: string | null;
+  skipReason?: string | null;
   consumedAt: string;
   createdAt: string;
+};
+
+export type ParseMealTextRequest = {
+  text: string;
+  mealType?: string;
+  consumedAt?: string;
+};
+
+export type ParseMealTextResponse = {
+  dishName: string;
+  totalCalories?: number;
+  proteins?: number;
+  carbohydrates?: number;
+  fats?: number;
+  fibers?: number;
+  sodium?: number;
+  items: FoodItemIdentified[];
+  aiNotes?: string;
+};
+
+export type QuickCheckinMealRequest = {
+  dietMealId: string;
+  date?: string;
+  status?: "PLANNED_CONSUMED" | "SKIPPED" | string;
+  skipReason?: string;
+};
+
+export type DailyMealChecklistItemResponse = {
+  dietMealId: string;
+  mealName: string;
+  mealTime: string;
+  weekDay: string;
+  orderIndex: number;
+  plannedCalories?: number;
+  plannedRecipes: string[];
+  status: "PENDING" | "PLANNED_CONSUMED" | "CUSTOM_CONSUMED" | "SKIPPED" | string;
+  mealLogId?: string | null;
+  customDishName?: string | null;
+  photoUrl?: string | null;
+  consumedCalories?: number | null;
+  consumedProteins?: number | null;
+  consumedCarbs?: number | null;
+  consumedFats?: number | null;
+  skipReason?: string | null;
+};
+
+export type StapleMealHabit = {
+  dishName: string;
+  mealType: string;
+  timesLogged: number;
+  averageCalories?: number;
+  averageProteins?: number;
+};
+
+export type HabitInsightsResponse = {
+  adherenceRate: number;
+  totalPlannedMeals: number;
+  plannedConsumedCount: number;
+  customConsumedCount: number;
+  skippedCount: number;
+  stapleMeals: StapleMealHabit[];
+  aiCoachingTip?: string;
 };
 
 export type DailyMealSummaryResponse = {

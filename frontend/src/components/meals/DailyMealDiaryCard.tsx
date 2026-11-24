@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { useToast } from "@/components/ui/Toast";
-import { FoodVisionScannerModal } from "@/components/meals/FoodVisionScannerModal";
+import { MealLogModal } from "@/components/meals/MealLogModal";
 import { getDailyMealSummary, deleteMealLog } from "@/services/meals";
 import type { DailyMealSummaryResponse, MealLogResponse } from "@/types/api";
 
@@ -260,9 +260,9 @@ export function DailyMealDiaryCard({
         </div>
       </PaperCard>
 
-      {/* Modal de Escanear Prato com Food Vision */}
+      {/* Modal Unificado de Registro (Texto ou Foto com IA) */}
       {isScannerOpen && (
-        <FoodVisionScannerModal
+        <MealLogModal
           isOpen={isScannerOpen}
           onClose={() => setIsScannerOpen(false)}
           accessToken={accessToken}

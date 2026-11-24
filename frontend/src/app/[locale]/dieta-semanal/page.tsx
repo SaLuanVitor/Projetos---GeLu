@@ -6,7 +6,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Modal } from "@/components/ui/Modal";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { useToast } from "@/components/ui/Toast";
-import { FoodVisionScannerModal } from "@/components/meals/FoodVisionScannerModal";
+import { MealLogModal } from "@/components/meals/MealLogModal";
 import { Link, useRouter } from "@/i18n/navigation";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import {
@@ -1005,9 +1005,9 @@ export default function WeeklyDietPage() {
           </form>
         </Modal>
 
-        {/* Modal de Escanear Prato com IA (Food Vision) */}
+        {/* Modal Unificado de Registro de Refeições com IA */}
         {foodVisionOpen && sessionToken && (
-          <FoodVisionScannerModal
+          <MealLogModal
             isOpen={foodVisionOpen}
             onClose={() => setFoodVisionOpen(false)}
             accessToken={sessionToken}

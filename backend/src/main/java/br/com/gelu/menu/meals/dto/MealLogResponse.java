@@ -10,6 +10,7 @@ public record MealLogResponse(
     UUID id,
     UUID userId,
     UUID familyId,
+    UUID dietMealId,
     String mealType,
     String dishName,
     String photoUrl,
@@ -21,5 +22,9 @@ public record MealLogResponse(
     BigDecimal sodium,
     List<FoodItemIdentified> items,
     String aiNotes,
+    String status,
+    String inputMethod,
+    String rawInputText,
+    String skipReason,
     LocalDateTime consumedAt,
     LocalDateTime createdAt) {}

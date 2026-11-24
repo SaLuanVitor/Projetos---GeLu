@@ -96,7 +96,20 @@ public class AiAgentCatalog {
                   "total calories",
                   "macronutrients",
                   "nutrition notes"),
-              ".codex/agents/food_vision_agent.md"));
+              ".codex/agents/food_vision_agent.md"),
+          new AiAgentDescriptor(
+              "food-parser",
+              "FoodParserAgent",
+              "Parse natural language meal descriptions in Brazilian Portuguese, extracting items, portions and calculating nutritional macros.",
+              List.of("meal description text", "meal type hint", "user context"),
+              List.of(
+                  "dish name",
+                  "identified food items",
+                  "portion estimates",
+                  "total calories",
+                  "macronutrients",
+                  "nutrition notes"),
+              ".codex/agents/food_parser_agent.md"));
 
   public List<AiAgentDescriptor> listAgents() {
     return agents;

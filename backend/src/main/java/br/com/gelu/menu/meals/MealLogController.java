@@ -4,12 +4,18 @@ import br.com.gelu.menu.auth.AuthenticatedUser;
 import br.com.gelu.menu.common.api.ApiResponse;
 import br.com.gelu.menu.meals.dto.AnalyzeMealPhotoResponse;
 import br.com.gelu.menu.meals.dto.CreateMealLogRequest;
+import br.com.gelu.menu.meals.dto.DailyMealChecklistItemResponse;
 import br.com.gelu.menu.meals.dto.DailyMealSummaryResponse;
+import br.com.gelu.menu.meals.dto.HabitInsightsResponse;
 import br.com.gelu.menu.meals.dto.MealLogResponse;
+import br.com.gelu.menu.meals.dto.ParseMealTextRequest;
+import br.com.gelu.menu.meals.dto.ParseMealTextResponse;
+import br.com.gelu.menu.meals.dto.QuickCheckinMealRequest;
 import br.com.gelu.menu.media.ObjectStorageService;
 import br.com.gelu.menu.media.StoredFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
@@ -31,7 +37,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "Meal Logs & Food Vision", description = "AI visual food recognition and meal tracking")
+@Tag(
+    name = "Meal Logs & Food Vision",
+    description = "AI visual/textual food recognition, habit tracking and meal check-in")
 @RestController
 @RequestMapping("/api/v1/meals")
 public class MealLogController {
@@ -56,6 +64,47 @@ public class MealLogController {
         mealLogService.analyzeMealPhoto(
             user != null ? user.id() : null, file, mealTypeHint, notesHint),
         "Meal photo analyzed successfully by FoodVisionAgent");
+  }
+
+  @Operation(summary = "Parse natural language meal description using FoodParserAgent")
+  @PostMapping("/parse-text")
+  public ApiResponse<ParseMealTextResponse> parseMealText(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @Valid @RequestBody ParseMealTextRequest request) {
+    return ApiResponse.ok(
+        mealLogService.parseMealText(user.id(), request),
+        "Meal description parsed successfully by FoodParserAgent");
+  }
+
+  @Operation(summary = "1-Click quick check-in for a planned meal (consumed or skipped)")
+  @PostMapping("/quick-checkin")
+  public ApiResponse<MealLogResponse> quickCheckin(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @Valid @RequestBody QuickCheckinMealRequest request) {
+    return ApiResponse.ok(
+        mealLogService.quickCheckin(user.id(), request), "Meal checked in successfully");
+  }
+
+  @Operation(summary = "Get daily meal checklist (planned vs consumed vs skipped)")
+  @GetMapping("/daily-checklist")
+  public ApiResponse<List<DailyMealChecklistItemResponse>> getDailyChecklist(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @RequestParam(value = "familyId", required = false) UUID familyId,
+      @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+          LocalDate date) {
+    return ApiResponse.ok(
+        mealLogService.getDailyChecklist(user.id(), familyId, date),
+        "Daily meal checklist loaded successfully");
+  }
+
+  @Operation(summary = "Get user eating habits insights, staples and AI coaching tip")
+  @GetMapping("/habits-insights")
+  public ApiResponse<HabitInsightsResponse> getHabitsInsights(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @RequestParam(value = "familyId", required = false) UUID familyId) {
+    return ApiResponse.ok(
+        mealLogService.getHabitsInsights(user.id(), familyId),
+        "Habits insights loaded successfully");
   }
 
   @Operation(summary = "Record a consumed meal in the daily diary")

@@ -8,6 +8,8 @@ import { ActionLink } from "@/components/ui/ActionButton";
 import { CoupleNotesCard } from "@/components/dashboard/CoupleNotesCard";
 import { WorkoutSection } from "@/components/dashboard/WorkoutSection";
 import { DailyMealDiaryCard } from "@/components/meals/DailyMealDiaryCard";
+import { DailyMealChecklistCard } from "@/components/meals/DailyMealChecklistCard";
+import { HabitsInsightsCard } from "@/components/meals/HabitsInsightsCard";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
@@ -490,67 +492,26 @@ export default function DashboardPage() {
             </div>
           </PaperCard>
 
-          {/* Refeições Reais de Hoje (Dieta Semanal) */}
-          <PaperCard className="lg:col-span-8 p-6" tape="none">
-            <div className="flex items-center justify-between gap-3 border-b border-stone-200/80 dark:border-stone-800 pb-3 mb-4">
-              <div>
-                <h3 className="font-display text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <span>🍽️</span> {isPersonal ? "Cardápio Pessoal de Hoje" : `Cardápio de Hoje (${activeFamily?.name || "Família"})`} ({DAYS_NAMES_PT[currentDayKey]})
-                </h3>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                  {todayMeals.length} refeições programadas na Dieta Semanal
-                </p>
-              </div>
-
-              <ActionLink href="/dieta-semanal" variant="outline" className="text-xs py-1.5 px-3">
-                Ver Semana Completa
-              </ActionLink>
-            </div>
-
-            {todayMeals.length === 0 ? (
-              <div className="rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-800 bg-white/40 dark:bg-[#211c18]/40 p-8 text-center">
-                <span className="text-3xl block mb-2">🥗</span>
-                <p className="text-xs text-stone-600 dark:text-stone-400 font-medium">
-                  Nenhuma refeição cadastrada para hoje na Dieta Semanal.
-                </p>
-                <div className="mt-4">
-                  <ActionLink href="/dieta-semanal" className="text-xs">
-                    ＋ Planejar Refeições de Hoje
-                  </ActionLink>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {todayMeals.map((meal) => (
-                  <div
-                    key={meal.id}
-                    className="flex items-center justify-between rounded-xl border border-stone-200 dark:border-stone-700/80 bg-white dark:bg-[#25201c] p-3 shadow-2xs"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 pr-2">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/60 text-xs font-bold text-amber-900 dark:text-amber-200">
-                        🍽️
-                      </span>
-                      <div className="min-w-0">
-                        <p className="font-bold text-stone-900 dark:text-stone-100 text-sm truncate">
-                          {meal.mealName}
-                        </p>
-                        <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
-                          {meal.mealTime ? `${meal.mealTime} • ` : ""}
-                          {meal.recipes && meal.recipes.length > 0
-                            ? meal.recipes.map((r) => r.recipeName).join(", ")
-                            : "Refeição livre"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <span className="rounded-lg bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-xs font-black text-amber-900 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 shrink-0">
-                      {meal.totalEstimatedCalories} kcal
-                    </span>
-                  </div>
-                ))}
-              </div>
+          {/* Checklist Inteligente de Refeições (1-Clique, IA Texto/Voz & Visão) */}
+          <div className="lg:col-span-8">
+            {session?.accessToken && (
+              <DailyMealChecklistCard
+                accessToken={session.accessToken}
+                familyId={isPersonal ? undefined : activeFamily?.id}
+                onMealsUpdated={loadDashboardData}
+              />
             )}
-          </PaperCard>
+          </div>
+
+          {/* Memória de Hábitos e Insights Nutricionais da IA (Orion) */}
+          <div className="lg:col-span-4">
+            {session?.accessToken && (
+              <HabitsInsightsCard
+                accessToken={session.accessToken}
+                familyId={isPersonal ? undefined : activeFamily?.id}
+              />
+            )}
+          </div>
         </section>
       </main>
     </AppShell>
