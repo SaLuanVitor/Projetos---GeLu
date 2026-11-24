@@ -1,5 +1,7 @@
 package br.com.gelu.menu.admin;
 
+import br.com.gelu.menu.admin.dto.AdminDashboardTelemetryResponse;
+
 import br.com.gelu.menu.admin.dto.AdminFamilyResponse;
 import br.com.gelu.menu.admin.dto.AdminMetricsResponse;
 import br.com.gelu.menu.admin.dto.AdminTeamMemberResponse;
@@ -50,6 +52,14 @@ public class AdminController {
   public ApiResponse<AdminMetricsResponse> getMetrics(
       @AuthenticationPrincipal AuthenticatedUser user) {
     return ApiResponse.ok(adminService.getMetrics(user.id()), "Admin metrics loaded successfully");
+  }
+
+  @GetMapping("/dashboard-telemetry")
+  public ApiResponse<AdminDashboardTelemetryResponse> getDashboardTelemetry(
+      @AuthenticationPrincipal AuthenticatedUser user) {
+    return ApiResponse.ok(
+        adminService.getDashboardTelemetry(user.id()),
+        "Admin dashboard telemetry loaded successfully");
   }
 
   @GetMapping("/users")

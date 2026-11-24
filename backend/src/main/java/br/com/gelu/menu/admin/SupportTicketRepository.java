@@ -24,4 +24,7 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicket, UU
   List<SupportTicket> findAllByUserIds(@Param("userIds") List<UUID> userIds);
 
   long countByStatus(String status);
+
+  @Query("SELECT COUNT(t) FROM SupportTicket t WHERE t.status = 'OPEN' AND (t.category = 'BUG' OR t.category = 'URGENTE' OR t.category = 'CRITICO')")
+  long countUrgentOpen();
 }

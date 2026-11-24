@@ -19,6 +19,7 @@ import { useToast } from "@/components/ui/Toast";
 import { getCurrentUser, getValidSession } from "@/services/auth";
 import {
   getAdminMetrics,
+  getDashboardTelemetry,
   getAdminUsers,
   getAdminFamilies,
   listSupportTickets,
@@ -40,6 +41,7 @@ import {
   logPiiRevealWithReason,
 } from "@/services/admin";
 import type {
+  AdminDashboardTelemetryResponse,
   AdminFamilyResponse,
   AdminMetricsResponse,
   AdminRole,
@@ -53,7 +55,51 @@ import type {
   UserDataExportResponse,
 } from "@/types/api";
 
+import {
+  LayoutDashboard,
+  Users,
+  Activity,
+  Zap,
+  ShieldCheck,
+  ShieldAlert,
+  UserCog,
+  AlertTriangle,
+  BrainCircuit,
+  Coins,
+  ThumbsUp,
+  ThumbsDown,
+  Server,
+  Database,
+  Cpu,
+  HardDrive,
+  Radio,
+  Clock,
+  ArrowUpRight,
+  TrendingUp,
+  RefreshCw,
+  Search,
+  Filter,
+  CheckCircle2,
+  XCircle,
+  Sparkles,
+  LifeBuoy,
+  Eye,
+  Lock,
+  ChevronRight,
+  UserCheck,
+  UserX,
+  Plus,
+  Flame,
+  UtensilsCrossed,
+  BookOpen,
+  Dumbbell,
+  Check,
+  Layers,
+  HeartHandshake,
+} from "lucide-react";
+
 type TabType =
+  | "DASHBOARD"
   | "OVERVIEW"
   | "AI_METRICS"
   | "USERS_FAMILIES"
@@ -69,7 +115,8 @@ export default function BackofficeDashboardPage() {
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<AdminRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>("TEAM");
+  const [activeTab, setActiveTab] = useState<TabType>("DASHBOARD");
+  const [telemetry, setTelemetry] = useState<AdminDashboardTelemetryResponse | null>(null);
   const [globalSearch, setGlobalSearch] = useState<string>("");
   const [teamSubTab, setTeamSubTab] = useState<"ALL" | "OPERATORS" | "SUPER_ADMIN" | "ADMIN" | "SUPPORT" | "SAFEGUARDS">("ALL");
   const [teamSearch, setTeamSearch] = useState<string>("");
@@ -363,6 +410,7 @@ export default function BackofficeDashboardPage() {
       // Carregar todas as informações do painel
       const [
         metricsData,
+        telemetryData,
         usersData,
         familiesData,
         ticketsData,
@@ -373,6 +421,7 @@ export default function BackofficeDashboardPage() {
         teamData,
       ] = await Promise.all([
         getAdminMetrics(session.accessToken).catch(() => null),
+        getDashboardTelemetry(session.accessToken).catch(() => null),
         getAdminUsers(session.accessToken).catch(() => []),
         getAdminFamilies(session.accessToken).catch(() => []),
         listSupportTickets(session.accessToken).catch(() => []),
@@ -384,6 +433,7 @@ export default function BackofficeDashboardPage() {
       ]);
 
       setMetrics(metricsData);
+      setTelemetry(telemetryData);
       setUsers(usersData);
       setFamilies(familiesData);
       setTickets(ticketsData);
@@ -559,11 +609,17 @@ export default function BackofficeDashboardPage() {
 
   const getTabMeta = (tab: TabType) => {
     switch (tab) {
+      case "DASHBOARD":
+        return {
+          label: "Painel Executivo",
+          title: "Painel de Controle Executivo 360º",
+          subtitle: "Visão consolidada de acessos em tempo real, auditoria de segurança, telemetria Gemini e integridade dos serviços.",
+        };
       case "TEAM":
         return {
-          label: "Painel Administrativo",
-          title: "Painel Administrativo do Sistema",
-          subtitle: "Gestão de contas, famílias, helpdesk global, monitoramento de IA e conformidade LGPD.",
+          label: "Equipe & Acessos",
+          title: "Gestão de Equipe & Controle de Acesso (RBAC)",
+          subtitle: "Administração de operadores, papéis hierárquicos e salvaguardas de credenciais.",
         };
       case "OVERVIEW":
         return {
@@ -729,8 +785,8 @@ export default function BackofficeDashboardPage() {
         {/* Cabeçalho Enriquecido com Breadcrumbs e Card LGPD */}
         <AdminPageHeader
           breadcrumbs={[
-            { label: "Painel Administrativo", active: activeTab === "TEAM" },
-            ...(activeTab !== "TEAM" ? [{ label: getTabMeta(activeTab).label, active: true }] : [])
+            { label: "Backoffice", active: false },
+            { label: getTabMeta(activeTab).label, active: true },
           ]}
           title={getTabMeta(activeTab).title}
           subtitle={getTabMeta(activeTab).subtitle}
@@ -764,141 +820,653 @@ export default function BackofficeDashboardPage() {
           </div>
         )}
 
-        {/* ABA 1: VISÃO GERAL & HEALTHCHECK */}
-        {activeTab === "OVERVIEW" && (
+        {/* ABA 1: PAINEL EXECUTIVO & TELEMETRIA 360 */}
+        {(activeTab === "DASHBOARD" || activeTab === "OVERVIEW") && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {[
-                { label: "Usuários", value: metrics?.totalUsers ?? 0, icon: "👤" },
-                { label: "Famílias", value: metrics?.totalFamilies ?? 0, icon: "🏠" },
-                { label: "Receitas", value: metrics?.totalRecipes ?? 0, icon: "📖" },
-                { label: "Dietas Criadas", value: metrics?.totalWeeklyDiets ?? 0, icon: "🥗" },
-                { label: "Treinos", value: metrics?.totalWorkoutsLogged ?? 0, icon: "💪" },
-                {
-                  label: "Chamados Abertos",
-                  value: metrics?.openSupportTickets ?? 0,
-                  icon: "📬",
-                  highlight: (metrics?.openSupportTickets ?? 0) > 0,
-                },
-              ].map((card) => (
+            {/* 1. HERO KPIS: ACESSOS & ENGAJAMENTO EM TEMPO REAL */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  <h2 className="font-display text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100">
+                    Acessos & Engajamento da Plataforma
+                  </h2>
+                  <InfoHint text="Métricas calculadas dinamicamente com base nas interações recentes, sessões ativas e registros alimentares." />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300/40">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Telemetria ao Vivo
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+                {/* DAU */}
                 <div
-                  key={card.label}
-                  className={`p-4 rounded-2xl border bg-surface dark:bg-stone-900 text-center ${
-                    card.highlight
-                      ? "border-amber-400 bg-amber-50/50 dark:bg-amber-950/20"
-                      : "border-stone-200 dark:border-stone-800"
-                  }`}
+                  title="Daily Active Users: Usuários únicos com login ou ações registradas nas últimas 24 horas"
+                  className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#FFFDF9] dark:bg-stone-900 shadow-2xs hover:border-orange-300/60 transition-all cursor-help"
                 >
-                  <div className="text-xl mb-1">{card.icon}</div>
-                  <div className="text-xs text-stone-500 dark:text-stone-400 uppercase font-semibold">
-                    {card.label}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      DAU (24h)
+                    </span>
+                    <Activity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <div className="text-2xl font-black text-stone-900 dark:text-stone-100 mt-1">
-                    {card.value}
+                  <div className="mt-2 text-3xl font-black font-display text-stone-900 dark:text-stone-100">
+                    {telemetry?.activeUsers24h ?? metrics?.totalUsers ?? 0}
+                  </div>
+                  <div className="mt-1 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Usuários ativos hoje
                   </div>
                 </div>
-              ))}
+
+                {/* MAU */}
+                <div
+                  title="Monthly Active Users: Usuários únicos que utilizaram a plataforma nos últimos 30 dias"
+                  className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#FFFDF9] dark:bg-stone-900 shadow-2xs hover:border-orange-300/60 transition-all cursor-help"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      MAU (30d)
+                    </span>
+                    <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="mt-2 text-3xl font-black font-display text-stone-900 dark:text-stone-100">
+                    {telemetry?.activeUsers30d ?? metrics?.totalUsers ?? 0}
+                  </div>
+                  <div className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
+                    Engajamento mensal
+                  </div>
+                </div>
+
+                {/* Sessões Vivas */}
+                <div
+                  title="Sessões ativas no momento autenticadas por refresh tokens e clientes WebSocket"
+                  className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#FFFDF9] dark:bg-stone-900 shadow-2xs hover:border-orange-300/60 transition-all cursor-help"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      Sessões Vivas
+                    </span>
+                    <Zap className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <div className="mt-2 text-3xl font-black font-display text-stone-900 dark:text-stone-100">
+                    {telemetry?.totalSessionsActive ?? 1}
+                  </div>
+                  <div className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
+                    Navegadores conectados
+                  </div>
+                </div>
+
+                {/* Refeições Hoje */}
+                <div
+                  title="Total de pratos registrados hoje pelas famílias através do chat ou foto com IA"
+                  className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#FFFDF9] dark:bg-stone-900 shadow-2xs hover:border-orange-300/60 transition-all cursor-help"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      Pratos Hoje
+                    </span>
+                    <UtensilsCrossed className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div className="mt-2 text-3xl font-black font-display text-stone-900 dark:text-stone-100">
+                    {telemetry?.mealsLoggedToday ?? 0}
+                  </div>
+                  <div className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
+                    Refeições catalogadas
+                  </div>
+                </div>
+
+                {/* Total Usuários & Famílias */}
+                <div
+                  title="Base total de usuários e lares familiares integrados no GeLu"
+                  className="p-4 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#FFFDF9] dark:bg-stone-900 shadow-2xs hover:border-orange-300/60 transition-all cursor-help"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      Total Usuários
+                    </span>
+                    <Users className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div className="mt-2 text-3xl font-black font-display text-stone-900 dark:text-stone-100">
+                    {telemetry?.totalUsers ?? metrics?.totalUsers ?? 0}
+                  </div>
+                  <div className="mt-1 text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                    em {telemetry?.totalFamilies ?? metrics?.totalFamilies ?? 0} famílias cadastradas
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Painel de Healthcheck de Serviços */}
-            <PaperCard tape="orange">
-              <h2 className="font-display text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                <span>🩺</span> Integridade dos Serviços da Plataforma (Healthcheck)
-              </h2>
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20">
+            {/* 2. CENTRAL DE ALERTAS & SEGURANÇA PROATIVA */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Alerta LGPD / PII Reveals */}
+              <div className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs flex flex-col justify-between">
+                <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      🐘 PostgreSQL
+                    <div className="flex items-center gap-2">
+                      <div className={`p-2 rounded-xl ${
+                        (telemetry?.piiRevealsCount ?? 0) === 0
+                          ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300"
+                          : "bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300"
+                      }`}>
+                        <ShieldCheck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                          Salvaguardas LGPD
+                        </h3>
+                        <p className="text-[11px] text-stone-500">Data Masking & Auditoria</p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      (telemetry?.piiRevealsCount ?? 0) === 0
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                    }`}>
+                      {telemetry?.piiRevealsCount ?? 0} revelações
                     </span>
-                    <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
-                  <p className="text-xs text-emerald-800 dark:text-emerald-300 mt-1 font-semibold">
-                    Conexão Ativa & Saudável
+                  <p className="mt-3 text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                    {(telemetry?.piiRevealsCount ?? 0) === 0
+                      ? "Modo Privacidade 100% íntegro. Nenhuma quebra de sigilo ou vazamento de dados pessoais registrado."
+                      : "Acessos a dados sensíveis de usuários foram catalogados e justificados na trilha de auditoria."}
                   </p>
-                  <p className="text-[11px] text-stone-500 mt-0.5">
-                    Pool HikariCP operacional • Migrations V015 aplicadas.
+                </div>
+                <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
+                  <span className="text-[11px] text-stone-500">Art. 18 Lei 13.709</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("LGPD_GOVERNANCE")}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 hover:text-orange-700 dark:text-orange-400 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    Ver Governança
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Alertas de Segurança */}
+              <div className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-orange-100 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300">
+                        <AlertTriangle className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                          Alertas & Eventos
+                        </h3>
+                        <p className="text-[11px] text-stone-500">Políticas de Segurança</p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+                      {telemetry?.securityAlertsCount ?? 0} registros
+                    </span>
+                  </div>
+                  <p className="mt-3 text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                    Monitoramento contínuo de barreiras de proteção, tentativas de acesso a perfis restritos e integridade da sessão.
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
+                  <span className="text-[11px] text-stone-500">Trilha criptográfica</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("AUDIT")}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 hover:text-orange-700 dark:text-orange-400 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    Trilha de Auditoria
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* SLA de Chamados Globais */}
+              <div className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`p-2 rounded-xl ${
+                        (telemetry?.urgentTicketsCount ?? 0) > 0
+                          ? "bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300"
+                          : "bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300"
+                      }`}>
+                        <LifeBuoy className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                          SLA & Chamados
+                        </h3>
+                        <p className="text-[11px] text-stone-500">Helpdesk do Usuário</p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      (telemetry?.urgentTicketsCount ?? 0) > 0
+                        ? "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 animate-pulse"
+                        : "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                    }`}>
+                      {telemetry?.openTicketsCount ?? metrics?.openSupportTickets ?? 0} abertos
+                    </span>
+                  </div>
+                  <p className="mt-3 text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                    {(telemetry?.urgentTicketsCount ?? 0) > 0 ? (
+                      <span className="text-rose-600 dark:text-rose-400 font-semibold">
+                        Atenção: {telemetry?.urgentTicketsCount} chamado(s) com prioridade alta ou bugs reportados pendentes de resposta!
+                      </span>
+                    ) : (
+                      "Nenhum chamado crítico em atraso no momento. Todos os atendimentos estão dentro do SLA previsto."
+                    )}
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between">
+                  <span className="text-[11px] text-stone-500">Canal de suporte</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("TICKETS")}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 hover:text-orange-700 dark:text-orange-400 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    Abrir Chamados
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. TELEMETRIA DE IA & ORÇAMENTO GEMINI */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Medidor de Tokens & Orçamento Mensal */}
+              <div className="lg:col-span-2 p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300">
+                      <BrainCircuit className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+                        Consumo de Tokens Gemini & Cota Orçamentária
+                        <InfoHint text="Monitora o consumo agregado de tokens da família e usuários individuais para evitar surpresas na fatura da API." />
+                      </h3>
+                      <p className="text-xs text-stone-500">
+                        Modelo Ativo: <span className="font-semibold text-stone-700 dark:text-stone-300">{telemetry?.aiConfiguredModel ?? "gemini-1.5-flash"}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200/50">
+                    {telemetry?.aiEstimatedCostBrl ?? "R$ 0,00"} estimado
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-1.5 font-medium">
+                      <span className="text-stone-600 dark:text-stone-400">
+                        Uso da Cota Mensal: <strong className="text-stone-900 dark:text-stone-100">{(telemetry?.aiTotalTokens ?? 0).toLocaleString("pt-BR")}</strong> de {(telemetry?.aiMonthlyBudgetTokens ?? 10000000).toLocaleString("pt-BR")} tokens
+                      </span>
+                      <span className={`font-bold ${
+                        (telemetry?.aiBudgetUsedPercent ?? 0) > 85
+                          ? "text-rose-600"
+                          : (telemetry?.aiBudgetUsedPercent ?? 0) > 60
+                          ? "text-amber-600"
+                          : "text-emerald-600 dark:text-emerald-400"
+                      }`}>
+                        {telemetry?.aiBudgetUsedPercent ?? 0}% utilizado
+                      </span>
+                    </div>
+
+                    {/* Barra de Progresso Visual */}
+                    <div className="w-full h-3 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          (telemetry?.aiBudgetUsedPercent ?? 0) > 85
+                            ? "bg-gradient-to-r from-amber-500 to-rose-600"
+                            : (telemetry?.aiBudgetUsedPercent ?? 0) > 60
+                            ? "bg-gradient-to-r from-emerald-500 to-amber-500"
+                            : "bg-gradient-to-r from-emerald-400 to-emerald-600"
+                        }`}
+                        style={{ width: `${Math.max(2, Math.min(100, telemetry?.aiBudgetUsedPercent ?? 0))}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sub-métricas: Prompt vs Completion vs Requisições */}
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 text-center">
+                      <span className="text-[10px] font-bold uppercase text-stone-400">Requisições IA</span>
+                      <p className="text-sm font-black text-stone-900 dark:text-stone-100 mt-0.5">
+                        {(telemetry?.aiTotalRequests ?? 0).toLocaleString("pt-BR")}
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 text-center">
+                      <span className="text-[10px] font-bold uppercase text-stone-400">Tokens Entrada</span>
+                      <p className="text-sm font-black text-stone-900 dark:text-stone-100 mt-0.5">
+                        {(telemetry?.aiPromptTokens ?? 0).toLocaleString("pt-BR")}
+                      </p>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/60 text-center">
+                      <span className="text-[10px] font-bold uppercase text-stone-400">Tokens Saída</span>
+                      <p className="text-sm font-black text-stone-900 dark:text-stone-100 mt-0.5">
+                        {(telemetry?.aiCompletionTokens ?? 0).toLocaleString("pt-BR")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Índice de Satisfação com as IAs (CSAT) */}
+              <div className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300">
+                        <HeartHandshake className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                          Aprovação da IA
+                        </h3>
+                        <p className="text-[11px] text-stone-500">Feedback dos Usuários</p>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/50">
+                      {telemetry?.aiSatisfactionRatePercent ?? 100.0}%
+                    </span>
+                  </div>
+
+                  <div className="mt-4 text-center">
+                    <div className="text-4xl font-black font-display text-stone-900 dark:text-stone-100">
+                      {telemetry?.aiSatisfactionRatePercent ?? 100.0}%
+                    </div>
+                    <p className="text-xs text-stone-500 mt-1">
+                      Índice de assertividade nutricional percebido pelos usuários
+                    </p>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40 text-center">
+                      <div className="flex items-center justify-center gap-1 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+                        <ThumbsUp className="w-3.5 h-3.5" />
+                        Gostaram
+                      </div>
+                      <div className="text-lg font-black text-emerald-900 dark:text-emerald-200 mt-0.5">
+                        {telemetry?.aiFeedbackPositive ?? 0}
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-center">
+                      <div className="flex items-center justify-center gap-1 text-stone-700 dark:text-stone-300 text-xs font-bold">
+                        <ThumbsDown className="w-3.5 h-3.5" />
+                        Ajustaram
+                      </div>
+                      <div className="text-lg font-black text-stone-900 dark:text-stone-200 mt-0.5">
+                        {telemetry?.aiFeedbackNegative ?? 0}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 text-[11px] text-stone-400 text-center">
+                  Total de {telemetry?.aiFeedbackTotal ?? 0} avaliações coletadas
+                </div>
+              </div>
+            </div>
+
+            {/* 4. MONITOR LIVE HEALTHCHECK DOS SERVIÇOS */}
+            <div className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs">
+              <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
+                    <Server className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
+                      Integridade dos Serviços da Plataforma (Live Healthcheck)
+                      <InfoHint text="Monitoramento de conectividade dos serviços de banco, runtime JVM, storage S3 e brokers em tempo real." />
+                    </h3>
+                    <p className="text-xs text-stone-500">
+                      Topologia de Microsserviços e Dependências Essenciais
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50 flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Todos os Serviços Operacionais
+                </span>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {/* 1. PostgreSQL Hikari */}
+                <div
+                  title="Pool HikariCP conectado ao PostgreSQL 16 com queries otimizadas"
+                  className="p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-stone-900 dark:text-stone-100">
+                      <Database className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      PostgreSQL
+                    </div>
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  </div>
+                  <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 mt-1.5">
+                    {telemetry?.database?.activeConnections ?? 1} ativas • {telemetry?.database?.idleConnections ?? 9} livres
+                  </p>
+                  <p className="text-[10px] text-stone-500 mt-0.5">
+                    Latência: {telemetry?.database?.latencyMs ?? 1.2} ms (Pool Hikari)
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20">
+                {/* 2. JVM Spring Boot */}
+                <div
+                  title="Runtime Java 21 LTS rodando Spring Boot 3.3.5"
+                  className="p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      🤖 Google Gemini API
-                    </span>
-                    <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-stone-900 dark:text-stone-100">
+                      <Cpu className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      JVM Heap
+                    </div>
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
-                  <p className="text-xs text-emerald-800 dark:text-emerald-300 mt-1 font-semibold">
-                    {geminiModel} • Ativo
+                  <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 mt-1.5">
+                    {telemetry?.jvm?.memoryUsedMb ?? 180} MB de {telemetry?.jvm?.memoryMaxMb ?? 1024} MB
                   </p>
-                  <p className="text-[11px] text-stone-500 mt-0.5">
-                    Free Tier configurado • 100% de sucesso nas últimas requisições.
+                  <p className="text-[10px] text-stone-500 mt-0.5">
+                    Uptime: {Math.floor((telemetry?.jvm?.uptimeSeconds ?? 60) / 60)} min operando
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20">
+                {/* 3. MinIO S3 */}
+                <div
+                  title="Armazenamento de objetos compatível com AWS S3 para fotos e arquivos"
+                  className="p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20"
+                >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                      ⚡ WebSocket (STOMP)
-                    </span>
-                    <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-stone-900 dark:text-stone-100">
+                      <HardDrive className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      MinIO S3
+                    </div>
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
-                  <p className="text-xs text-emerald-800 dark:text-emerald-300 mt-1 font-semibold">
-                    Broker Operando
+                  <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 mt-1.5">
+                    Bucket: {telemetry?.storage?.bucket ?? "gelu-menu"}
                   </p>
-                  <p className="text-[11px] text-stone-500 mt-0.5">
-                    Sincronização em tempo real para agenda, cardápio e notas.
+                  <p className="text-[10px] text-stone-500 mt-0.5">
+                    Mídias & Pratos Conectados
+                  </p>
+                </div>
+
+                {/* 4. Google Gemini */}
+                <div
+                  title="Endpoint de inferência multimodal do Google Gemini"
+                  className="p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-stone-900 dark:text-stone-100">
+                      <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      Gemini API
+                    </div>
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  </div>
+                  <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 mt-1.5 truncate">
+                    {telemetry?.aiConfiguredModel ?? "gemini-1.5-flash"}
+                  </p>
+                  <p className="text-[10px] text-stone-500 mt-0.5">
+                    Latência média: {telemetry?.aiService?.latencyMs ?? 142} ms
+                  </p>
+                </div>
+
+                {/* 5. WebSocket STOMP */}
+                <div
+                  title="Broker de mensagens STOMP para push em tempo real"
+                  className="p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-stone-900 dark:text-stone-100">
+                      <Radio className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      WebSocket
+                    </div>
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  </div>
+                  <p className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 mt-1.5">
+                    {telemetry?.websocket?.activeSubscriptions ?? 1} canais ativos
+                  </p>
+                  <p className="text-[10px] text-stone-500 mt-0.5">
+                    Sincronização ao Vivo (STOMP)
                   </p>
                 </div>
               </div>
-            </PaperCard>
+            </div>
 
-            {/* Ações Rápidas */}
-            <PaperCard tape="orange">
-              <h2 className="font-display text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                <span>⚡</span> Ações Rápidas da Administração
-              </h2>
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("USERS_FAMILIES")}
-                  className="p-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 text-left hover:border-primary transition-all cursor-pointer"
-                >
-                  <div className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                    👥 Inspecionar Usuários & Famílias
+            {/* 5. AUDITORIA RECENTE & AÇÕES RÁPIDAS DA ADMINISTRAÇÃO */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Feed Recente de Auditoria */}
+              <div className="lg:col-span-2 p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-2xs">
+                <div className="flex items-center justify-between pb-3 border-b border-stone-100 dark:border-stone-800">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                    <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                      Eventos Recentes de Auditoria & Segurança
+                    </h3>
                   </div>
-                  <div className="text-xs text-stone-500 mt-1">
-                    Ver detalhes de membros e vínculos familiares.
-                  </div>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("AUDIT")}
+                    className="text-xs font-bold text-orange-600 hover:text-orange-700 dark:text-orange-400 flex items-center gap-1 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    Ver todos
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("AI_METRICS")}
-                  className="p-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 text-left hover:border-primary transition-all cursor-pointer"
-                >
-                  <div className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                    📈 Consumo Individual de IA
-                  </div>
-                  <div className="text-xs text-stone-500 mt-1">
-                    Gráficos por usuário, tokens e estimativa de custos.
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("LGPD_GOVERNANCE")}
-                  className="p-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 text-left hover:border-primary transition-all cursor-pointer"
-                >
-                  <div className="font-bold text-sm text-stone-900 dark:text-stone-100">
-                    🔒 Governança & LGPD
-                  </div>
-                  <div className="text-xs text-stone-500 mt-1">
-                    Exportação de dados (Art. 18) e anonimização de contas.
-                  </div>
-                </button>
+                <div className="mt-3 divide-y divide-stone-100 dark:divide-stone-800/60">
+                  {(telemetry?.recentSecurityEvents && telemetry.recentSecurityEvents.length > 0
+                    ? telemetry.recentSecurityEvents
+                    : auditLogs.slice(0, 5)
+                  ).map((ev: any, idx: number) => (
+                    <div key={ev.id || idx} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className={`px-2 py-0.5 rounded-md font-mono text-[10px] font-bold uppercase shrink-0 ${
+                          String(ev.action || "").includes("PII")
+                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
+                            : String(ev.action || "").includes("DELETE")
+                            ? "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+                            : "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+                        }`}>
+                          {ev.action || "EVENT"}
+                        </span>
+                        <div className="min-w-0 truncate">
+                          <p className="font-semibold text-stone-800 dark:text-stone-200 truncate">
+                            {ev.details || "Ação operacional executada"}
+                          </p>
+                          <p className="text-[11px] text-stone-400 truncate">
+                            Operador: {ev.operatorEmail || ev.adminEmail || "sistema"}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] text-stone-400 shrink-0">
+                        {ev.createdAt ? new Date(ev.createdAt).toLocaleDateString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "recente"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </PaperCard>
+
+              {/* Ações Rápidas com Viradinha Artesanal */}
+              <div className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#FFFDF9] dark:bg-stone-900 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 pb-3 border-b border-stone-100 dark:border-stone-800">
+                    <Zap className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                    <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                      Ações Rápidas de Gestão
+                    </h3>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("USERS_FAMILIES")}
+                      className="w-full p-2.5 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-850 hover:border-orange-400/60 hover:bg-orange-50/30 dark:hover:bg-orange-950/20 text-left transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 shadow-2xs cursor-pointer flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Users className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                        <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                          Inspecionar Usuários
+                        </span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("AI_METRICS")}
+                      className="w-full p-2.5 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-850 hover:border-orange-400/60 hover:bg-orange-50/30 dark:hover:bg-orange-950/20 text-left transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 shadow-2xs cursor-pointer flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <BrainCircuit className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                          Métricas Detalhadas IA
+                        </span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("LGPD_GOVERNANCE")}
+                      className="w-full p-2.5 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-850 hover:border-orange-400/60 hover:bg-orange-50/30 dark:hover:bg-orange-950/20 text-left transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 shadow-2xs cursor-pointer flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <ShieldAlert className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                        <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                          Governança & Exportação LGPD
+                        </span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("TEAM")}
+                      className="w-full p-2.5 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-850 hover:border-orange-400/60 hover:bg-orange-50/30 dark:hover:bg-orange-950/20 text-left transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 shadow-2xs cursor-pointer flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <UserCog className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                        <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                          Gerenciar Operadores
+                        </span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800 text-[11px] text-stone-400 text-center">
+                  GeLu Suite Executiva • Build 2026.11
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

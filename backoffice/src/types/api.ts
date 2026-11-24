@@ -679,3 +679,79 @@ export type PiiRevealRequest = {
   reason: string;
 };
 
+export type DatabaseHealthDto = {
+  status: string;
+  activeConnections: number;
+  idleConnections: number;
+  maxConnections: number;
+  latencyMs: number;
+};
+
+export type JvmHealthDto = {
+  status: string;
+  uptimeSeconds: number;
+  memoryUsedMb: number;
+  memoryMaxMb: number;
+};
+
+export type StorageHealthDto = {
+  status: string;
+  provider: string;
+  bucket: string;
+};
+
+export type AiServiceHealthDto = {
+  status: string;
+  model: string;
+  latencyMs: number;
+  healthy: boolean;
+};
+
+export type WebSocketHealthDto = {
+  status: string;
+  activeSubscriptions: number;
+};
+
+export type RecentAuditItemDto = {
+  id: string;
+  action: string;
+  operatorEmail: string;
+  details: string;
+  createdAt: string;
+};
+
+export type AdminDashboardTelemetryResponse = {
+  totalUsers: number;
+  activeUsers24h: number;
+  activeUsers30d: number;
+  totalSessionsActive: number;
+  totalFamilies: number;
+  mealsLoggedToday: number;
+  recipesCount: number;
+  weeklyDietsCount: number;
+  securityAlertsCount: number;
+  piiRevealsCount: number;
+  openTicketsCount: number;
+  urgentTicketsCount: number;
+  aiTotalRequests: number;
+  aiTotalTokens: number;
+  aiPromptTokens: number;
+  aiCompletionTokens: number;
+  aiEstimatedCostBrl: string;
+  aiMonthlyBudgetTokens: number;
+  aiBudgetUsedPercent: number;
+  aiConfiguredModel: string;
+  aiFeedbackTotal: number;
+  aiFeedbackPositive: number;
+  aiFeedbackNegative: number;
+  aiSatisfactionRatePercent: number;
+  database: DatabaseHealthDto;
+  jvm: JvmHealthDto;
+  storage: StorageHealthDto;
+  aiService: AiServiceHealthDto;
+  websocket: WebSocketHealthDto;
+  recentSecurityEvents: RecentAuditItemDto[];
+  generatedAt: string;
+};
+
+

@@ -1,5 +1,6 @@
 import { ApiClientError, getValidSession } from "@/services/auth";
 import type {
+  AdminDashboardTelemetryResponse,
   AdminFamilyResponse,
   AdminMetricsResponse,
   AdminRole,
@@ -28,6 +29,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1
 
 export async function getAdminMetrics(accessToken: string): Promise<AdminMetricsResponse> {
   return request<AdminMetricsResponse>("/admin/metrics", accessToken);
+}
+
+export async function getDashboardTelemetry(accessToken: string): Promise<AdminDashboardTelemetryResponse> {
+  return request<AdminDashboardTelemetryResponse>("/admin/dashboard-telemetry", accessToken);
 }
 
 export async function getAdminUsers(accessToken: string): Promise<AdminUserResponse[]> {

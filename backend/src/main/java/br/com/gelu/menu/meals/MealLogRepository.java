@@ -23,4 +23,7 @@ public interface MealLogRepository extends JpaRepository<MealLog, UUID> {
 
   @Query("SELECT COUNT(m) FROM MealLog m WHERE m.userId = :userId AND m.consumedAt >= :since")
   long countByUserIdSince(@Param("userId") UUID userId, @Param("since") LocalDateTime since);
+
+  @Query("SELECT COUNT(m) FROM MealLog m WHERE m.consumedAt >= :since")
+  long countSince(@Param("since") LocalDateTime since);
 }

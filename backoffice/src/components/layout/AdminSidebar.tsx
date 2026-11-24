@@ -2,8 +2,23 @@
 
 import React from "react";
 import type { AdminRole } from "@/types/api";
+import {
+  LayoutDashboard,
+  Activity,
+  BrainCircuit,
+  Users,
+  ShieldCheck,
+  ShieldAlert,
+  UserCog,
+  LifeBuoy,
+  Settings,
+  ScrollText,
+  ChevronDown,
+  X,
+} from "lucide-react";
 
 export type AdminTabType =
+  | "DASHBOARD"
   | "OVERVIEW"
   | "AI_METRICS"
   | "USERS_FAMILIES"
@@ -42,90 +57,48 @@ export function AdminSidebar({
     hasSubmenu?: boolean;
   }[] = [
     {
-      id: "TEAM",
-      label: "Painel Administrativo",
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-        </svg>
-      ),
-    },
-    {
-      id: "OVERVIEW",
-      label: "Visão Geral & Health",
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
+      id: "DASHBOARD",
+      label: "Painel Executivo",
+      icon: <LayoutDashboard className="w-5 h-5" />,
     },
     {
       id: "AI_METRICS",
       label: "Consumo & Métricas IA",
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-      ),
+      icon: <BrainCircuit className="w-5 h-5" />,
     },
     {
       id: "USERS_FAMILIES",
       label: "Usuários & Famílias",
       badge: usersCount > 0 ? usersCount : undefined,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      ),
+      icon: <Users className="w-5 h-5" />,
     },
     {
       id: "LGPD_GOVERNANCE",
       label: "Governança & LGPD",
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      ),
+      icon: <ShieldAlert className="w-5 h-5" />,
     },
     {
       id: "TEAM",
       label: "Equipe & Acessos",
       hasSubmenu: true,
       badge: teamCount > 0 ? teamCount : undefined,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      ),
+      icon: <UserCog className="w-5 h-5" />,
     },
     {
       id: "TICKETS",
       label: "Chamados Globais",
       badge: openTicketsCount > 0 ? `${openTicketsCount} aberto${openTicketsCount > 1 ? "s" : ""}` : undefined,
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      ),
+      icon: <LifeBuoy className="w-5 h-5" />,
     },
     {
       id: "SETTINGS",
       label: "Configurações Globais",
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
+      icon: <Settings className="w-5 h-5" />,
     },
     {
       id: "AUDIT",
       label: "Auditoria do Sistema",
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
+      icon: <ScrollText className="w-5 h-5" />,
     },
   ];
 
@@ -147,8 +120,8 @@ export function AdminSidebar({
         {/* Top Logo / Branding */}
         <div className="flex h-18 items-center justify-between px-6 border-b border-stone-200/60 dark:border-stone-800/80">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 shadow-sm text-white font-black text-xl">
-              🛡️
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-600 via-orange-600 to-amber-700 shadow-md text-amber-100 border border-amber-400/40">
+              <ShieldCheck className="w-5 h-5 text-amber-100" />
             </div>
             <div>
               <span className="font-display text-lg font-black tracking-tight text-stone-900 dark:text-stone-100">
@@ -167,9 +140,7 @@ export function AdminSidebar({
               onClick={onCloseMobile}
               className="lg:hidden rounded-lg p-1.5 text-stone-400 hover:bg-stone-200/60 dark:hover:bg-stone-800"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -223,16 +194,11 @@ export function AdminSidebar({
                     </span>
                   )}
                   {item.hasSubmenu && (
-                    <svg
+                    <ChevronDown
                       className={`w-3.5 h-3.5 text-stone-400 transition-transform ${
                         isActive ? "rotate-180 text-orange-600" : ""
                       }`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    />
                   )}
                 </div>
               </button>

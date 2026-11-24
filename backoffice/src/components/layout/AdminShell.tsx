@@ -21,7 +21,7 @@ interface AdminShellProps {
 
 export function AdminShell({
   children,
-  activeTab = "OVERVIEW",
+  activeTab = "DASHBOARD",
   onTabChange,
   openTicketsCount = 0,
   usersCount = 0,
