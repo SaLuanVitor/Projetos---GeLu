@@ -45,6 +45,18 @@ public class Workout {
   @Column(name = "notes", columnDefinition = "TEXT")
   private String notes;
 
+  @Column(name = "days_of_week", length = 100)
+  private String daysOfWeek;
+
+  @Column(name = "exercises_json", columnDefinition = "TEXT")
+  private String exercisesJson;
+
+  @Column(name = "favorite", nullable = false)
+  private boolean favorite = false;
+
+  @Column(name = "intensity", nullable = false, length = 30)
+  private String intensity = "MODERADO";
+
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
 
@@ -61,6 +73,21 @@ public class Workout {
       int caloriesPerHour,
       int defaultDurationMinutes,
       String notes) {
+    this(family, user, title, category, caloriesPerHour, defaultDurationMinutes, notes, null, null, false, "MODERADO");
+  }
+
+  public Workout(
+      Family family,
+      User user,
+      String title,
+      String category,
+      int caloriesPerHour,
+      int defaultDurationMinutes,
+      String notes,
+      String daysOfWeek,
+      String exercisesJson,
+      boolean favorite,
+      String intensity) {
     this.family = family;
     this.user = user;
     this.title = title.trim();
@@ -68,6 +95,10 @@ public class Workout {
     this.caloriesPerHour = caloriesPerHour > 0 ? caloriesPerHour : 400;
     this.defaultDurationMinutes = defaultDurationMinutes > 0 ? defaultDurationMinutes : 60;
     this.notes = notes;
+    this.daysOfWeek = daysOfWeek;
+    this.exercisesJson = exercisesJson;
+    this.favorite = favorite;
+    this.intensity = intensity != null ? intensity.trim().toUpperCase() : "MODERADO";
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -104,6 +135,22 @@ public class Workout {
     return notes;
   }
 
+  public String getDaysOfWeek() {
+    return daysOfWeek;
+  }
+
+  public String getExercisesJson() {
+    return exercisesJson;
+  }
+
+  public boolean isFavorite() {
+    return favorite;
+  }
+
+  public String getIntensity() {
+    return intensity;
+  }
+
   public Instant getCreatedAt() {
     return createdAt;
   }
@@ -117,13 +164,30 @@ public class Workout {
       String category,
       int caloriesPerHour,
       int defaultDurationMinutes,
-      String notes) {
+      String notes,
+      String daysOfWeek,
+      String exercisesJson,
+      Boolean favorite,
+      String intensity) {
     this.title = title.trim();
     this.category = category != null ? category.trim().toUpperCase() : this.category;
     this.caloriesPerHour = caloriesPerHour > 0 ? caloriesPerHour : this.caloriesPerHour;
     this.defaultDurationMinutes =
         defaultDurationMinutes > 0 ? defaultDurationMinutes : this.defaultDurationMinutes;
     this.notes = notes;
+    this.daysOfWeek = daysOfWeek;
+    this.exercisesJson = exercisesJson;
+    if (favorite != null) this.favorite = favorite;
+    if (intensity != null && !intensity.isBlank()) this.intensity = intensity.trim().toUpperCase();
     this.updatedAt = Instant.now();
+  }
+
+  public void update(
+      String title,
+      String category,
+      int caloriesPerHour,
+      int defaultDurationMinutes,
+      String notes) {
+    update(title, category, caloriesPerHour, defaultDurationMinutes, notes, this.daysOfWeek, this.exercisesJson, this.favorite, this.intensity);
   }
 }

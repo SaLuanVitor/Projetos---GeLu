@@ -4,6 +4,7 @@ import type {
   ApiResponse,
   CreateWorkoutLogRequest,
   DailyWorkoutSummaryResponse,
+  TodayWorkoutRoutineResponse,
   WorkoutLogResponse,
   WorkoutRequest,
   WorkoutResponse,
@@ -26,6 +27,36 @@ export async function createWorkout(
   return request<WorkoutResponse>("/workouts", accessToken, {
     method: "POST",
     body,
+  });
+}
+
+export async function updateWorkout(
+  accessToken: string,
+  id: string,
+  body: WorkoutRequest
+): Promise<WorkoutResponse> {
+  return request<WorkoutResponse>(`/workouts/${id}`, accessToken, {
+    method: "PUT",
+    body,
+  });
+}
+
+export async function getTodayWorkoutRoutine(
+  accessToken: string,
+  familyId?: string
+): Promise<TodayWorkoutRoutineResponse> {
+  const query = familyId ? `?familyId=${familyId}` : "";
+  return request<TodayWorkoutRoutineResponse>(`/workouts/today${query}`, accessToken);
+}
+
+export async function completeRoutineWorkout(
+  accessToken: string,
+  id: string,
+  notes?: string
+): Promise<WorkoutLogResponse> {
+  const query = notes ? `?notes=${encodeURIComponent(notes)}` : "";
+  return request<WorkoutLogResponse>(`/workouts/${id}/complete${query}`, accessToken, {
+    method: "POST",
   });
 }
 

@@ -9,4 +9,8 @@ public record WorkoutRequest(
     String category,
     Integer caloriesPerHour,
     Integer defaultDurationMinutes,
-    String notes) {}
+    String notes,
+    String daysOfWeek,
+    String exercisesJson,
+    Boolean favorite,
+    String intensity) {}

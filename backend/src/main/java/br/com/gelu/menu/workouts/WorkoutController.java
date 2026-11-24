@@ -4,6 +4,7 @@ import br.com.gelu.menu.auth.AuthenticatedUser;
 import br.com.gelu.menu.common.api.ApiResponse;
 import br.com.gelu.menu.workouts.dto.CreateWorkoutLogRequest;
 import br.com.gelu.menu.workouts.dto.DailyWorkoutSummaryResponse;
+import br.com.gelu.menu.workouts.dto.TodayWorkoutRoutineResponse;
 import br.com.gelu.menu.workouts.dto.WorkoutLogResponse;
 import br.com.gelu.menu.workouts.dto.WorkoutRequest;
 import br.com.gelu.menu.workouts.dto.WorkoutResponse;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +47,33 @@ public class WorkoutController {
       @AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody WorkoutRequest request) {
     return ApiResponse.ok(
         workoutService.createWorkout(user.id(), request), "Workout created successfully");
+  }
+
+  @PutMapping("/{id}")
+  public ApiResponse<WorkoutResponse> updateWorkout(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @PathVariable UUID id,
+      @Valid @RequestBody WorkoutRequest request) {
+    return ApiResponse.ok(
+        workoutService.updateWorkout(user.id(), id, request), "Workout updated successfully");
+  }
+
+  @GetMapping("/today")
+  public ApiResponse<TodayWorkoutRoutineResponse> getTodayRoutine(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @RequestParam(required = false) UUID familyId) {
+    return ApiResponse.ok(
+        workoutService.getTodayRoutine(user.id(), familyId), "Today routine loaded successfully");
+  }
+
+  @PostMapping("/{id}/complete")
+  public ApiResponse<WorkoutLogResponse> completeRoutineWorkout(
+      @AuthenticationPrincipal AuthenticatedUser user,
+      @PathVariable UUID id,
+      @RequestParam(required = false) String notes) {
+    return ApiResponse.ok(
+        workoutService.completeRoutineWorkout(user.id(), id, notes),
+        "Routine workout completed successfully");
   }
 
   @DeleteMapping("/{id}")

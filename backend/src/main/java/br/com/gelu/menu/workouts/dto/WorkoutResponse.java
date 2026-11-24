@@ -13,6 +13,10 @@ public record WorkoutResponse(
     int caloriesPerHour,
     int defaultDurationMinutes,
     String notes,
+    String daysOfWeek,
+    String exercisesJson,
+    boolean favorite,
+    String intensity,
     Instant createdAt) {
   public static WorkoutResponse from(Workout w) {
     return new WorkoutResponse(
@@ -24,6 +28,10 @@ public record WorkoutResponse(
         w.getCaloriesPerHour(),
         w.getDefaultDurationMinutes(),
         w.getNotes(),
+        w.getDaysOfWeek(),
+        w.getExercisesJson(),
+        w.isFavorite(),
+        w.getIntensity() != null ? w.getIntensity() : "MODERADO",
         w.getCreatedAt());
   }
 }

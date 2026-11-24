@@ -291,9 +291,9 @@
       "category": "Categoria",
       "maxTime": "Tempo máx.",
       "maxCalories": "Calorias máx.",
-    "favorite": "Favoritos",
-    "allFavorites": "Todas",
-    "onlyFavorites": "Apenas favoritas",
+      "favorite": "Favoritos",
+      "allFavorites": "Todas",
+      "onlyFavorites": "Apenas favoritas",
       "allCategories": "Todas as categorias",
       "anyTime": "Qualquer tempo",
       "noCalorieLimit": "Sem limite",
@@ -523,6 +523,21 @@
       "family": "Ambiente familiar, membros, permissoes e convites por e-mail entram nas sprints de familia.",
       "recipes": "Listagem, filtros, favoritos e cadastro de receitas entram a partir da Sprint 3.",
       "ai": "As dicas do chef inteligente serao conectadas ao modulo de IA quando a Sprint 11 comecar."
+    }
+  },
+  "Workouts": {
+    "title": "Treinos & Rotinas",
+    "subtitle": "Cadastre suas fichas, organize sua semana e acompanhe o ritmo de movimento da casa.",
+    "newWorkout": "Nova Ficha de Treino",
+    "todayRoutine": "Treino de Hoje",
+    "weeklyRoutine": "Rotina Semanal",
+    "myWorkouts": "Minhas Fichas",
+    "recentHistory": "Histórico Recente",
+    "filters": {
+      "searchPlaceholder": "Buscar treino ou exercício...",
+      "allCategories": "Todas as categorias",
+      "allFavorites": "Todos os treinos",
+      "onlyFavorites": "Apenas favoritos"
     }
   }
 }

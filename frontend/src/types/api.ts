@@ -558,6 +558,13 @@ export type FamilyInviteResponse = {
   createdAt: string;
 };
 
+export type WorkoutExercise = {
+  name: string;
+  sets?: string;
+  weight?: string;
+  notes?: string;
+};
+
 export type WorkoutResponse = {
   id: string;
   familyId?: string | null;
@@ -567,6 +574,10 @@ export type WorkoutResponse = {
   caloriesPerHour: number;
   defaultDurationMinutes: number;
   notes?: string | null;
+  daysOfWeek?: string | null;
+  exercisesJson?: string | null;
+  favorite: boolean;
+  intensity: string;
   createdAt: string;
 };
 
@@ -577,6 +588,23 @@ export type WorkoutRequest = {
   caloriesPerHour?: number;
   defaultDurationMinutes?: number;
   notes?: string;
+  daysOfWeek?: string;
+  exercisesJson?: string;
+  favorite?: boolean;
+  intensity?: string;
+};
+
+export type TodayWorkoutRoutineResponse = {
+  dayOfWeek: string;
+  dayLabel: string;
+  scheduledWorkouts: WorkoutResponse[];
+  currentWorkout?: WorkoutResponse | null;
+  completedToday: boolean;
+  todayCaloriesBurned: number;
+  todayDurationMinutes: number;
+  totalLoggedWorkoutsToday: number;
+  suggestedPreWorkoutMeal?: string | null;
+  suggestedPostWorkoutMeal?: string | null;
 };
 
 export type CreateWorkoutLogRequest = {

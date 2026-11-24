@@ -291,9 +291,9 @@
       "category": "Category",
       "maxTime": "Max time",
       "maxCalories": "Max calories",
-    "favorite": "Favorites",
-    "allFavorites": "All",
-    "onlyFavorites": "Favorites only",
+      "favorite": "Favorites",
+      "allFavorites": "All",
+      "onlyFavorites": "Favorites only",
       "allCategories": "All categories",
       "anyTime": "Any time",
       "noCalorieLimit": "No limit",
@@ -523,6 +523,21 @@
       "family": "Family space, members, permissions and email invites enter the family sprints.",
       "recipes": "Listing, filters, favorites and recipe creation start in Sprint 3.",
       "ai": "Smart chef tips will connect to the AI module when Sprint 11 starts."
+    }
+  },
+  "Workouts": {
+    "title": "Workouts & Routines",
+    "subtitle": "Manage your workout routines, exercise sheets, and track your daily physical activities.",
+    "newWorkout": "New Workout Sheet",
+    "todayRoutine": "Today's Workout",
+    "weeklyRoutine": "Weekly Routine",
+    "myWorkouts": "My Workout Sheets",
+    "recentHistory": "Recent History",
+    "filters": {
+      "searchPlaceholder": "Search workout or exercise...",
+      "allCategories": "All categories",
+      "allFavorites": "All workouts",
+      "onlyFavorites": "Only favorites"
     }
   }
 }

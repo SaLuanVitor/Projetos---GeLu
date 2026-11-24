@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { Link } from "@/i18n/navigation";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Modal } from "@/components/ui/Modal";
 import { TextInput, SelectField } from "@/components/ui/FormField";
 import { useToast } from "@/components/ui/Toast";
-import { logWorkout } from "@/services/workouts";
+import {
+  logWorkout,
+  getTodayWorkoutRoutine,
+  completeRoutineWorkout,
+} from "@/services/workouts";
 import { estimateWorkoutCalories } from "@/services/ai";
 import {
   Dumbbell,
@@ -21,9 +26,11 @@ import {
   Sparkles,
   Lightbulb,
   Loader2,
+  CalendarDays,
+  ChevronRight,
   type LucideIcon,
 } from "lucide-react";
-import type { DailyWorkoutSummaryResponse } from "@/types/api";
+import type { DailyWorkoutSummaryResponse, TodayWorkoutRoutineResponse } from "@/types/api";
 
 interface PresetWorkoutItem {
   title: string;
@@ -69,6 +76,34 @@ export function WorkoutSection({
   const [saving, setSaving] = useState(false);
   const [estimating, setEstimating] = useState(false);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+  const [routine, setRoutine] = useState<TodayWorkoutRoutineResponse | null>(null);
+  const [completingRoutine, setCompletingRoutine] = useState(false);
+
+  const loadRoutine = useCallback(async () => {
+    try {
+      const data = await getTodayWorkoutRoutine(accessToken);
+      setRoutine(data);
+    } catch {}
+  }, [accessToken]);
+
+  useEffect(() => {
+    loadRoutine();
+  }, [loadRoutine]);
+
+  const handleQuickCompleteRoutine = async () => {
+    if (!routine || !routine.currentWorkout) return;
+    setCompletingRoutine(true);
+    try {
+      await completeRoutineWorkout(accessToken, routine.currentWorkout.id);
+      toast.success(`Parabéns! "${routine.currentWorkout.title}" marcado como concluído!`);
+      loadRoutine();
+      onRefresh();
+    } catch {
+      toast.error("Não foi possível concluir o treino.");
+    } finally {
+      setCompletingRoutine(false);
+    }
+  };
 
   const calculateCalorieEstimate = (minsStr: string, cat: string, inten: string) => {
     const mins = parseInt(minsStr, 10);
@@ -173,21 +208,65 @@ export function WorkoutSection({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              handleSelectPreset(PRESET_WORKOUTS[0]);
-              setModalOpen(true);
-            }}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-md transition-all cursor-pointer ${
-              completed
-                ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
-                : "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20 animate-pulse hover:animate-none"
-            }`}
-          >
-            <span>{completed ? "+ Registrar Outro Treino" : "Treinei Hoje!"}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/treinos"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-850 px-3.5 py-2 text-xs font-bold text-stone-700 dark:text-stone-300 hover:border-orange-400 hover:text-orange-600 shadow-2xs transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0"
+            >
+              <span>Caderno de Treinos</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleSelectPreset(PRESET_WORKOUTS[0]);
+                setModalOpen(true);
+              }}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-md transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 cursor-pointer ${
+                completed
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+                  : "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20"
+              }`}
+            >
+              <span>{completed ? "+ Registrar Outro" : "Treinei Hoje!"}</span>
+            </button>
+          </div>
         </div>
+
+        {/* Banner do Treino da Rotina de Hoje (Se houver treino programado) */}
+        {routine && routine.currentWorkout && !completed && (
+          <div className="mt-4 p-3.5 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-transparent border border-orange-200 dark:border-orange-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-orange-500 text-white shadow-xs">
+                <CalendarDays className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                    Rotina de Hoje ({routine.dayLabel})
+                  </span>
+                </div>
+                <p className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                  {routine.currentWorkout.title}
+                  <span className="text-xs font-normal text-stone-500 ml-2">
+                    ({routine.currentWorkout.defaultDurationMinutes} min • ~{Math.round((routine.currentWorkout.caloriesPerHour * routine.currentWorkout.defaultDurationMinutes) / 60)} kcal)
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={completingRoutine}
+              onClick={handleQuickCompleteRoutine}
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white px-3.5 py-1.5 text-xs font-bold shadow-xs transition-all duration-200 hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 cursor-pointer shrink-0"
+            >
+              <Check className="w-4 h-4" />
+              {completingRoutine ? "Gravando..." : "Concluir em 1 Clique"}
+            </button>
+          </div>
+        )}
 
         {/* Status de Hoje */}
         <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
