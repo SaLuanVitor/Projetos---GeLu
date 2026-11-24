@@ -5,6 +5,16 @@ import { PaperCard } from "@/components/ui/PaperCard";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import {
+  HeartHandshake,
+  Heart,
+  PenLine,
+  User,
+  Clock,
+  Check,
+  X,
+  Mail,
+} from "lucide-react";
+import {
   acknowledgeCoupleNote,
   createCoupleNote,
   listCoupleNotes,
@@ -99,7 +109,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
       setNotes((prev) => [newNote, ...prev]);
       setContent("");
       setRecipientUserId("");
-      showToast("Bilhetinho colocado no mural com amor! 💌", "success");
+      showToast("Bilhetinho colocado no mural com carinho!", "success");
     } catch {
       showToast("Não foi possível postar o recado.", "error");
     } finally {
@@ -111,7 +121,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
     try {
       const updated = await acknowledgeCoupleNote(accessToken, id);
       setNotes((prev) => prev.map((n) => (n.id === id ? updated : n)));
-      showToast("Visto com ❤️ confirmado!", "success");
+      showToast("Visto confirmado no bilhete!", "success");
     } catch {
       showToast("Erro ao registrar visualização.", "error");
     }
@@ -136,7 +146,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
     return (
       <PaperCard className="lg:col-span-12" tape="orange">
         <div className="flex items-center gap-3 py-6 text-center justify-center flex-col text-stone-500">
-          <span className="text-3xl">👤</span>
+          <User className="w-8 h-8 text-stone-400 mx-auto stroke-[1.75]" />
           <p className="font-display font-bold text-base text-stone-800 dark:text-stone-200">
             Você está no seu Espaço Pessoal Solo
           </p>
@@ -169,7 +179,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200/80 dark:border-stone-800 pb-4">
         <div>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-            <span>💌</span> Mural de Bilhetes do Lar
+            <span className="inline-flex items-center gap-1.5"><HeartHandshake className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[1.75]" /> Mural de Bilhetes do Lar</span>
           </h2>
           <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
             Recados rápidos, carinhos e avisos importantes entre os membros de <strong>{activeFamily.name}</strong>.
@@ -233,10 +243,10 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
               onChange={(e) => setRecipientUserId(e.target.value)}
               className="rounded-xl border border-stone-300 dark:border-stone-700 bg-white/95 dark:bg-stone-800 px-3 py-2.5 text-xs font-bold text-stone-800 dark:text-stone-200 shadow-sm focus:border-primary focus:outline-none cursor-pointer"
             >
-              <option value="">💌 Para: Toda a Família</option>
+              <option value="">Para: Toda a Família</option>
               {activeFamily.members.map((m) => (
                 <option key={m.userId} value={m.userId}>
-                  👤 Para: {m.userName}
+                  Para: {m.userName}
                 </option>
               ))}
             </select>
@@ -267,7 +277,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
           <p className="text-xs text-stone-500">Carregando mural...</p>
         ) : filteredNotes.length === 0 ? (
           <div className="col-span-full rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700 bg-white/50 dark:bg-stone-800/40 p-8 text-center text-xs text-stone-500 dark:text-stone-400 font-medium">
-            💌 Nenhum recado encontrado neste filtro. Que tal deixar um bilhete afetuoso agora?
+            Nenhum recado encontrado neste filtro. Que tal deixar um bilhete afetuoso agora?
           </div>
         ) : (
           filteredNotes.map((note, index) => {
@@ -303,7 +313,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
                   <div className="flex items-center justify-between gap-2 border-b border-black/5 pb-2 mb-3">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className={`text-xs font-bold ${cfg.titleColor}`}>
-                        ✍️ {note.authorName}
+                        <span className="inline-flex items-center gap-1"><PenLine className="w-3 h-3" /> {note.authorName}</span>
                       </span>
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-bold border ${cfg.badgeColor}`}
@@ -314,7 +324,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
                       {/* Destinatário */}
                       {note.recipientUserName ? (
                         <span className="rounded-full bg-rose-100/90 text-rose-800 border border-rose-200 px-2 py-0.5 text-[10px] font-extrabold">
-                          💌 Para: {note.recipientUserName}
+                          <span className="inline-flex items-center gap-1"><Heart className="w-3 h-3 text-rose-500" /> Para: {note.recipientUserName}</span>
                         </span>
                       ) : (
                         <span className="rounded-full bg-stone-100/90 text-stone-700 border border-stone-200 px-2 py-0.5 text-[10px] font-medium">
@@ -351,7 +361,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
                     note.acknowledgedByName &&
                     note.acknowledgedByName.toLowerCase() !== note.authorName.toLowerCase() ? (
                       <span className="flex items-center gap-1.5 font-bold text-pink-700 bg-pink-100/90 px-2.5 py-1 rounded-full border border-pink-200 text-[11px] shadow-sm">
-                        <span>❤️</span> Visto por {note.acknowledgedByName} às{" "}
+                        <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500 shrink-0 inline mr-1" /> Visto por {note.acknowledgedByName} às{" "}
                         {new Date(note.acknowledgedAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -359,12 +369,12 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
                       </span>
                     ) : (
                       <span className="flex items-center gap-1.5 text-[11px] font-semibold text-stone-500 bg-white/70 px-2.5 py-1 rounded-full border border-stone-200/60 shadow-xs">
-                        <span>🕒</span> Aguardando visto...
+                        <span className="inline-flex items-center gap-1 text-stone-400"><Clock className="w-3 h-3" /> Aguardando visto...</span>
                       </span>
                     )
                   ) : note.acknowledgedAt ? (
                     <span className="flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-100/90 px-2.5 py-1 rounded-full border border-emerald-200 text-[11px] shadow-sm">
-                      <span>✓</span> Você visualizou este bilhete
+                      <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400"><Check className="w-3 h-3 stroke-[2]" /> Você visualizou este bilhete</span>
                     </span>
                   ) : (
                     <button
@@ -372,7 +382,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
                       onClick={() => handleAcknowledge(note.id)}
                       className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-700 border border-rose-300 hover:bg-rose-100 transition-colors shadow-xs"
                     >
-                      <span>❤️</span> Marcar como Visto
+                      <span className="inline-flex items-center gap-1"><Heart className="w-3 h-3" /> Marcar como Visto</span>
                     </button>
                   )}
 

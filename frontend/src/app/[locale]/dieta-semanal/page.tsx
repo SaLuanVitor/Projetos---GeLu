@@ -20,6 +20,34 @@ import { detectMealCategory, findConflictingMeal } from "@/services/diet-conflic
 import { listRecipes } from "@/services/recipes";
 import { useFamilyContext } from "@/contexts/FamilyContext";
 import { subscribeToFamilyEvents } from "@/hooks/useFamilySocket";
+import { getMealIcon } from "@/components/meals/mealIcons";
+import {
+  UtensilsCrossed,
+  Coffee,
+  Soup,
+  Apple,
+  Salad,
+  Moon,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  CalendarDays,
+  Camera,
+  Plus,
+  Search,
+  X,
+  Sparkles,
+  Clock,
+  BookOpen,
+  Flame,
+  Pencil,
+  Trash2,
+  AlertCircle,
+  RefreshCw,
+  User,
+  Check,
+  type LucideIcon,
+} from "lucide-react";
 import type {
   DietMealResponse,
   RecipeResponse,
@@ -37,22 +65,28 @@ const DAYS = [
   { id: "DOM", namePt: "Domingo", short: "Dom" },
 ];
 
-const MEAL_PRESETS = [
-  { name: "Café da Manhã", time: "08:00", icon: "☕" },
-  { name: "Almoço", time: "12:30", icon: "🍲" },
-  { name: "Lanche da Tarde", time: "16:30", icon: "🍎" },
-  { name: "Jantar", time: "20:00", icon: "🥗" },
-  { name: "Ceia / Snack", time: "22:00", icon: "🌙" },
+interface MealPreset {
+  name: string;
+  time: string;
+  icon: LucideIcon;
+}
+
+const MEAL_PRESETS: MealPreset[] = [
+  { name: "Café da Manhã", time: "08:00", icon: Coffee },
+  { name: "Almoço", time: "12:30", icon: Soup },
+  { name: "Lanche da Tarde", time: "16:30", icon: Apple },
+  { name: "Jantar", time: "20:00", icon: Salad },
+  { name: "Ceia / Snack", time: "22:00", icon: Moon },
 ];
 
-function getMealIcon(name: string) {
+function getMealCategory(name: string): "CAFE" | "ALMOCO" | "LANCHE" | "JANTAR" | "CEIA" | "OUTROS" {
   const low = name.toLowerCase();
-  if (low.includes("café") || low.includes("cafe")) return "☕";
-  if (low.includes("almoço") || low.includes("almoco")) return "🍲";
-  if (low.includes("lanche")) return "🍎";
-  if (low.includes("jantar") || low.includes("janta")) return "🥗";
-  if (low.includes("ceia") || low.includes("snack")) return "🌙";
-  return "🍽️";
+  if (low.includes("café") || low.includes("cafe")) return "CAFE";
+  if (low.includes("almoço") || low.includes("almoco")) return "ALMOCO";
+  if (low.includes("lanche")) return "LANCHE";
+  if (low.includes("jantar") || low.includes("janta")) return "JANTAR";
+  if (low.includes("ceia") || low.includes("snack")) return "CEIA";
+  return "OUTROS";
 }
 
 function getMondayOfDate(d: Date): string {
@@ -195,16 +229,12 @@ export default function WeeklyDietPage() {
     return dayMeals.filter((m) => {
       // Filtro de categoria de refeição
       if (mealCategoryFilter !== "ALL") {
-        const icon = getMealIcon(m.mealName);
-        if (mealCategoryFilter === "CAFE" && icon !== "☕") return false;
-        if (mealCategoryFilter === "ALMOCO" && icon !== "🍲") return false;
-        if (mealCategoryFilter === "LANCHE" && icon !== "🍎") return false;
-        if (mealCategoryFilter === "JANTAR" && icon !== "🥗") return false;
-        if (
-          mealCategoryFilter === "OUTROS" &&
-          (icon === "☕" || icon === "🍲" || icon === "🍎" || icon === "🥗")
-        )
-          return false;
+        const cat = getMealCategory(m.mealName);
+        if (mealCategoryFilter === "CAFE" && cat !== "CAFE") return false;
+        if (mealCategoryFilter === "ALMOCO" && cat !== "ALMOCO") return false;
+        if (mealCategoryFilter === "LANCHE" && cat !== "LANCHE") return false;
+        if (mealCategoryFilter === "JANTAR" && cat !== "JANTAR") return false;
+        if (mealCategoryFilter === "OUTROS" && (cat === "CAFE" || cat === "ALMOCO" || cat === "LANCHE" || cat === "JANTAR")) return false;
       }
 
       // Filtro de texto de busca
@@ -291,7 +321,7 @@ export default function WeeklyDietPage() {
         toast.success("Refeição atualizada com sucesso!");
       } else if (conflictingMeal && conflictResolution === "REPLACE") {
         await updateDietMeal(session.accessToken, conflictingMeal.id, payload);
-        toast.success(`Refeição anterior substituída por "${payload.mealName}"! 🔄`);
+        toast.success(`Refeição substituída por "${payload.mealName}" no cardápio!`);
       } else {
         await addDietMeal(session.accessToken, diet.id, payload);
         toast.success("Refeição adicionada ao cardápio!");
@@ -355,11 +385,11 @@ export default function WeeklyDietPage() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-bold text-amber-900 dark:text-amber-200">
-                {isPersonal ? "👤 Espaço Pessoal" : `🏠 ${activeFamily?.name || "Família"}`}
+                {isPersonal ? <span className="inline-flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> Espaço Pessoal</span> : <span className="inline-flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> {activeFamily?.name || "Família"}</span>}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-3xl">🍲</span>
+              <UtensilsCrossed className="w-8 h-8 text-amber-800 dark:text-amber-300 stroke-[2]" />
               <h1 className="font-display text-3xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight">
                 {isPersonal ? "Meu Cardápio Pessoal" : `Cardápio: ${activeFamily?.name || "Família"}`}
               </h1>
@@ -378,7 +408,7 @@ export default function WeeklyDietPage() {
               onClick={handlePrevWeek}
               className="rounded-xl border border-stone-300 dark:border-stone-700 bg-white/95 dark:bg-[#25201c] px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-200 shadow-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-all cursor-pointer"
             >
-              ◀ Anterior
+              <span className="inline-flex items-center gap-1"><ChevronLeft className="w-3.5 h-3.5" /> Anterior</span>
             </button>
             <button
               type="button"
@@ -392,7 +422,7 @@ export default function WeeklyDietPage() {
               onClick={handleNextWeek}
               className="rounded-xl border border-stone-300 dark:border-stone-700 bg-white/95 dark:bg-[#25201c] px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-200 shadow-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-all cursor-pointer"
             >
-              Próxima ▶
+              <span className="inline-flex items-center gap-1">Próxima <ChevronRight className="w-3.5 h-3.5" /></span>
             </button>
             <button
               type="button"
@@ -404,7 +434,7 @@ export default function WeeklyDietPage() {
               }}
               className="rounded-xl border border-stone-300 dark:border-stone-700 bg-white/95 dark:bg-[#25201c] px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-200 shadow-sm hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-800 dark:hover:text-amber-300 transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <span>📋</span> Copiar Semana
+              <Copy className="w-3.5 h-3.5" /> <span>Copiar Semana</span>
             </button>
           </div>
         </div>
@@ -413,7 +443,7 @@ export default function WeeklyDietPage() {
         {diet && (
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/80 dark:bg-[#25201c]/80 p-4 border border-stone-200/80 dark:border-stone-800 shadow-xs">
             <div className="flex items-center gap-2">
-              <span className="text-xl">📅</span>
+              <CalendarDays className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[1.75]" />
               <div>
                 <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">{diet.title}</h2>
                 <p className="text-[11px] text-stone-500 dark:text-stone-400">
@@ -485,7 +515,7 @@ export default function WeeklyDietPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 dark:border-stone-800 pb-5 mb-6">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🍽️</span>
+                <UtensilsCrossed className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[2]" />
                 <h3 className="font-display text-2xl font-bold text-stone-900 dark:text-stone-100">
                   {DAYS.find((d) => d.id === selectedDay)?.namePt}
                 </h3>
@@ -502,7 +532,7 @@ export default function WeeklyDietPage() {
                 onClick={() => setFoodVisionOpen(true)}
                 className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-xs font-bold shadow-xs transition-all cursor-pointer"
               >
-                <span>📷</span>
+                <Camera className="w-3.5 h-3.5" />
                 <span>Escanear com IA</span>
               </button>
 
@@ -521,25 +551,28 @@ export default function WeeklyDietPage() {
             <span className="text-xs font-bold text-stone-600 dark:text-stone-400 uppercase tracking-wider mr-1">
               Atalhos rápidos:
             </span>
-            {MEAL_PRESETS.map((p) => (
-              <button
-                key={p.name}
-                type="button"
-                onClick={() => handleOpenNewMeal(p)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white/90 dark:bg-[#25201c] px-3 py-1 text-xs font-bold text-stone-700 dark:text-stone-200 shadow-2xs hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-300 dark:hover:border-amber-800 hover:text-amber-900 dark:hover:text-amber-300 transition-all cursor-pointer"
-              >
-                <span>{p.icon}</span>
-                <span>{p.name}</span>
-              </button>
-            ))}
+            {MEAL_PRESETS.map((p) => {
+              const Icon = p.icon;
+              return (
+                <button
+                  key={p.name}
+                  type="button"
+                  onClick={() => handleOpenNewMeal(p)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-white/90 dark:bg-[#25201c] px-3 py-1 text-xs font-bold text-stone-700 dark:text-stone-200 shadow-2xs hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-300 dark:hover:border-amber-800 hover:text-amber-900 dark:hover:text-amber-300 transition-all cursor-pointer"
+                >
+                  <Icon className="w-3.5 h-3.5 stroke-[1.75]" />
+                  <span>{p.name}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Barra de Pesquisa e Filtros de Refeição */}
           <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/80 dark:bg-stone-900/60 p-3 rounded-2xl border border-stone-200/90 dark:border-stone-800 shadow-2xs backdrop-blur-xs">
             {/* Campo de Pesquisa */}
             <div className="relative flex-1">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm">
-                🔍
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
+                <Search className="w-4 h-4" />
               </span>
               <input
                 type="text"
@@ -555,7 +588,7 @@ export default function WeeklyDietPage() {
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-0.5 cursor-pointer"
                   title="Limpar pesquisa"
                 >
-                  ✕
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
@@ -563,26 +596,30 @@ export default function WeeklyDietPage() {
             {/* Filtro de Tipo de Refeição */}
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
               {[
-                { id: "ALL", label: "Todas", icon: "✨" },
-                { id: "CAFE", label: "Café", icon: "☕" },
-                { id: "ALMOCO", label: "Almoço", icon: "🍲" },
-                { id: "LANCHE", label: "Lanches", icon: "🍎" },
-                { id: "JANTAR", label: "Jantar", icon: "🥗" },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setMealCategoryFilter(f.id)}
-                  className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    mealCategoryFilter === f.id
-                      ? "bg-amber-600 text-white shadow-xs scale-102"
-                      : "bg-white/80 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700"
-                  }`}
-                >
-                  <span>{f.icon}</span>
-                  <span>{f.label}</span>
-                </button>
-              ))}
+                { id: "ALL", label: "Todas", icon: Sparkles },
+                { id: "CAFE", label: "Café", icon: Coffee },
+                { id: "ALMOCO", label: "Almoço", icon: Soup },
+                { id: "LANCHE", label: "Lanches", icon: Apple },
+                { id: "JANTAR", label: "Jantar", icon: Salad },
+              ].map((f) => {
+                const Icon = f.icon;
+                const isSelected = mealCategoryFilter === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setMealCategoryFilter(f.id)}
+                    className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-amber-800 text-white shadow-xs scale-102"
+                        : "bg-white/80 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-700"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5 stroke-[1.75]" />
+                    <span>{f.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -627,7 +664,7 @@ export default function WeeklyDietPage() {
           ) : (
             <div className="space-y-4">
               {filteredDayMeals.map((meal) => {
-                const icon = getMealIcon(meal.mealName);
+                const MealIcon = getMealIcon(meal.mealName);
                 const hasRecipe = meal.recipes.length > 0;
                 const recipeItem = hasRecipe ? meal.recipes[0] : null;
 
@@ -644,14 +681,14 @@ export default function WeeklyDietPage() {
 
                     <div className="flex items-start gap-4 min-w-0">
                       {/* Ícone da Refeição */}
-                      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200/70 dark:from-amber-950/70 dark:to-stone-800 text-3xl border border-amber-300/60 dark:border-amber-800/60 shadow-2xs group-hover:scale-105 group-hover:rotate-1 transition-transform">
-                        {icon}
+                      <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200/70 dark:from-amber-950/70 dark:to-stone-800 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-800/60 shadow-2xs group-hover:scale-105 group-hover:rotate-1 transition-transform">
+                        <MealIcon className="w-6 h-6 stroke-[1.75]" />
                       </div>
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="inline-flex items-center gap-1 text-[11px] font-extrabold tracking-wide uppercase px-2.5 py-0.5 rounded-lg bg-amber-100/80 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border border-amber-300/60 dark:border-amber-800/50">
-                            🕒 {meal.mealTime || "Horário livre"}
+                            <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3 text-stone-400" /> {meal.mealTime || "Horário livre"}</span>
                           </span>
                           <h4 className="text-base font-extrabold text-stone-900 dark:text-stone-100 group-hover:text-amber-900 dark:group-hover:text-amber-300 transition-colors">
                             {meal.mealName}
@@ -665,10 +702,10 @@ export default function WeeklyDietPage() {
                               href={`/receitas/${recipeItem.recipeId}`}
                               className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100 underline decoration-amber-400 decoration-dotted underline-offset-4 bg-amber-500/10 dark:bg-amber-950/40 px-2.5 py-1 rounded-xl border border-amber-500/20 dark:border-amber-800/40"
                             >
-                              <span>📖</span> {recipeItem.recipeName}
+                              <BookOpen className="w-3 h-3 text-amber-800" /> <span>{recipeItem.recipeName}</span>
                             </Link>
                             <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                              <span>🔥</span> {recipeItem.totalCalories} kcal
+                              <Flame className="w-3 h-3 text-amber-700" /> <span>{recipeItem.totalCalories} kcal</span>
                               <span className="text-emerald-600/70 dark:text-emerald-400/70 font-medium">
                                 ({recipeItem.servings}{" "}
                                 {recipeItem.servings === 1 ? "porção" : "porções"})
@@ -713,14 +750,14 @@ export default function WeeklyDietPage() {
                         onClick={() => handleOpenEditMeal(meal)}
                         className="inline-flex items-center gap-1 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-200 shadow-2xs hover:bg-amber-50 hover:border-amber-300 dark:hover:bg-amber-950/30 hover:text-amber-900 dark:hover:text-amber-200 transition-all cursor-pointer"
                       >
-                        <span>✏️</span> Editar
+                        <Pencil className="w-3 h-3" /> <span>Editar</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setMealToDelete(meal)}
                         className="inline-flex items-center gap-1 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50/80 dark:bg-red-950/40 px-3 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 shadow-2xs hover:bg-red-100 dark:hover:bg-red-900/60 transition-all cursor-pointer"
                       >
-                        <span>🗑️</span> Excluir
+                        <Trash2 className="w-3 h-3" /> <span>Excluir</span>
                       </button>
                     </div>
                   </div>
@@ -788,7 +825,7 @@ export default function WeeklyDietPage() {
             {conflictingMeal && !editingMealId && (
               <div className="rounded-2xl border-2 border-amber-400/90 dark:border-amber-600/70 bg-amber-50/95 dark:bg-amber-950/40 p-4 shadow-xs">
                 <div className="flex items-start gap-3">
-                  <span className="text-xl shrink-0">⚠️</span>
+                  <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
                   <div className="flex-1 text-xs">
                     <h5 className="font-bold text-amber-950 dark:text-amber-200">
                       Conflito no Cardápio: Já existe um {detectMealCategory(conflictingMeal.mealName, conflictingMeal.mealTime)} em {DAYS.find((d) => d.id === formWeekDay)?.namePt || formWeekDay}!
@@ -810,7 +847,7 @@ export default function WeeklyDietPage() {
                             : "bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700 hover:bg-stone-50"
                         }`}
                       >
-                        🔄 Substituir refeição existente
+                        <span className="inline-flex items-center gap-1.5"><RefreshCw className="w-3.5 h-3.5" /> Substituir refeição existente</span>
                       </button>
                       <button
                         type="button"
@@ -821,7 +858,7 @@ export default function WeeklyDietPage() {
                             : "bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700 hover:bg-stone-50"
                         }`}
                       >
-                        ➕ Manter ambas (prato extra/acompanhamento)
+                        <span className="inline-flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" /> Manter ambas (acompanhamento)</span>
                       </button>
                     </div>
                   </div>
@@ -911,7 +948,7 @@ export default function WeeklyDietPage() {
                             : "border-stone-300 dark:border-stone-700 bg-white/90 dark:bg-[#28221d] text-stone-600 dark:text-stone-300 hover:border-stone-400"
                         }`}
                       >
-                        <span>{isSelected ? "✅" : "👤"}</span>
+                        {isSelected ? <Check className="w-3.5 h-3.5 text-amber-800 stroke-[2]" /> : <User className="w-3.5 h-3.5 text-stone-400" />}
                         <span>{member.userName}</span>
                       </button>
                     );

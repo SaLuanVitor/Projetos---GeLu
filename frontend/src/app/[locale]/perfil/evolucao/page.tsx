@@ -24,6 +24,23 @@ import type {
   WeightHistoryItem
 } from "@/types/api";
 import { useRouter } from "@/i18n/navigation";
+import {
+  Scale,
+  TrendingDown,
+  TrendingUp,
+  Sparkles,
+  Lightbulb,
+  Check,
+  Users,
+  User,
+  Flame,
+  Activity,
+  Calendar,
+  AlertCircle,
+  Plus,
+  BarChart3,
+  Home,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -235,7 +252,7 @@ export default function WeightEvolutionPage() {
         recordedAt: new Date().toISOString(),
       });
 
-      toast.success("⚖️ Peso registrado com sucesso! Boa semana!");
+      toast.success("Peso anotado com sucesso no caderno! Boa semana!");
       setQuickWeight("");
       await loadData(false);
     } catch (err) {
@@ -266,7 +283,7 @@ export default function WeightEvolutionPage() {
         recordedAt: dateObj.toISOString(),
       });
 
-      toast.success("⚖️ Novo registro de peso adicionado!");
+      toast.success("Novo registro de peso adicionado!");
       setModalOpen(false);
       setModalWeight("");
       await loadData(false);
@@ -288,7 +305,7 @@ export default function WeightEvolutionPage() {
         activeFamily && !isPersonal ? activeFamily.id : undefined
       );
       setWeeklySummary(sum);
-      toast.success("✨ Retrospectiva da semana atualizada com sucesso!");
+      toast.success("Retrospectiva da semana atualizada com sucesso!");
     } catch (err) {
       toast.error("Não foi possível atualizar a análise da semana.");
     } finally {
@@ -503,7 +520,7 @@ export default function WeightEvolutionPage() {
         <NotebookPageHeader
           action={
             <ActionButton onClick={() => setModalOpen(true)} variant="primary">
-              ＋ Registrar Peso
+              <span className="inline-flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 stroke-[2]" /> Registrar Peso</span>
             </ActionButton>
           }
           eyebrow={activeFamily && !isPersonal ? `Família ${activeFamily.name} • Evolução` : "Minha Evolução Pessoal"}
@@ -519,7 +536,7 @@ export default function WeightEvolutionPage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="rounded-full bg-amber-500 text-white px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider shadow-xs">
-                    {isMonday ? "🗓️ Segunda-Feira • Dia Oficial" : "⚖️ Lembrete de Pesagem"}
+                    {isMonday ? "Segunda-Feira • Dia Oficial" : "Lembrete de Pesagem"}
                   </span>
                   <span className="text-xs font-semibold text-amber-900/80 dark:text-amber-300">
                     {isMonday ? "Comece a semana no ritmo certo!" : "Atualize seu peso da semana"}
@@ -554,7 +571,7 @@ export default function WeightEvolutionPage() {
                   </span>
                 </div>
                 <ActionButton type="submit" disabled={savingWeight} className="whitespace-nowrap py-2.5 px-4">
-                  {savingWeight ? "Salvando..." : "Salvar Peso ⚖️"}
+                  {savingWeight ? "Salvando..." : "Salvar Peso"}
                 </ActionButton>
               </form>
             </div>
@@ -612,10 +629,10 @@ export default function WeightEvolutionPage() {
               {delta == null
                 ? "Necessário 2 registros para calcular"
                 : delta < 0
-                ? "📉 Redução em relação à pesagem anterior"
+                ? "Redução em relação à pesagem anterior"
                 : delta > 0
-                ? "📈 Aumento em relação à pesagem anterior"
-                : "⚖️ Peso mantido e estável"}
+                ? "Aumento em relação à pesagem anterior"
+                : "Peso mantido e estável"}
             </p>
           </PaperCard>
         </section>
@@ -642,7 +659,7 @@ export default function WeightEvolutionPage() {
                       : "bg-surface text-on-surface-variant hover:bg-surface-variant/40"
                   }`}
                 >
-                  <span>👥</span>
+                  <Users className="w-4 h-4 text-amber-800 dark:text-amber-300" />
                   <span>Toda a Família ({membersList.length})</span>
                 </button>
 
@@ -716,7 +733,7 @@ export default function WeightEvolutionPage() {
                   </div>
                 ) : !chartData || chartData.memberSeries.length === 0 ? (
                   <div className="h-64 flex flex-col items-center justify-center text-center p-6 space-y-2 border-2 border-dashed border-surface-variant rounded-2xl">
-                    <span className="text-4xl">⚖️</span>
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/60 shadow-2xs"><Scale className="w-7 h-7 stroke-[1.75]" /></div>
                     <h3 className="font-display text-base font-bold text-on-surface">
                       Nenhum peso registrado para os membros selecionados
                     </h3>
@@ -882,9 +899,9 @@ export default function WeightEvolutionPage() {
                               fontWeight="bold"
                             >
                               {tooltip.delta < 0
-                                ? `-${Math.abs(tooltip.delta).toFixed(1)}kg 📉`
+                                ? `-${Math.abs(tooltip.delta).toFixed(1)}kg`
                                 : tooltip.delta > 0
-                                ? `+${tooltip.delta.toFixed(1)}kg 📈`
+                                ? `+${tooltip.delta.toFixed(1)}kg`
                                 : "Estável"}
                             </text>
                           )}
@@ -901,7 +918,7 @@ export default function WeightEvolutionPage() {
 
               {/* Dica de Rodapé */}
               <div className="mt-4 pt-3 border-t border-stone-200/60 dark:border-stone-800 text-[11px] text-on-surface-variant flex items-center justify-between">
-                <span>💡 Dica: Passe o mouse sobre os pontos para ver data exata e variação.</span>
+                <span className="inline-flex items-center gap-1.5"><Lightbulb className="w-3.5 h-3.5 text-amber-700" /> Dica: Passe o cursor sobre os pontos para ver data exata e variação.</span>
                 <span className="font-semibold text-primary">Pesagem recomendada: Segundas-feiras</span>
               </div>
             </PaperCard>
@@ -918,7 +935,7 @@ export default function WeightEvolutionPage() {
                     onClick={() => setModalOpen(true)}
                     className="text-xs font-bold text-primary hover:underline cursor-pointer"
                   >
-                    ＋ Adicionar
+                    + Adicionar
                   </button>
                 </div>
 
@@ -942,7 +959,7 @@ export default function WeightEvolutionPage() {
                             })}
                           </p>
                         </div>
-                        <span className="text-xs text-stone-400">⚖️</span>
+                        <Scale className="w-3.5 h-3.5 text-stone-400" />
                       </div>
                     ))
                   ) : (
@@ -954,7 +971,7 @@ export default function WeightEvolutionPage() {
               </div>
 
               <ActionButton onClick={() => setModalOpen(true)} className="w-full mt-4 text-xs py-2">
-                ＋ Novo Registro de Peso
+                <span className="inline-flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 stroke-[2]" /> Novo Registro de Peso</span>
               </ActionButton>
             </PaperCard>
           </div>
@@ -967,7 +984,7 @@ export default function WeightEvolutionPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200/70 dark:border-stone-800 pb-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">📊</span>
+                  <BarChart3 className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[1.75]" />
                   <h3 className="font-display text-2xl font-bold text-on-surface">
                     Retrospectiva Semanal & Evolução
                   </h3>
@@ -1000,7 +1017,7 @@ export default function WeightEvolutionPage() {
                   className="rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-1.5 text-xs font-bold text-stone-700 dark:text-stone-200 hover:border-primary transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
                   title="Atualizar análise inteligente com a IA"
                 >
-                  {summaryLoading ? "Atualizando..." : "✨ Atualizar Análise IA"}
+                  {summaryLoading ? "Atualizando..." : "Atualizar Análise"}
                 </button>
               </div>
             </div>
@@ -1022,7 +1039,7 @@ export default function WeightEvolutionPage() {
                       : "bg-surface-container text-on-surface-variant hover:bg-surface-variant/40"
                   }`}
                 >
-                  <span>🏡</span>
+                  <Home className="w-3.5 h-3.5" />
                   <span>Pontos da Família & Lar</span>
                 </button>
 
@@ -1075,7 +1092,7 @@ export default function WeightEvolutionPage() {
                         </p>
                       </div>
                       <div className="shrink-0 text-xs font-semibold text-on-surface-variant">
-                        📋 {weeklySummary.familyScope?.collectiveActivitiesCount || weeklySummary.activitiesCompleted} hábitos e acordos concluídos
+                        <span className="inline-flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-600" /> {weeklySummary.familyScope?.collectiveActivitiesCount || weeklySummary.activitiesCompleted} hábitos e acordos concluídos</span>
                       </div>
                     </div>
 
@@ -1186,10 +1203,10 @@ export default function WeightEvolutionPage() {
                         {/* Estatísticas Pessoais */}
                         <div className="flex items-center gap-2 flex-wrap text-xs font-semibold">
                           <span className="rounded-lg bg-surface px-2.5 py-1 border border-surface-variant">
-                            🏃‍♂️ {member.workoutsCount} treinos ({member.totalMinutes} min)
+                            <span className="inline-flex items-center gap-1.5"><Activity className="w-3.5 h-3.5 text-emerald-600" /> {member.workoutsCount} treinos ({member.totalMinutes} min)</span>
                           </span>
                           <span className="rounded-lg bg-surface px-2.5 py-1 border border-surface-variant">
-                            🔥 {member.caloriesBurned} kcal queimadas
+                            <span className="inline-flex items-center gap-1.5"><Flame className="w-3.5 h-3.5 text-amber-600" /> {member.caloriesBurned} kcal queimadas</span>
                           </span>
                         </div>
                       </div>
@@ -1264,13 +1281,13 @@ export default function WeightEvolutionPage() {
                 <div className="pt-4 border-t border-stone-200/60 dark:border-stone-800 flex flex-wrap items-center justify-between gap-3 text-xs text-on-surface-variant font-medium">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="inline-flex items-center gap-1 rounded-lg bg-surface-container px-2.5 py-1 border border-surface-variant">
-                      🏃‍♂️ {weeklySummary.workoutsCompleted} {weeklySummary.workoutsCompleted === 1 ? "treino total" : "treinos totais"} ({weeklySummary.totalWorkoutMinutes} min)
+                      <Activity className="w-3.5 h-3.5 text-emerald-600 inline mr-1" /> {weeklySummary.workoutsCompleted} {weeklySummary.workoutsCompleted === 1 ? "treino total" : "treinos totais"} ({weeklySummary.totalWorkoutMinutes} min)
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-lg bg-surface-container px-2.5 py-1 border border-surface-variant">
-                      🔥 {weeklySummary.totalCaloriesBurned} kcal gastas pela casa
+                      <Flame className="w-3.5 h-3.5 text-amber-600 inline mr-1" /> {weeklySummary.totalCaloriesBurned} kcal gastas pela casa
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-lg bg-surface-container px-2.5 py-1 border border-surface-variant">
-                      📋 {weeklySummary.activitiesCompleted} tarefas/hábitos da casa
+                      <Calendar className="w-3.5 h-3.5 text-stone-600 inline mr-1" /> {weeklySummary.activitiesCompleted} tarefas/hábitos da casa
                     </span>
                   </div>
                   <span className="font-serif italic text-stone-400">
@@ -1290,7 +1307,12 @@ export default function WeightEvolutionPage() {
         <Modal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          title="Registrar Peso na Balança ⚖️"
+          title={
+        <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold">
+          <Scale className="w-5 h-5 text-amber-800 dark:text-amber-400 stroke-[2]" />
+          <span>Anotar Peso na Balança</span>
+        </div>
+      }
           subtitle="Mantenha o histórico contínuo da sua jornada."
           maxWidth="md"
         >
@@ -1356,7 +1378,7 @@ export default function WeightEvolutionPage() {
                 Cancelar
               </button>
               <ActionButton type="submit" disabled={savingWeight} className="py-2 px-5 text-xs">
-                {savingWeight ? "Salvando..." : "Confirmar Peso ⚖️"}
+                {savingWeight ? "Salvando..." : "Confirmar Peso"}
               </ActionButton>
             </div>
           </form>

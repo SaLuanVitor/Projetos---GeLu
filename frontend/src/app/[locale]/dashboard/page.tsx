@@ -11,6 +11,16 @@ import { DailyMealDiaryCard } from "@/components/meals/DailyMealDiaryCard";
 import { DailyMealChecklistCard } from "@/components/meals/DailyMealChecklistCard";
 import { HabitsInsightsCard } from "@/components/meals/HabitsInsightsCard";
 import { PaperCard } from "@/components/ui/PaperCard";
+import {
+  User,
+  Home,
+  CalendarDays,
+  AlertCircle,
+  Clock,
+  Zap,
+  Check,
+  CheckCircle2,
+} from "lucide-react";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import { getLocalizedApiError } from "@/services/localized-error";
@@ -234,14 +244,14 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-bold text-amber-900 dark:text-amber-200">
-                {isPersonal ? "👤 Espaço Pessoal" : `🏠 ${activeFamily?.name || "Família"}`}
+                {isPersonal ? <span className="inline-flex items-center gap-1"><User className="w-3.5 h-3.5" /> Espaço Pessoal</span> : <span className="inline-flex items-center gap-1"><Home className="w-3.5 h-3.5" /> {activeFamily?.name || "Família"}</span>}
               </span>
               <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
                 {DAYS_NAMES_PT[currentDayKey]}
               </span>
             </div>
             <h1 className="mt-2 font-display text-3xl sm:text-4xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight">
-              Bom ver você por aqui, {displayName}! ✨
+              Bom ver você por aqui, {displayName}!
             </h1>
             <p className="mt-1 text-sm text-stone-600 dark:text-stone-300">
               {isPersonal
@@ -293,7 +303,7 @@ export default function DashboardPage() {
                   <span className="text-xs text-stone-500 font-semibold">• {DAYS_NAMES_PT[currentDayKey]}</span>
                 </div>
                 <h2 className="mt-1 font-display text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <span>📋</span> Rotina de Agora & Próximas Tarefas
+                  <span className="inline-flex items-center gap-1.5"><CalendarDays className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[1.75]" /> Rotina de Agora & Próximas Tarefas</span>
                 </h2>
                 <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
                   {completedActivitiesCount} de {todayActivities.length} tarefas concluídas no dia ({activityProgressPercent}%)
@@ -323,7 +333,7 @@ export default function DashboardPage() {
             {overdueActivities.length > 0 && (
               <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl bg-amber-500/10 border border-amber-500/30 p-3.5 text-amber-950 dark:text-amber-200">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="text-xl shrink-0">⚠️</span>
+                  <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-xs sm:text-sm font-bold truncate sm:whitespace-normal">
                       {overdueActivities.length} {overdueActivities.length > 1 ? "atividades anteriores não foram marcadas" : "atividade anterior não foi marcada"} no horário programado.
@@ -347,17 +357,17 @@ export default function DashboardPage() {
             {/* ITENS DO MOMENTO ATUAL (Somente Agora e Próximas) */}
             {todayActivities.length === 0 ? (
               <div className="rounded-xl border border-dashed border-stone-300 dark:border-stone-800 p-6 text-center text-xs text-stone-500">
-                <span className="text-2xl block mb-1">🗓️</span>
+                <CalendarDays className="w-8 h-8 text-stone-400 mx-auto mb-1 stroke-[1.75]" />
                 Nenhuma atividade agendada para {DAYS_NAMES_PT[currentDayKey]}. Aproveite para descansar ou programar sua rotina!
                 <div className="mt-3">
                   <ActionLink href="/agenda" className="text-xs py-1.5 px-3">
-                    ＋ Adicionar Tarefa na Agenda
+                    + Adicionar Tarefa na Agenda
                   </ActionLink>
                 </div>
               </div>
             ) : currentAndUpcomingActivities.length === 0 ? (
               <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-[#201b17]/50 p-6 text-center text-xs text-stone-500">
-                <span className="text-2xl block mb-1">✨</span>
+                <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-1 stroke-[1.75]" />
                 Todas as tarefas programadas para hoje já encerraram seu horário. Bom descanso!
                 <div className="mt-3">
                   <ActionLink href="/agenda" variant="outline" className="text-xs py-1.5 px-3">
@@ -392,15 +402,15 @@ export default function DashboardPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 flex-wrap mb-1">
                           <span className="font-mono text-[11px] font-bold text-primary">
-                            ⏱️ {act.startTime} - {act.endTime}
+                            <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3 text-stone-400" /> {act.startTime} - {act.endTime}</span>
                           </span>
                           {isNow ? (
                             <span className="text-[10px] font-extrabold bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100 px-1.5 py-0.2 rounded animate-pulse">
-                              ⚡ Agora
+                              <span className="inline-flex items-center gap-1"><Zap className="w-3 h-3 text-amber-700" /> Agora</span>
                             </span>
                           ) : (
                             <span className="text-[10px] font-bold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 px-1.5 py-0.2 rounded">
-                              ⏱️ Próxima
+                              <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3 text-stone-500" /> Próxima</span>
                             </span>
                           )}
                           <span
@@ -439,7 +449,7 @@ export default function DashboardPage() {
                         }`}
                         aria-label="Marcar tarefa"
                       >
-                        {act.completedToday ? "✓" : ""}
+                        {act.completedToday ? <Check className="w-3.5 h-3.5 text-white stroke-[2]" /> : null}
                       </button>
                     </div>
                   );

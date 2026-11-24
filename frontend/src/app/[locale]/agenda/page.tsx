@@ -18,6 +18,25 @@ import {
   toggleScheduleActivityCompletion,
   updateScheduleActivity
 } from "@/services/schedule";
+import {
+  Sunrise,
+  Sun,
+  Moon,
+  Plus,
+  Search,
+  X,
+  List,
+  FolderKanban,
+  Clock,
+  Target,
+  Check,
+  Users,
+  User,
+  Pencil,
+  Trash2,
+  StickyNote,
+  type LucideIcon,
+} from "lucide-react";
 import type {
   FamilyResponse,
   FamilyWeeklyGoalResponse,
@@ -245,9 +264,9 @@ export default function SchedulePage() {
     }
 
     return [
-      { period: "Manhã", icon: "🌅", desc: "Começando o dia com energia", items: morning },
-      { period: "Tarde", icon: "☀️", desc: "Foco, trabalho e afazeres", items: afternoon },
-      { period: "Noite", icon: "🌙", desc: "Desacelerar, autocuidado e descanso", items: evening }
+      { period: "Manhã", icon: Sunrise, desc: "Começando o dia com energia", items: morning },
+      { period: "Tarde", icon: Sun, desc: "Foco, trabalho e afazeres", items: afternoon },
+      { period: "Noite", icon: Moon, desc: "Desacelerar, autocuidado e descanso", items: evening }
     ].filter((g) => g.items.length > 0);
   }, [filteredDayActivities]);
 
@@ -553,7 +572,7 @@ export default function SchedulePage() {
                   </p>
                 </div>
                 <ActionButton onClick={() => handleOpenModal()}>
-                  ＋ {t("newActivity")}
+                  <span className="inline-flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 stroke-[2]" /> {t("newActivity")}</span>
                 </ActionButton>
               </div>
 
@@ -597,7 +616,7 @@ export default function SchedulePage() {
                       }`}
                       title="Visualização em Linha do Tempo contínua"
                     >
-                      <span>📋</span>
+                      <List className="w-3.5 h-3.5" />
                       <span>Linha do Tempo</span>
                     </button>
                     <button
@@ -610,7 +629,7 @@ export default function SchedulePage() {
                       }`}
                       title="Visualização em Fichas do Lar (Cards por período)"
                     >
-                      <span>🗂️</span>
+                      <FolderKanban className="w-3.5 h-3.5" />
                       <span>Fichas (Cards)</span>
                     </button>
                   </div>
@@ -674,7 +693,7 @@ export default function SchedulePage() {
                     {groupedCardActivities.map((group) => (
                       <div key={group.period} className="space-y-3">
                         <div className="flex items-center gap-2 border-b border-surface-variant/60 pb-1.5">
-                          <span className="text-lg">{group.icon}</span>
+                          {(() => { const Icon = group.icon; return <Icon className="w-4 h-4 text-amber-800 dark:text-amber-300 stroke-[1.75]" />; })()}
                           <h3 className="font-display text-base font-bold text-on-surface">
                             {group.period}
                           </h3>
@@ -707,14 +726,14 @@ export default function SchedulePage() {
                                     <div className="min-w-0 flex-1">
                                       <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
                                         <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">
-                                          ⏱️ {act.startTime} - {act.endTime}
+                                          <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3 text-stone-400" /> {act.startTime} - {act.endTime}</span>
                                         </span>
                                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${color.bg} ${color.text}`}>
                                           {t(`categories.${act.category}` as never) || act.category}
                                         </span>
                                         {act.goalTag && (
                                           <span className="text-[10px] font-semibold bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded-md">
-                                            🎯 {act.goalTag}
+                                            <span className="inline-flex items-center gap-1"><Target className="w-3 h-3" /> {act.goalTag}</span>
                                           </span>
                                         )}
                                       </div>
@@ -748,7 +767,7 @@ export default function SchedulePage() {
                                       }`}
                                       aria-label="Marcar como concluída"
                                     >
-                                      {act.completedToday ? "✓" : ""}
+                                      {act.completedToday ? <Check className="w-3.5 h-3.5 text-white stroke-[2]" /> : null}
                                     </button>
                                   </div>
                                 </div>
@@ -758,12 +777,12 @@ export default function SchedulePage() {
                                   <div className="flex items-center gap-1.5">
                                     {act.assignees && act.assignees.length > 0 ? (
                                       <span className="inline-flex items-center gap-1 rounded-md bg-amber-100/80 px-2 py-0.5 font-bold text-amber-900 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-900">
-                                        {act.assignees.length > 1 ? "👥 " : "👤 "}
+                                        {act.assignees.length > 1 ? <Users className="w-3 h-3 inline mr-1" /> : <User className="w-3 h-3 inline mr-1" />}
                                         {act.assignees.map((a) => a.name.split(" ")[0]).join(" & ")}
                                       </span>
                                     ) : act.assignedToUserName ? (
                                       <span className="inline-flex items-center gap-1 rounded-md bg-amber-100/80 px-2 py-0.5 font-bold text-amber-900 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-900">
-                                        👤 {act.assignedToUserName.split(" ")[0]}
+                                        <span className="inline-flex items-center gap-1"><User className="w-3 h-3" /> {act.assignedToUserName.split(" ")[0]}</span>
                                       </span>
                                     ) : (
                                       <span className="text-on-surface-variant opacity-75">Toda a casa</span>
@@ -778,7 +797,7 @@ export default function SchedulePage() {
                                     className="inline-flex items-center gap-1 rounded-md bg-stone-100 dark:bg-stone-800/80 px-2 py-0.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-primary hover:bg-amber-100/60 dark:hover:bg-amber-950/60 border border-stone-200/80 dark:border-stone-700 transition-colors cursor-pointer"
                                     title="Editar ficha"
                                   >
-                                    ✏️ Editar
+                                    <span className="inline-flex items-center gap-1"><Pencil className="w-3 h-3" /> Editar</span>
                                   </button>
                                 </div>
                               </PaperCard>
@@ -834,18 +853,18 @@ export default function SchedulePage() {
                               </span>
                               {act.goalTag && (
                                 <span className="inline-block rounded-md bg-surface-variant px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
-                                  🎯 {act.goalTag}
+                                  <span className="inline-flex items-center gap-1"><Target className="w-3 h-3" /> {act.goalTag}</span>
                                 </span>
                               )}
                               {/* Responsáveis da Atividade */}
                               {act.assignees && act.assignees.length > 0 ? (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-amber-100/80 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-900">
-                                  {act.assignees.length > 1 ? "👥 " : "👤 "}
+                                  {act.assignees.length > 1 ? <Users className="w-3 h-3 inline mr-1" /> : <User className="w-3 h-3 inline mr-1" />}
                                   {act.assignees.map((a) => a.name.split(" ")[0]).join(" & ")}
                                 </span>
                               ) : act.assignedToUserName ? (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-amber-100/80 px-2 py-0.5 text-[10px] font-bold text-amber-900 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-200 dark:border-amber-900">
-                                  👤 {act.assignedToUserName.split(" ")[0]}
+                                  <span className="inline-flex items-center gap-1"><User className="w-3 h-3" /> {act.assignedToUserName.split(" ")[0]}</span>
                                 </span>
                               ) : null}
                             </div>
@@ -862,7 +881,7 @@ export default function SchedulePage() {
                             }`}
                             aria-label="Marcar como concluída"
                           >
-                            {act.completedToday ? "✓" : ""}
+                            {act.completedToday ? <Check className="w-3.5 h-3.5 text-white stroke-[2]" /> : null}
                           </button>
                         </div>
                       );
@@ -909,7 +928,7 @@ export default function SchedulePage() {
               <PaperCard className="p-5" tape="orange">
                 <div className="flex items-center justify-between">
                   <h3 className="font-display text-lg font-bold text-on-surface flex items-center gap-2">
-                    <span>📝</span> {t("dayNotes")}
+                    <span className="inline-flex items-center gap-1.5"><StickyNote className="w-4 h-4 text-amber-800 dark:text-amber-400 stroke-[1.75]" /> {t("dayNotes")}</span>
                   </h3>
                   {notesStatus === "saving" && (
                     <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 animate-pulse">
@@ -918,7 +937,7 @@ export default function SchedulePage() {
                   )}
                   {notesStatus === "saved" && (
                     <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                      ✓ Salvo no dia
+                      <span className="inline-flex items-center gap-1"><Check className="w-3 h-3 text-emerald-600 stroke-[2]" /> Salvo no dia</span>
                     </span>
                   )}
                 </div>
@@ -1009,11 +1028,11 @@ export default function SchedulePage() {
                   onChange={(e) => setFormCategory(e.target.value)}
                   className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#28221d] px-3 py-2.5 text-sm font-semibold text-stone-900 dark:text-stone-100 shadow-sm focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 >
-                  <option value="TRABALHO" className="dark:bg-[#28221d] dark:text-stone-100">💼 Trabalho</option>
-                  <option value="ESTUDO" className="dark:bg-[#28221d] dark:text-stone-100">📚 Estudo</option>
-                  <option value="SAUDE" className="dark:bg-[#28221d] dark:text-stone-100">💪 Saúde & Treino</option>
-                  <option value="CASA" className="dark:bg-[#28221d] dark:text-stone-100">🏡 Casa & Rotina</option>
-                  <option value="PESSOAS" className="dark:bg-[#28221d] dark:text-stone-100">❤️ Casal & Pessoas</option>
+                  <option value="TRABALHO" className="dark:bg-[#28221d] dark:text-stone-100">Trabalho</option>
+                  <option value="ESTUDO" className="dark:bg-[#28221d] dark:text-stone-100">Estudo</option>
+                  <option value="SAUDE" className="dark:bg-[#28221d] dark:text-stone-100">Saúde & Treino</option>
+                  <option value="CASA" className="dark:bg-[#28221d] dark:text-stone-100">Casa & Rotina</option>
+                  <option value="PESSOAS" className="dark:bg-[#28221d] dark:text-stone-100">Casal & Pessoas</option>
                 </select>
               </div>
               <div>
@@ -1069,7 +1088,7 @@ export default function SchedulePage() {
                             : "border-stone-300 dark:border-stone-700 bg-white/90 dark:bg-[#28221d] text-stone-600 dark:text-stone-300 hover:border-stone-400"
                         }`}
                       >
-                        <span>{isSelected ? "✅" : "👤"}</span>
+                        {isSelected ? <Check className="w-3.5 h-3.5 text-amber-800 stroke-[2]" /> : <User className="w-3.5 h-3.5 text-stone-400" />}
                         <span>{member.userName}</span>
                       </button>
                     );
@@ -1088,7 +1107,7 @@ export default function SchedulePage() {
                   onClick={() => setConfirmDeleteOpen(true)}
                   className="rounded-xl px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                 >
-                  🗑️ {t("delete")}
+                  <span className="inline-flex items-center gap-1"><Trash2 className="w-3 h-3" /> {t("delete")}</span>
                 </button>
               ) : (
                 <div />

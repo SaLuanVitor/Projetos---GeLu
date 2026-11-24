@@ -9,6 +9,22 @@ import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { TextInput, TextAreaField, SelectField } from "@/components/ui/FormField";
 import { useToast } from "@/components/ui/Toast";
+import {
+  Clock,
+  UtensilsCrossed,
+  HeartHandshake,
+  Wallet,
+  Phone,
+  Plus,
+  Info,
+  List,
+  Search,
+  X,
+  Home,
+  Pin,
+  Star,
+  type LucideIcon,
+} from "lucide-react";
 import { useFamilyContext } from "@/contexts/FamilyContext";
 import { getValidSession } from "@/services/auth";
 import {
@@ -23,13 +39,13 @@ type CategoryFilter = "ALL" | "ROTINA" | "ALIMENTACAO" | "BEM_ESTAR" | "FINANCAS
 
 const CATEGORY_MAP: Record<
   string,
-  { label: string; icon: string; tape: "green" | "orange" | "brown" }
+  { label: string; icon: LucideIcon; tape: "green" | "orange" | "brown" }
 > = {
-  ROTINA: { label: "Rotina da Casa", icon: "🕒", tape: "green" },
-  ALIMENTACAO: { label: "Alimentação & Cozinha", icon: "🥗", tape: "orange" },
-  BEM_ESTAR: { label: "Bem-estar & Convivência", icon: "🧘", tape: "green" },
-  FINANCAS: { label: "Finanças & Metas", icon: "💰", tape: "brown" },
-  CONTATOS: { label: "Contatos Importantes", icon: "📞", tape: "green" },
+  ROTINA: { label: "Rotina da Casa", icon: Clock, tape: "green" },
+  ALIMENTACAO: { label: "Alimentação & Cozinha", icon: UtensilsCrossed, tape: "orange" },
+  BEM_ESTAR: { label: "Bem-estar & Convivência", icon: HeartHandshake, tape: "green" },
+  FINANCAS: { label: "Finanças & Metas", icon: Wallet, tape: "brown" },
+  CONTATOS: { label: "Contatos Importantes", icon: Phone, tape: "green" },
 };
 
 export default function NossoEspacoPage() {
@@ -163,14 +179,14 @@ export default function NossoEspacoPage() {
               variant="primary"
               className="shrink-0 self-start sm:self-auto shadow-md"
             >
-              ➕ Novo Registro
+              <span className="inline-flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 stroke-[2]" /> Novo Registro</span>
             </ActionButton>
           )}
         </div>
 
         {isPersonal && (
           <div className="p-4 rounded-2xl border-2 border-amber-300 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-xs font-semibold flex items-center gap-3">
-            <span>ℹ️</span>
+            <Info className="w-4 h-4 text-amber-800 dark:text-amber-300 shrink-0" />
             <span>
               Você está no seu <strong>Espaço Pessoal Solo</strong>. Para ver e adicionar acordos compartilhados do lar, selecione uma <strong>Família</strong> no topo.
             </span>
@@ -188,11 +204,12 @@ export default function NossoEspacoPage() {
                 : "bg-surface-container-low dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200"
             }`}
           >
-            📋 Todos ({items.length})
+            <span className="inline-flex items-center gap-1"><List className="w-3.5 h-3.5" /> Todos ({items.length})</span>
           </button>
           {Object.entries(CATEGORY_MAP).map(([key, config]) => {
             const count = items.filter((i) => i.category === key).length;
             const active = activeCategory === key;
+            const Icon = config.icon;
             return (
               <button
                 key={key}
@@ -204,7 +221,7 @@ export default function NossoEspacoPage() {
                     : "bg-surface-container-low dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200"
                 }`}
               >
-                <span>{config.icon}</span>
+                <Icon className="w-3.5 h-3.5 stroke-[1.75]" />
                 <span>{config.label}</span>
                 <span className="text-[10px] opacity-75">({count})</span>
               </button>
@@ -244,7 +261,7 @@ export default function NossoEspacoPage() {
         ) : filteredItems.length === 0 ? (
           <PaperCard tape="brown">
             <div className="py-12 text-center text-stone-500 space-y-3">
-              <span className="text-4xl">🏡</span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 mx-auto mb-2"><Home className="w-6 h-6 stroke-[1.75]" /></div>
               <p className="font-display text-base font-bold text-stone-800 dark:text-stone-200">
                 Nenhum registro encontrado nesta categoria.
               </p>
@@ -258,9 +275,10 @@ export default function NossoEspacoPage() {
             {filteredItems.map((item, idx) => {
               const cat = CATEGORY_MAP[item.category] ?? {
                 label: item.category,
-                icon: "📌",
+                icon: Pin,
                 tape: "orange",
               };
+              const CatIcon = cat.icon;
               return (
                 <div
                   key={item.id}
@@ -273,7 +291,7 @@ export default function NossoEspacoPage() {
                     <div>
                       <div className="flex items-start justify-between gap-2 pb-2 border-b border-surface-variant">
                         <div className="flex items-center gap-1.5 text-[11px] font-bold text-stone-600 dark:text-stone-300">
-                          <span>{cat.icon}</span>
+                          <CatIcon className="w-3.5 h-3.5 stroke-[1.75]" />
                           <span>{cat.label}</span>
                         </div>
                         <button
@@ -298,7 +316,7 @@ export default function NossoEspacoPage() {
 
                       {item.highlightTag && (
                         <div className="mt-3 inline-block rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">
-                          ⭐ {item.highlightTag}
+                          <span className="inline-flex items-center gap-1"><Star className="w-3 h-3 fill-amber-400 text-amber-500" /> {item.highlightTag}</span>
                         </div>
                       )}
                     </div>
@@ -328,11 +346,11 @@ export default function NossoEspacoPage() {
             value={newCategory}
             onValueChange={setNewCategory}
             options={[
-              { label: "🕒 Rotina da Casa (Lixo, Limpeza, Compras)", value: "ROTINA" },
-              { label: "🥗 Alimentação & Cozinha (Quem cozinha, Cardápios)", value: "ALIMENTACAO" },
-              { label: "🧘 Bem-estar & Convivência (Hábitos, Noite do Filme)", value: "BEM_ESTAR" },
-              { label: "💰 Finanças & Metas (Poupança, Contas do Mês)", value: "FINANCAS" },
-              { label: "📞 Contatos Importantes (Médicos, Emergência, Chaveiro)", value: "CONTATOS" },
+              { label: "Rotina da Casa (Lixo, Limpeza, Compras)", value: "ROTINA" },
+              { label: "Alimentação & Cozinha (Quem cozinha, Cardápios)", value: "ALIMENTACAO" },
+              { label: "Bem-estar & Convivência (Hábitos, Noite do Filme)", value: "BEM_ESTAR" },
+              { label: "Finanças & Metas (Poupança, Contas do Mês)", value: "FINANCAS" },
+              { label: "Contatos Importantes (Médicos, Emergência, Chaveiro)", value: "CONTATOS" },
             ]}
           />
 

@@ -9,6 +9,19 @@ import { Modal } from "@/components/ui/Modal";
 import { TextInput, SelectField, TextAreaField } from "@/components/ui/FormField";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useToast } from "@/components/ui/Toast";
+import {
+  HelpCircle,
+  Megaphone,
+  Phone,
+  Clock,
+  Mail,
+  MessageSquare,
+  ListOrdered,
+  ShieldCheck,
+  CheckCircle,
+  AlertCircle,
+  Hourglass,
+} from "lucide-react";
 import { getValidSession } from "@/services/auth";
 import {
   getPublicSupportSettings,
@@ -21,11 +34,11 @@ import type {
 } from "@/types/api";
 
 const TICKET_CATEGORIES = [
-  { label: "❓ Dúvida sobre o Sistema", value: "DUVIDA" },
-  { label: "💡 Sugestão de Melhoria", value: "SUGESTAO" },
-  { label: "🐞 Problema Técnico / Bug", value: "PROBLEMA" },
-  { label: "🍎 Dúvida de Dieta / Receita", value: "NUTRICAO" },
-  { label: "✨ Outro Assunto", value: "OUTRO" },
+  { label: "Dúvida sobre o Sistema", value: "DUVIDA" },
+  { label: "Sugestão de Melhoria", value: "SUGESTAO" },
+  { label: "Problema Técnico ou Inconsistência", value: "PROBLEMA" },
+  { label: "Dúvida de Dieta ou Receita", value: "NUTRICAO" },
+  { label: "Outro Assunto", value: "OUTRO" },
 ];
 
 export default function SuportePage() {
@@ -110,17 +123,17 @@ export default function SuportePage() {
     switch (status) {
       case "RESOLVED":
         return {
-          label: "✅ Resolvido",
+          label: "Resolvido",
           bg: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800",
         };
       case "IN_PROGRESS":
         return {
-          label: "⏳ Em Andamento",
+          label: "Em Andamento",
           bg: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
         };
       default:
         return {
-          label: "📬 Aberto",
+          label: "Aberto",
           bg: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
         };
     }
@@ -148,7 +161,7 @@ export default function SuportePage() {
 
         {settings?.systemBroadcastBanner && (
           <div className="p-4 rounded-xl border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-sm font-semibold flex items-center gap-3 shadow-sm">
-            <span className="text-xl">📢</span>
+            <Megaphone className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[1.75]" />
             <p>{settings.systemBroadcastBanner}</p>
           </div>
         )}
@@ -158,7 +171,7 @@ export default function SuportePage() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-surface-variant">
             <div>
               <h2 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                <span>📞</span> Canais de Atendimento Direto
+                <span className="inline-flex items-center gap-1.5"><Phone className="w-4 h-4 text-amber-800 dark:text-amber-300" /> Canais de Atendimento Direto</span>
               </h2>
               <p className="text-xs text-stone-600 dark:text-stone-300 mt-1">
                 Prefere conversar diretamente com a equipe do GeLu? Fale conosco pelos canais abaixo:
@@ -166,7 +179,7 @@ export default function SuportePage() {
             </div>
             {settings?.supportHours && (
               <span className="text-xs px-3 py-1.5 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-medium">
-                🕒 {settings.supportHours}
+                <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {settings.supportHours}</span>
               </span>
             )}
           </div>
@@ -178,7 +191,7 @@ export default function SuportePage() {
                 className="flex items-center gap-3 p-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 hover:border-primary/50 transition-colors group"
               >
                 <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 flex items-center justify-center text-lg shrink-0">
-                  ✉️
+                  <Mail className="w-4 h-4 text-amber-800 dark:text-amber-300" />
                 </div>
                 <div>
                   <div className="text-xs text-stone-500 dark:text-stone-400 font-semibold uppercase tracking-wider">
@@ -199,7 +212,7 @@ export default function SuportePage() {
                 className="flex items-center gap-3 p-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 hover:border-emerald-500/50 transition-colors group"
               >
                 <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg shrink-0">
-                  💬
+                  <MessageSquare className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                 </div>
                 <div>
                   <div className="text-xs text-stone-500 dark:text-stone-400 font-semibold uppercase tracking-wider">
@@ -219,7 +232,7 @@ export default function SuportePage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-surface-variant">
             <div>
               <h2 className="font-display text-xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                <span>📋</span> Minhas Solicitações & Sugestões
+                <span className="inline-flex items-center gap-1.5"><ListOrdered className="w-4 h-4 text-amber-800 dark:text-amber-300" /> Minhas Solicitações & Sugestões</span>
               </h2>
               <p className="text-xs text-stone-600 dark:text-stone-300 mt-1">
                 Acompanhe o andamento das suas mensagens e as respostas da nossa equipe.
@@ -306,7 +319,7 @@ export default function SuportePage() {
                     {t.adminNotes && (
                       <div className="mt-3 p-4 rounded-xl border-l-4 border-l-primary bg-primary/5 dark:bg-primary/10 border-t border-r border-b border-stone-200 dark:border-stone-800 text-sm">
                         <div className="font-bold text-xs text-primary uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                          <span>🛡️</span> Resposta da Equipe GeLu:
+                          <span className="inline-flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-stone-600" /> Resposta da Equipe:</span>
                         </div>
                         <p className="text-stone-800 dark:text-stone-200 whitespace-pre-line">
                           {t.adminNotes}

@@ -9,6 +9,15 @@ import { NotebookPageHeader } from "@/components/ui/Notebook";
 import { PaperCard } from "@/components/ui/PaperCard";
 import { StatusMessage } from "@/components/ui/StatusMessage";
 import { useToast } from "@/components/ui/Toast";
+import {
+  Users,
+  Clock,
+  Pencil,
+  Trash2,
+  Mail,
+  Copy,
+  CheckCircle2,
+} from "lucide-react";
 import { getValidSession, handleInvalidSession } from "@/services/auth";
 import {
   addFamilyMember,
@@ -361,7 +370,7 @@ export default function FamilyPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200/70 pb-4">
                   <div>
                     <h3 className="font-display text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                      <span>🏡</span> {family.name}
+                      <Users className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[2] shrink-0" /> <span>{family.name}</span>
                     </h3>
                     <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                       {family.members.length}{" "}
@@ -377,7 +386,7 @@ export default function FamilyPage() {
                       onClick={() => handleOpenAudit(family)}
                       className="rounded-xl border border-stone-300 dark:border-stone-700 bg-white/90 dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 px-3 py-1.5 text-xs font-bold transition-colors shadow-sm cursor-pointer"
                     >
-                      📜 Histórico
+                      <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Histórico</span>
                     </button>
                     <button
                       type="button"
@@ -387,14 +396,14 @@ export default function FamilyPage() {
                       }}
                       className="rounded-xl border border-stone-300 dark:border-stone-700 bg-white/90 dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 px-3 py-1.5 text-xs font-bold transition-colors shadow-sm cursor-pointer"
                     >
-                      ✏️ {t("edit")}
+                      <span className="inline-flex items-center gap-1"><Pencil className="w-3.5 h-3.5" /> {t("edit")}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setFamilyToDelete(family)}
                       className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50/80 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 px-3 py-1.5 text-xs font-bold transition-colors shadow-sm cursor-pointer"
                     >
-                      🗑️ {t("delete")}
+                      <span className="inline-flex items-center gap-1"><Trash2 className="w-3.5 h-3.5" /> {t("delete")}</span>
                     </button>
                   </div>
                 </div>
@@ -417,7 +426,7 @@ export default function FamilyPage() {
                         }}
                         className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-900 dark:text-amber-200 bg-amber-100 dark:bg-amber-950/60 hover:bg-amber-200/80 dark:hover:bg-amber-900/60 px-3 py-1.5 rounded-xl transition-colors border border-amber-300 dark:border-amber-800 cursor-pointer shadow-xs"
                       >
-                        <span>💌</span> Convidar por E-mail
+                        <span className="inline-flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> Convidar por E-mail</span>
                       </button>
 
                       <button
@@ -499,7 +508,7 @@ export default function FamilyPage() {
                   {familyInvites[family.id] && familyInvites[family.id].length > 0 && (
                     <div className="mt-5 pt-4 border-t border-dashed border-stone-200 dark:border-stone-800">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-1.5">
-                        <span>✉️</span> Convites Pendentes ({familyInvites[family.id].length})
+                        <span className="inline-flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> Convites Pendentes ({familyInvites[family.id].length})</span>
                       </h4>
                       <div className="space-y-2">
                         {familyInvites[family.id].map((inv) => {
@@ -537,7 +546,7 @@ export default function FamilyPage() {
                                   }}
                                   className="rounded-lg border border-amber-300 dark:border-amber-700 bg-white dark:bg-stone-800 px-2.5 py-1 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100/50 transition-colors cursor-pointer"
                                 >
-                                  🔗 Copiar Link
+                                  <span className="inline-flex items-center gap-1"><Copy className="w-3.5 h-3.5" /> Copiar Link</span>
                                 </button>
                                 <button
                                   type="button"
@@ -782,7 +791,7 @@ export default function FamilyPage() {
           {generatedInviteLink ? (
             <div className="space-y-4 py-2">
               <div className="rounded-2xl border-2 border-emerald-300 dark:border-emerald-700 bg-emerald-50/80 dark:bg-emerald-950/30 p-4 text-center">
-                <span className="text-3xl block mb-1">🎉</span>
+                <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto mb-2 stroke-[1.75]" />
                 <h4 className="font-display text-lg font-bold text-emerald-950 dark:text-emerald-200">
                   Convite Criado com Sucesso!
                 </h4>

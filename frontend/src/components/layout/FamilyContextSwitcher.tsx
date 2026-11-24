@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useFamilyContext } from "@/contexts/FamilyContext";
+import { Home, User, ChevronDown, Check, Settings } from "lucide-react";
 
 export function FamilyContextSwitcher() {
   const { families, switchContext, isPersonal, activeFamily } = useFamilyContext();
@@ -31,11 +32,11 @@ export function FamilyContextSwitcher() {
         aria-haspopup="true"
         aria-expanded={open}
       >
-        <span className="text-sm">{isPersonal ? "👤" : "🏠"}</span>
+        {isPersonal ? <User className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300" /> : <Home className="w-3.5 h-3.5 text-amber-800 dark:text-amber-300" />}
         <span className="max-w-[130px] truncate sm:max-w-[180px] font-bold">
           {isPersonal ? "Meu Espaço Pessoal" : activeFamily?.name ?? "Família"}
         </span>
-        <span className="text-[10px] text-stone-500 dark:text-stone-400">▾</span>
+        <ChevronDown className="w-3.5 h-3.5 text-stone-500 dark:text-stone-400" />
       </button>
 
       {open && (
@@ -67,7 +68,7 @@ export function FamilyContextSwitcher() {
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                    <span className="text-base shrink-0">🏠</span>
+                    <Home className="w-4 h-4 text-amber-800 dark:text-amber-300 shrink-0" />
                     <div className="min-w-0">
                       <p className="truncate font-black">{fam.name}</p>
                       <p className={`text-[10px] ${isActive ? "text-amber-100" : "text-stone-500 dark:text-stone-400"}`}>
@@ -77,7 +78,7 @@ export function FamilyContextSwitcher() {
                   </div>
                   {isActive && (
                     <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black text-white shrink-0">
-                      Ativo ✓
+                      <span className="inline-flex items-center gap-1"><Check className="w-3 h-3" /> Ativo</span>
                     </span>
                   )}
                 </button>
@@ -97,7 +98,7 @@ export function FamilyContextSwitcher() {
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                <span className="text-base shrink-0">👤</span>
+                <User className="w-4 h-4 text-stone-600 dark:text-stone-300 shrink-0" />
                 <div className="min-w-0">
                   <p className="truncate font-black">Meu Espaço Pessoal</p>
                   <p className={`text-[10px] ${isPersonal ? "text-amber-100" : "text-stone-500 dark:text-stone-400"}`}>
@@ -107,7 +108,7 @@ export function FamilyContextSwitcher() {
               </div>
               {isPersonal && (
                 <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black text-white shrink-0">
-                  Ativo ✓
+                  <span className="inline-flex items-center gap-1"><Check className="w-3 h-3" /> Ativo</span>
                 </span>
               )}
             </button>
@@ -119,7 +120,7 @@ export function FamilyContextSwitcher() {
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-primary hover:bg-primary/10 transition-colors"
             >
-              <span>⚙️</span>
+              <Settings className="w-3.5 h-3.5" />
               <span>Gerenciar Famílias & Convites</span>
             </Link>
           </div>

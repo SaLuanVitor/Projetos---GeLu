@@ -13,6 +13,19 @@ import { fetchRecipeMediaObjectUrl } from "@/services/recipe-media";
 import { listRecipes, setRecipeFavorite } from "@/services/recipes";
 import type { RecipeResponse, RecipeSearchFilters } from "@/types/api";
 import { useTranslations } from "next-intl";
+import {
+  FolderKanban,
+  List,
+  Heart,
+  Tag,
+  Users,
+  Clock,
+  Flame,
+  Pencil,
+  BookOpen,
+  ListOrdered,
+  UtensilsCrossed,
+} from "lucide-react";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
 const CATEGORY_VALUES = [
@@ -277,7 +290,7 @@ export default function RecipesPage() {
                 }`}
                 title="Visualização em Fichas com fotos grandes"
               >
-                <span>🗂️</span>
+                <FolderKanban className="w-3.5 h-3.5" />
                 <span>Fichas (Cards)</span>
               </button>
               <button
@@ -290,7 +303,7 @@ export default function RecipesPage() {
                 }`}
                 title="Visualização em Listagem com mais informações e fotos menores"
               >
-                <span>📋</span>
+                <List className="w-3.5 h-3.5" />
                 <span>Listagem Detalhada</span>
               </button>
             </div>
@@ -335,15 +348,15 @@ export default function RecipesPage() {
                       onClick={() => void handleFavoriteToggle(recipe)}
                       type="button"
                     >
-                      {recipe.favorite ? "♥" : "♡"}
+                      <Heart className={`w-4 h-4 ${recipe.favorite ? "fill-rose-500 text-rose-500" : "text-stone-400 hover:text-stone-600"}`} />
                     </button>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-full bg-secondary-fixed dark:bg-emerald-950/60 px-3 py-1 text-xs font-bold text-secondary dark:text-emerald-300 border border-transparent dark:border-emerald-800">
-                      🏷️ {recipe.category ?? t("noCategory")}
+                      <span className="inline-flex items-center gap-1"><Tag className="w-3 h-3 text-stone-400" /> {recipe.category ?? t("noCategory")}</span>
                     </span>
                     <span className="rounded-full bg-primary-fixed dark:bg-amber-950/60 px-3 py-1 text-xs font-bold text-primary dark:text-amber-300 border border-transparent dark:border-amber-800">
-                      👥 {recipe.servings ? t("servings", { count: recipe.servings }) : t("noServings")}
+                      <span className="inline-flex items-center gap-1"><Users className="w-3 h-3 text-stone-400" /> {recipe.servings ? t("servings", { count: recipe.servings }) : t("noServings")}</span>
                     </span>
                   </div>
                   <p className="mt-4 line-clamp-2 text-xs sm:text-sm leading-relaxed text-on-surface-variant">
@@ -351,14 +364,14 @@ export default function RecipesPage() {
                   </p>
                   <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-bold text-on-surface">
                     <span className="inline-flex items-center gap-1 rounded-lg bg-stone-100 dark:bg-stone-800 px-2.5 py-1 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                      ⏱️ {recipe.prepTimeMinutes ? t("minutes", { count: recipe.prepTimeMinutes }) : t("noTime")}
+                      <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3 text-stone-400" /> {recipe.prepTimeMinutes ? t("minutes", { count: recipe.prepTimeMinutes }) : t("noTime")}</span>
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                      🔥 {recipe.caloriesPerServing ? `${recipe.caloriesPerServing} kcal/porção` : (recipe.estimatedCalories ? `${recipe.estimatedCalories} kcal` : t("noCalories"))}
+                      <span className="inline-flex items-center gap-1"><Flame className="w-3 h-3 text-amber-600" /> {recipe.caloriesPerServing ? `${recipe.caloriesPerServing} kcal/porção` : (recipe.estimatedCalories ? `${recipe.estimatedCalories} kcal` : t("noCalories"))}</span>
                     </span>
                     {(recipe.proteins != null || recipe.carbohydrates != null || recipe.fats != null) && (
                       <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                        🥩 {recipe.proteinPerServing ?? recipe.proteins ?? 0}g P · 🍞 {recipe.carbsPerServing ?? recipe.carbohydrates ?? 0}g C · 🥑 {recipe.fatPerServing ?? recipe.fats ?? 0}g G
+                        <span>P: {recipe.proteinPerServing ?? recipe.proteins ?? 0}g · C: {recipe.carbsPerServing ?? recipe.carbohydrates ?? 0}g · G: {recipe.fatPerServing ?? recipe.fats ?? 0}g</span>
                       </span>
                     )}
                   </div>
@@ -372,7 +385,7 @@ export default function RecipesPage() {
                       href={`/receitas/${recipe.slug || recipe.id}/editar`}
                       variant="outline"
                     >
-                      ✏️
+                      <Pencil className="w-3.5 h-3.5" />
                     </ActionLink>
                   </div>
                 </article>
@@ -407,7 +420,7 @@ export default function RecipesPage() {
                     onClick={() => void handleFavoriteToggle(recipe)}
                     type="button"
                   >
-                    {recipe.favorite ? "♥" : "♡"}
+                    <Heart className={`w-4 h-4 ${recipe.favorite ? "fill-rose-500 text-rose-500" : "text-stone-400 hover:text-stone-600"}`} />
                   </button>
                 </div>
 
@@ -418,17 +431,17 @@ export default function RecipesPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="rounded-full bg-secondary-fixed dark:bg-emerald-950/60 px-2.5 py-0.5 text-xs font-bold text-secondary dark:text-emerald-300 border border-transparent dark:border-emerald-800">
-                          🏷️ {recipe.category ?? t("noCategory")}
+                          <span className="inline-flex items-center gap-1"><Tag className="w-3 h-3 text-stone-400" /> {recipe.category ?? t("noCategory")}</span>
                         </span>
                         <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                          ⏱️ {recipe.prepTimeMinutes ? t("minutes", { count: recipe.prepTimeMinutes }) : t("noTime")}
+                          <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3 text-stone-400" /> {recipe.prepTimeMinutes ? t("minutes", { count: recipe.prepTimeMinutes }) : t("noTime")}</span>
                         </span>
                         <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                          👥 {recipe.servings ? t("servings", { count: recipe.servings }) : t("noServings")}
+                          <span className="inline-flex items-center gap-1"><Users className="w-3 h-3 text-stone-400" /> {recipe.servings ? t("servings", { count: recipe.servings }) : t("noServings")}</span>
                         </span>
                         {recipe.steps && recipe.steps.length > 0 && (
                           <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 text-xs font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hidden sm:inline-flex">
-                            📝 {recipe.steps.length} {recipe.steps.length === 1 ? "passo" : "passos"}
+                            <span className="inline-flex items-center gap-1"><ListOrdered className="w-3 h-3 text-stone-400" /> {recipe.steps.length} {recipe.steps.length === 1 ? "passo" : "passos"}</span>
                           </span>
                         )}
                       </div>
@@ -440,7 +453,7 @@ export default function RecipesPage() {
                         onClick={() => void handleFavoriteToggle(recipe)}
                         type="button"
                       >
-                        {recipe.favorite ? "♥" : "♡"}
+                        <Heart className={`w-4 h-4 ${recipe.favorite ? "fill-rose-500 text-rose-500" : "text-stone-400 hover:text-stone-600"}`} />
                       </button>
                     </div>
 
@@ -462,7 +475,7 @@ export default function RecipesPage() {
                     {recipe.ingredients && recipe.ingredients.length > 0 && (
                       <div className="mt-2.5 flex items-center gap-1.5 flex-wrap text-xs text-stone-600 dark:text-stone-300">
                         <span className="font-bold text-stone-700 dark:text-stone-200 shrink-0">
-                          🥕 {recipe.ingredients.length} {recipe.ingredients.length === 1 ? "ingrediente" : "ingredientes"}:
+                          <span className="inline-flex items-center gap-1"><UtensilsCrossed className="w-3 h-3 text-amber-700" /> {recipe.ingredients.length} {recipe.ingredients.length === 1 ? "ingrediente" : "ingredientes"}:</span>
                         </span>
                         {recipe.ingredients.slice(0, 5).map((ing, idx) => (
                           <span
@@ -486,26 +499,26 @@ export default function RecipesPage() {
                     {/* Nutrição */}
                     <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
                       <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                        🔥 {recipe.caloriesPerServing ? `${recipe.caloriesPerServing} kcal/porção` : (recipe.estimatedCalories ? `${recipe.estimatedCalories} kcal` : t("noCalories"))}
+                        <span className="inline-flex items-center gap-1"><Flame className="w-3 h-3 text-amber-600" /> {recipe.caloriesPerServing ? `${recipe.caloriesPerServing} kcal/porção` : (recipe.estimatedCalories ? `${recipe.estimatedCalories} kcal` : t("noCalories"))}</span>
                       </span>
                       {(recipe.proteinPerServing != null || recipe.proteins != null) && (
                         <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                          🥩 {recipe.proteinPerServing ?? recipe.proteins}g P
+                          P: {recipe.proteinPerServing ?? recipe.proteins}g
                         </span>
                       )}
                       {(recipe.carbsPerServing != null || recipe.carbohydrates != null) && (
                         <span className="inline-flex items-center gap-1 rounded-lg bg-amber-100/60 dark:bg-amber-900/30 px-2.5 py-1 text-amber-800 dark:text-amber-200 border border-amber-200/60 dark:border-amber-800">
-                          🍞 {recipe.carbsPerServing ?? recipe.carbohydrates}g C
+                          C: {recipe.carbsPerServing ?? recipe.carbohydrates}g
                         </span>
                       )}
                       {(recipe.fatPerServing != null || recipe.fats != null) && (
                         <span className="inline-flex items-center gap-1 rounded-lg bg-yellow-50 dark:bg-yellow-950/40 px-2.5 py-1 text-yellow-900 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800">
-                          🥑 {recipe.fatPerServing ?? recipe.fats}g G
+                          G: {recipe.fatPerServing ?? recipe.fats}g
                         </span>
                       )}
                       {(recipe.fiberPerServing != null || recipe.fibers != null) && (
                         <span className="inline-flex items-center gap-1 rounded-lg bg-teal-50 dark:bg-teal-950/40 px-2.5 py-1 text-teal-900 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hidden md:inline-flex">
-                          🥗 {recipe.fiberPerServing ?? recipe.fibers}g Fibras
+                          Fibras: {recipe.fiberPerServing ?? recipe.fibers}g
                         </span>
                       )}
                     </div>
@@ -521,7 +534,7 @@ export default function RecipesPage() {
                         href={`/receitas/${recipe.slug || recipe.id}/editar`}
                         variant="outline"
                       >
-                        ✏️
+                        <Pencil className="w-3.5 h-3.5" />
                       </ActionLink>
                     </div>
                   </div>

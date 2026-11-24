@@ -8,22 +8,45 @@ import { TextInput, SelectField } from "@/components/ui/FormField";
 import { useToast } from "@/components/ui/Toast";
 import { logWorkout } from "@/services/workouts";
 import { estimateWorkoutCalories } from "@/services/ai";
+import {
+  Dumbbell,
+  Footprints,
+  Dog,
+  Zap,
+  Bike,
+  HeartHandshake,
+  Flame,
+  Check,
+  Hourglass,
+  Sparkles,
+  Lightbulb,
+  Loader2,
+  type LucideIcon,
+} from "lucide-react";
 import type { DailyWorkoutSummaryResponse } from "@/types/api";
 
-const PRESET_WORKOUTS = [
-  { title: "Musculação", category: "MUSCULACAO", caloriesPerHour: 450, defaultMinutes: 60, icon: "🏋️" },
-  { title: "Corrida na Rua / Esteira", category: "CORRIDA", caloriesPerHour: 650, defaultMinutes: 45, icon: "🏃" },
-  { title: "Caminhada com a Ellie", category: "CAMINHADA", caloriesPerHour: 280, defaultMinutes: 40, icon: "🐕" },
-  { title: "Treino Funcional / HIIT", category: "FUNCIONAL", caloriesPerHour: 500, defaultMinutes: 45, icon: "⚡" },
-  { title: "Ciclismo / Bike", category: "CICLISMO", caloriesPerHour: 480, defaultMinutes: 50, icon: "🚴" },
-  { title: "Yoga / Alongamento", category: "YOGA", caloriesPerHour: 200, defaultMinutes: 30, icon: "🧘" },
+interface PresetWorkoutItem {
+  title: string;
+  category: string;
+  caloriesPerHour: number;
+  defaultMinutes: number;
+  icon: LucideIcon;
+}
+
+const PRESET_WORKOUTS: PresetWorkoutItem[] = [
+  { title: "Musculação", category: "MUSCULACAO", caloriesPerHour: 450, defaultMinutes: 60, icon: Dumbbell },
+  { title: "Corrida na Rua / Esteira", category: "CORRIDA", caloriesPerHour: 650, defaultMinutes: 45, icon: Footprints },
+  { title: "Caminhada com a Ellie", category: "CAMINHADA", caloriesPerHour: 280, defaultMinutes: 40, icon: Dog },
+  { title: "Treino Funcional / HIIT", category: "FUNCIONAL", caloriesPerHour: 500, defaultMinutes: 45, icon: Zap },
+  { title: "Ciclismo / Bike", category: "CICLISMO", caloriesPerHour: 480, defaultMinutes: 50, icon: Bike },
+  { title: "Yoga / Alongamento", category: "YOGA", caloriesPerHour: 200, defaultMinutes: 30, icon: HeartHandshake },
 ];
 
 const INTENSITY_OPTIONS = [
-  { id: "LEVE", label: "Leve", icon: "🟢", desc: "Ritmo tranquilo, sem cansaço extremo" },
-  { id: "MODERADO", label: "Moderado", icon: "🟡", desc: "Ritmo padrão constante" },
-  { id: "INTENSO", label: "Intenso", icon: "🟠", desc: "Ritmo acelerado, suor e respiração forte" },
-  { id: "MUITO_INTENSO", label: "Muito Intenso", icon: "🔴", desc: "HIIT, tiros, esforço máximo" },
+  { id: "LEVE", label: "Leve", color: "bg-emerald-500", desc: "Ritmo tranquilo, sem cansaço extremo" },
+  { id: "MODERADO", label: "Moderado", color: "bg-amber-500", desc: "Ritmo padrão constante" },
+  { id: "INTENSO", label: "Intenso", color: "bg-orange-500", desc: "Ritmo acelerado, suor e respiração forte" },
+  { id: "MUITO_INTENSO", label: "Muito Intenso", color: "bg-rose-500", desc: "HIIT, tiros, esforço máximo" },
 ];
 
 export function WorkoutSection({
@@ -96,7 +119,7 @@ export function WorkoutSection({
 
       setCaloriesBurned(String(res.estimatedCalories));
       setAiExplanation(res.explanation);
-      toast.success(`✨ Estimado: ${res.estimatedCalories} kcal (${res.caloriesPerHour} kcal/h)!`);
+      toast.success(`Estimado: ${res.estimatedCalories} kcal (${res.caloriesPerHour} kcal/h)!`);
     } catch {
       toast.error("Não foi possível consultar o assistente de treino no momento.");
     } finally {
@@ -118,7 +141,7 @@ export function WorkoutSection({
         notes: notes.trim() || undefined,
       });
 
-      toast.success("Treino confirmado com sucesso! Queima registrada! 🔥");
+      toast.success("Treino confirmado com sucesso! Queima registrada!");
       setModalOpen(false);
       onRefresh();
     } catch {
@@ -138,7 +161,7 @@ export function WorkoutSection({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200/80 dark:border-stone-800 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl">💪</span>
+              <Dumbbell className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[2]" />
               <h3 className="font-display text-2xl font-bold text-stone-900 dark:text-stone-100">
                 Treino & Atividade Física
               </h3>
@@ -162,7 +185,7 @@ export function WorkoutSection({
                 : "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20 animate-pulse hover:animate-none"
             }`}
           >
-            <span>{completed ? "＋ Registrar Outro Treino" : "⚡ Treinei Hoje!"}</span>
+            <span>{completed ? "+ Registrar Outro Treino" : "Treinei Hoje!"}</span>
           </button>
         </div>
 
@@ -197,7 +220,7 @@ export function WorkoutSection({
                   : "bg-stone-200/80 dark:bg-stone-800 text-stone-600 dark:text-stone-400"
               }`}
             >
-              {completed ? "✅ Concluído" : "⏳ Pendente"}
+              {completed ? <span className="inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Concluído</span> : <span className="inline-flex items-center gap-1"><Hourglass className="w-3.5 h-3.5" /> Pendente</span>}
             </span>
           </div>
         </div>
@@ -245,24 +268,27 @@ export function WorkoutSection({
             Atalhos rápidos:
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {PRESET_WORKOUTS.map((p) => (
-              <button
-                key={p.category}
-                type="button"
-                onClick={() => handleSelectPreset(p)}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                  category === p.category
-                    ? "border-amber-600 bg-amber-500/15 text-amber-950 dark:text-amber-200 ring-1 ring-amber-500/30"
-                    : "border-stone-200 dark:border-stone-700 bg-white dark:bg-[#25201c] text-stone-700 dark:text-stone-300 hover:border-stone-300"
-                }`}
-              >
-                <span className="text-lg block mb-0.5">{p.icon}</span>
+            {PRESET_WORKOUTS.map((p) => {
+              const Icon = p.icon;
+              return (
+                <button
+                  key={p.category}
+                  type="button"
+                  onClick={() => handleSelectPreset(p)}
+                  className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    category === p.category
+                      ? "border-amber-600 bg-amber-500/15 text-amber-950 dark:text-amber-200 ring-1 ring-amber-500/30"
+                      : "border-stone-200 dark:border-stone-700 bg-white dark:bg-[#25201c] text-stone-700 dark:text-stone-300 hover:border-stone-300"
+                  }`}
+                >
+                  <Icon className="w-5 h-5 mb-1 stroke-[1.75]" />
                 <span className="text-xs font-bold block truncate">{p.title}</span>
                 <span className="text-[10px] text-stone-400 block">
                   ~{p.caloriesPerHour} kcal/h
                 </span>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -296,7 +322,7 @@ export function WorkoutSection({
                   }`}
                   title={opt.desc}
                 >
-                  <span className="text-sm block">{opt.icon}</span>
+                  <span className={`w-3.5 h-3.5 rounded-full inline-block mx-auto mb-1 ${opt.color}`} />
                   <span className="text-xs block mt-0.5">{opt.label}</span>
                 </button>
               ))}
@@ -325,7 +351,7 @@ export function WorkoutSection({
                   disabled={estimating}
                   className="text-[11px] font-bold text-amber-700 dark:text-amber-400 hover:underline cursor-pointer inline-flex items-center gap-1 disabled:opacity-50"
                 >
-                  <span>{estimating ? "⏳" : "✨"}</span>
+                  {estimating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-700" />}
                   <span>{estimating ? "Calculando..." : "Assistente IA"}</span>
                 </button>
               </div>
@@ -343,7 +369,7 @@ export function WorkoutSection({
           {/* Caixa de Explicação do Assistente */}
           {aiExplanation && (
             <div className="rounded-xl border border-amber-500/30 bg-amber-50/70 dark:bg-amber-950/30 p-2.5 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2 animate-in fade-in">
-              <span className="text-base shrink-0">💡</span>
+              <Lightbulb className="w-4 h-4 text-amber-700 shrink-0" />
               <p className="leading-relaxed">{aiExplanation}</p>
             </div>
           )}
@@ -364,7 +390,7 @@ export function WorkoutSection({
               Cancelar
             </ActionButton>
             <ActionButton type="submit" disabled={saving}>
-              {saving ? "Salvando..." : "Confirmar Treino 🔥"}
+              {saving ? "Salvando..." : "Confirmar Treino"}
             </ActionButton>
           </div>
         </form>
