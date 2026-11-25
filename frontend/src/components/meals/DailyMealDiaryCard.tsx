@@ -217,7 +217,7 @@ export function DailyMealDiaryCard({
                             {typeName}
                           </span>
                           {timeStr && (
-                            <span className="text-[10px] text-stone-400 font-mono">
+                            <span suppressHydrationWarning className="text-[10px] text-stone-400 font-mono">
                               {timeStr}
                             </span>
                           )}

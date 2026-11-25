@@ -74,12 +74,7 @@ const mobileBottomTabs: NavItem[] = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [sessionChecked, setSessionChecked] = useState(() => {
-    if (typeof window !== "undefined") {
-      return !!loadSession();
-    }
-    return false;
-  });
+  const [sessionChecked, setSessionChecked] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { activeFamily } = useFamilyContext();
 
@@ -87,13 +82,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   useFamilySocket(activeFamily?.id);
 
   useEffect(() => {
-    getValidSession().then((session) => {
-      if (!session) {
-        router.replace("/login");
-        return;
-      }
+    const session = loadSession();
+    if (!session) {
+      router.replace("/login");
+      return;
+    }
+    setSessionChecked(true);
 
-      setSessionChecked(true);
+    getValidSession().then((valid) => {
+      if (!valid) {
+        router.replace("/login");
+      }
     });
   }, [router]);
 

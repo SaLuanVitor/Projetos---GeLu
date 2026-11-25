@@ -360,7 +360,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
                     note.acknowledgedAt &&
                     note.acknowledgedByName &&
                     note.acknowledgedByName.toLowerCase() !== note.authorName.toLowerCase() ? (
-                      <span className="flex items-center gap-1.5 font-bold text-pink-700 bg-pink-100/90 px-2.5 py-1 rounded-full border border-pink-200 text-[11px] shadow-sm">
+                      <span suppressHydrationWarning className="flex items-center gap-1.5 font-bold text-pink-700 bg-pink-100/90 px-2.5 py-1 rounded-full border border-pink-200 text-[11px] shadow-sm">
                         <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500 shrink-0 inline mr-1" /> Visto por {note.acknowledgedByName} às{" "}
                         {new Date(note.acknowledgedAt).toLocaleTimeString([], {
                           hour: "2-digit",
@@ -386,7 +386,7 @@ export function CoupleNotesCard({ accessToken }: { accessToken: string }) {
                     </button>
                   )}
 
-                  <span className="text-[10px] text-stone-500 font-medium">
+                  <span suppressHydrationWarning className="text-[10px] text-stone-500 font-medium">
                     {new Date(note.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",

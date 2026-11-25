@@ -144,7 +144,7 @@ export function CoupleNotePopupListener() {
           <p className="font-hand text-2xl sm:text-3xl font-normal text-stone-900 leading-snug break-words">
             &ldquo;{activeNote.content}&rdquo;
           </p>
-          <p className="mt-2 text-[10px] font-medium text-stone-500">
+          <p suppressHydrationWarning className="mt-2 text-[10px] font-medium text-stone-500">
             Postado às{" "}
             {new Date(activeNote.createdAt).toLocaleTimeString([], {
               hour: "2-digit",

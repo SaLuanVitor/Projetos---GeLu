@@ -934,7 +934,7 @@ export default function WorkoutsPage() {
                     </div>
                     <div>
                       <p className="font-bold text-stone-800 dark:text-stone-200">{log.title}</p>
-                      <p className="text-[11px] text-stone-400">
+                      <p suppressHydrationWarning className="text-[11px] text-stone-400">
                         {log.durationMinutes} min • {log.performedAt ? new Date(log.performedAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}
                       </p>
                     </div>

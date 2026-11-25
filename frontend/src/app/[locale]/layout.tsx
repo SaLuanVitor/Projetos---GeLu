@@ -52,8 +52,8 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={locale}>
-      <body className={`${displayFont.variable} ${bodyFont.variable} ${handFont.variable}`}>
+    <html lang={locale} suppressHydrationWarning>
+      <body suppressHydrationWarning className={`${displayFont.variable} ${bodyFont.variable} ${handFont.variable}`}>
         <NextIntlClientProvider>
           <ToastProvider>
             <FamilyProvider>{children}</FamilyProvider>

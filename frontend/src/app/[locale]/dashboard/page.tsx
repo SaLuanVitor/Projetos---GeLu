@@ -246,7 +246,7 @@ export default function DashboardPage() {
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-bold text-amber-900 dark:text-amber-200">
                 {isPersonal ? <span className="inline-flex items-center gap-1"><User className="w-3.5 h-3.5" /> Espaço Pessoal</span> : <span className="inline-flex items-center gap-1"><Home className="w-3.5 h-3.5" /> {activeFamily?.name || "Família"}</span>}
               </span>
-              <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
+              <span suppressHydrationWarning className="text-xs font-semibold text-stone-500 dark:text-stone-400">
                 {DAYS_NAMES_PT[currentDayKey]}
               </span>
             </div>
@@ -300,7 +300,7 @@ export default function DashboardPage() {
                   <span className="text-xs font-bold uppercase tracking-wider text-primary">
                     {isPersonal ? "Minha Rotina de Hoje" : "Rotina da Casa de Hoje"}
                   </span>
-                  <span className="text-xs text-stone-500 font-semibold">• {DAYS_NAMES_PT[currentDayKey]}</span>
+                  <span suppressHydrationWarning className="text-xs text-stone-500 font-semibold">• {DAYS_NAMES_PT[currentDayKey]}</span>
                 </div>
                 <h2 className="mt-1 font-display text-2xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <span className="inline-flex items-center gap-1.5"><CalendarDays className="w-5 h-5 text-amber-800 dark:text-amber-300 stroke-[1.75]" /> Rotina de Agora & Próximas Tarefas</span>
@@ -358,7 +358,9 @@ export default function DashboardPage() {
             {todayActivities.length === 0 ? (
               <div className="rounded-xl border border-dashed border-stone-300 dark:border-stone-800 p-6 text-center text-xs text-stone-500">
                 <CalendarDays className="w-8 h-8 text-stone-400 mx-auto mb-1 stroke-[1.75]" />
-                Nenhuma atividade agendada para {DAYS_NAMES_PT[currentDayKey]}. Aproveite para descansar ou programar sua rotina!
+                <span suppressHydrationWarning>
+                  Nenhuma atividade agendada para {DAYS_NAMES_PT[currentDayKey]}. Aproveite para descansar ou programar sua rotina!
+                </span>
                 <div className="mt-3">
                   <ActionLink href="/agenda" className="text-xs py-1.5 px-3">
                     + Adicionar Tarefa na Agenda
