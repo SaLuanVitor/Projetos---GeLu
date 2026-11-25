@@ -15,4 +15,36 @@ public record AnalyzeMealPhotoResponse(
     BigDecimal fibers,
     BigDecimal sodium,
     List<FoodItemIdentified> items,
-    String nutritionNotes) {}
+    String nutritionNotes,
+    boolean isFood,
+    String rejectionReason) {
+
+  public AnalyzeMealPhotoResponse(
+      String dishName,
+      String confidence,
+      String photoUrl,
+      BigDecimal totalCalories,
+      BigDecimal proteins,
+      BigDecimal carbohydrates,
+      BigDecimal fats,
+      BigDecimal fibers,
+      BigDecimal sodium,
+      List<FoodItemIdentified> items,
+      String nutritionNotes) {
+    this(
+        dishName,
+        confidence,
+        photoUrl,
+        totalCalories,
+        proteins,
+        carbohydrates,
+        fats,
+        fibers,
+        sodium,
+        items,
+        nutritionNotes,
+        true,
+        null);
+  }
+}
+

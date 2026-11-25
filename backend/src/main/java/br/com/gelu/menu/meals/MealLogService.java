@@ -641,6 +641,19 @@ public class MealLogService {
       throw new BadRequestException("Nome do prato ou refeição é obrigatório");
     }
 
+    String lowerDish = request.dishName().trim().toLowerCase();
+    if (lowerDish.contains("nenhuma refeição")
+        || lowerDish.contains("não identificado")
+        || lowerDish.contains("análise indisponível")
+        || lowerDish.equals("alimento não identificado")) {
+      throw new BadRequestException("Não é permitido registrar uma refeição sem alimentos identificados ou válidos.");
+    }
+    if (request.totalCalories() != null
+        && request.totalCalories().compareTo(BigDecimal.ZERO) <= 0
+        && (request.items() == null || request.items().isEmpty())) {
+      throw new BadRequestException("A refeição precisa conter ao menos um alimento ou calorias válidas.");
+    }
+
     UUID familyId = null;
     List<Family> families = familyRepository.findAllByMemberUserId(userId);
     if (!families.isEmpty()) {
@@ -772,10 +785,14 @@ public class MealLogService {
             : "Nenhuma informação adicional fornecida.";
 
     String systemInstruction =
-        "Você é o FoodVisionAgent especialista em nutrição clínica, gastronomia brasileira e análise visual de alimentos do GeLu Menu. "
-            + "Analise a foto do prato fornecida, identifique cada alimento visível, estime as porções com precisão e calcule os macronutrientes totais. "
+        "Você é o FoodVisionAgent especialista em nutrição clínica, gastronomia e análise visual de alimentos do GeLu Menu. "
+            + "PRIMEIRO PASSO OBRIGATÓRIO: Avalie com rigor se a imagem fornecida contém realmente comida, bebida, ingrediente ou refeição comestível. "
+            + "Se a imagem NÃO for alimento (ex: pessoas, portas, animais, eletrônicos, documentos, móveis, selfies, paisagens ou objetos), defina 'isFood': false, 'rejectionReason': 'A imagem fornecida não contém alimentos visíveis ou identificáveis.', 'dishName': 'Alimento Não Identificado', 'totalCalories': 0.0, 'items': [], 'confidence': 'LOW'. "
+            + "Se a imagem FOR alimento, defina 'isFood': true, 'rejectionReason': null, identifique cada alimento visível, estime as porções com precisão e calcule os macronutrientes totais. "
             + "Responda ESTRITAMENTE em formato JSON com o seguinte schema:\n"
             + "{\n"
+            + "  \"isFood\": true,\n"
+            + "  \"rejectionReason\": null,\n"
             + "  \"dishName\": \"Nome principal do prato/refeição\",\n"
             + "  \"confidence\": \"HIGH\",\n"
             + "  \"totalCalories\": 450.0,\n"
@@ -845,6 +862,9 @@ public class MealLogService {
 
     JsonNode parsed = objectMapper.readTree(textNode.asText().trim());
 
+    boolean isFood = parsed.path("isFood").asBoolean(true);
+    String rejectionReason =
+        parsed.hasNonNull("rejectionReason") ? parsed.path("rejectionReason").asText(null) : null;
     String dishName = parsed.path("dishName").asText("Refeição Identificada");
     String confidence = parsed.path("confidence").asText("HIGH");
     BigDecimal totalCalories =
@@ -867,29 +887,54 @@ public class MealLogService {
             .path("nutritionNotes")
             .asText("Refeição balanceada identificada por inteligência artificial.");
 
-    List<FoodItemIdentified> items = new ArrayList<>();
-    JsonNode itemsNode = parsed.path("items");
-    if (itemsNode.isArray()) {
-      for (JsonNode item : itemsNode) {
-        items.add(
-            new FoodItemIdentified(
-                item.path("name").asText("Alimento"),
-                item.path("portion").asText("1 porção"),
-                BigDecimal.valueOf(item.path("calories").asDouble(100.0))
-                    .setScale(1, RoundingMode.HALF_UP),
-                BigDecimal.valueOf(item.path("proteins").asDouble(5.0))
-                    .setScale(1, RoundingMode.HALF_UP),
-                BigDecimal.valueOf(item.path("carbohydrates").asDouble(10.0))
-                    .setScale(1, RoundingMode.HALF_UP),
-                BigDecimal.valueOf(item.path("fats").asDouble(2.0))
-                    .setScale(1, RoundingMode.HALF_UP)));
+    // Heurística de proteção adicional: detectar termos de não-alimento ou calorias zeradas
+    String lowerDish = dishName.toLowerCase();
+    if (lowerDish.contains("nenhuma refeição")
+        || lowerDish.contains("não identificado")
+        || lowerDish.contains("indisponível")
+        || (totalCalories.compareTo(BigDecimal.ZERO) == 0
+            && proteins.compareTo(BigDecimal.ZERO) == 0)) {
+      isFood = false;
+      if (rejectionReason == null) {
+        rejectionReason = "A imagem enviada não aparenta conter alimentos visíveis ou identificáveis.";
       }
     }
 
-    if (items.isEmpty()) {
-      items.add(
-          new FoodItemIdentified(
-              dishName, "1 prato", totalCalories, proteins, carbohydrates, fats));
+    List<FoodItemIdentified> items = new ArrayList<>();
+    if (isFood) {
+      JsonNode itemsNode = parsed.path("items");
+      if (itemsNode.isArray()) {
+        for (JsonNode item : itemsNode) {
+          items.add(
+              new FoodItemIdentified(
+                  item.path("name").asText("Alimento"),
+                  item.path("portion").asText("1 porção"),
+                  BigDecimal.valueOf(item.path("calories").asDouble(100.0))
+                      .setScale(1, RoundingMode.HALF_UP),
+                  BigDecimal.valueOf(item.path("proteins").asDouble(5.0))
+                      .setScale(1, RoundingMode.HALF_UP),
+                  BigDecimal.valueOf(item.path("carbohydrates").asDouble(10.0))
+                      .setScale(1, RoundingMode.HALF_UP),
+                  BigDecimal.valueOf(item.path("fats").asDouble(2.0))
+                      .setScale(1, RoundingMode.HALF_UP)));
+        }
+      }
+
+      if (items.isEmpty()) {
+        items.add(
+            new FoodItemIdentified(
+                dishName, "1 prato", totalCalories, proteins, carbohydrates, fats));
+      }
+    } else {
+      dishName = "Alimento Não Identificado";
+      confidence = "LOW";
+      totalCalories = BigDecimal.ZERO;
+      proteins = BigDecimal.ZERO;
+      carbohydrates = BigDecimal.ZERO;
+      fats = BigDecimal.ZERO;
+      fibers = BigDecimal.ZERO;
+      sodium = BigDecimal.ZERO;
+      nutritionNotes = rejectionReason != null ? rejectionReason : "Nenhum alimento identificado na imagem.";
     }
 
     AnalyzeMealPhotoResponse photoResp =
@@ -904,7 +949,9 @@ public class MealLogService {
             fibers,
             sodium,
             items,
-            nutritionNotes);
+            nutritionNotes,
+            isFood,
+            rejectionReason);
 
     JsonNode usage = root.path("usageMetadata");
     int promptTokens = usage.path("promptTokenCount").asInt(260);

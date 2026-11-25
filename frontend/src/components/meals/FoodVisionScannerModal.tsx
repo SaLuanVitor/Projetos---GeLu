@@ -17,6 +17,7 @@ import {
   Lightbulb,
   Loader2,
   Check,
+  AlertTriangle,
   type LucideIcon,
 } from "lucide-react";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -319,7 +320,42 @@ export function FoodVisionScannerModal({
         )}
 
         {/* ETAPA 2: RESULTADO DA ANÁLISE PELA IA */}
-        {analysisResult && (
+        {analysisResult && (analysisResult.isFood === false || editableDishName.toLowerCase().includes("não identificado") || editableDishName.toLowerCase().includes("nenhuma refeição") || (editableCalories <= 0 && (!analysisResult.items || analysisResult.items.length === 0))) ? (
+          <div className="space-y-4">
+            <div className="flex flex-col items-center justify-center text-center p-6 bg-amber-50 dark:bg-amber-950/30 border-2 border-dashed border-amber-300 dark:border-amber-800 rounded-2xl">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 mb-3">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <h4 className="font-display font-black text-base text-stone-900 dark:text-stone-100">
+                Nenhum alimento identificado nesta imagem
+              </h4>
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 max-w-sm">
+                {analysisResult.rejectionReason || analysisResult.aiNotes || "A inteligência artificial verificou que esta foto não aparenta conter um prato ou refeição comestível."}
+              </p>
+              <p className="text-[11px] text-amber-800 dark:text-amber-400 font-semibold mt-2">
+                Para manter a precisão do seu diário e metas, não é permitido registrar fotos sem alimentos visíveis.
+              </p>
+
+              <div className="mt-5 flex gap-3">
+                <button
+                  type="button"
+                  onClick={resetState}
+                  className="inline-flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white px-4 py-2.5 text-xs font-black shadow-xs transition-all hover:rotate-1 hover:scale-[1.02] active:scale-[0.98] active:rotate-0 cursor-pointer"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Tirar Nova Foto do Prato</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="inline-flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 py-2.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:bg-stone-50 cursor-pointer"
+                >
+                  <span>Cancelar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : analysisResult ? (
           <div className="space-y-4">
             <div className="flex gap-4 items-start bg-orange-50/60 dark:bg-orange-950/20 p-4 rounded-2xl border border-orange-200/80 dark:border-orange-900/40">
               {previewUrl && (
@@ -474,7 +510,7 @@ export function FoodVisionScannerModal({
               </button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </Modal>
   );

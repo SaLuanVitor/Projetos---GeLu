@@ -838,6 +838,8 @@ export type AnalyzeMealPhotoResponse = {
   sodium?: number | null;
   items: FoodItemIdentified[];
   aiNotes?: string | null;
+  isFood?: boolean;
+  rejectionReason?: string | null;
 };
 
 export type CreateMealLogRequest = {
